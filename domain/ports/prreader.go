@@ -6,7 +6,7 @@ import (
 
 // PRReader Contract for all services reading Pull requests from providers
 type PRReader interface {
-	GetPRs() (prs []models.PullRequest, err error)
+	GetPRs(req interface{}) (prs []models.PullRequest, err error)
 }
 
 // ProviderService Contract for all providers

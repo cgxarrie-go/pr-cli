@@ -1,41 +1,28 @@
 package main
 
 import (
-	"encoding/base64"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
+
+	"github.com/cgxarrie/pr-go/domain/azure"
 )
 
 func main() {
 
-	pat := "`:azurepat"
-	companyName := "companyName"
-	projectID := "projectID"
-	repoID := "repoID"
-	status := "1"
-	url := fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/git/repositories/%s/pullrequests?searchCriteria.status=%s&$top=1001&api-version=5.1", companyName, projectID, repoID, status)
+	svc := azure.NewAzureService("companyNamw", "azurePAT")
 
-	b64PAT := base64.RawStdEncoding.EncodeToString([]byte(pat))
-	bearer := fmt.Sprintf("Basic %s", b64PAT)
-
-	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", bearer)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println("Error on response.\n[ERROR] -", err)
+	req := azure.GetPRsRequest{
+		ProjectID:    "projectID",
+		RepositoryID: "repoID",
+		Status:       1,
 	}
 
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
+	prs, err := svc.GetPRs(req)
 	if err != nil {
-		log.Println("Error while reading the response bytes:", err)
+		log.Fatal(err)
 	}
 
-	fmt.Println(string(body))
-
+	for _, pr := range prs {
+		fmt.Printf("%+v \n", pr)
+	}
 }

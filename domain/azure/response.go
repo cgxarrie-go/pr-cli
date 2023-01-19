@@ -1,6 +1,10 @@
 package azure
 
-import "time"
+import (
+	"time"
+
+	"github.com/cgxarrie/pr-go/domain/models"
+)
 
 type GetPRsResponse struct {
 	Value []GetPRsResponsePullRequest `json:"value"`
@@ -46,4 +50,24 @@ type GetPRsResponseRepository struct {
 type GetPRsResponseProject struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+// ToPullRequest converts a GetPRsResponsePullRequest to a models.PullRequest
+func (azPR GetPRsResponsePullRequest) ToPullRequest() models.PullRequest {
+	return models.PullRequest{
+		ID:             azPR.ID,
+		Title:          azPR.Title,
+		Description:    azPR.Description,
+		RepositoryID:   azPR.Repo.ID,
+		RepositoryName: azPR.Repo.Name,
+		RepositoryURL:  azPR.Repo.URL,
+		ProjectID:      azPR.Repo.Project.ID,
+		ProjectName:    azPR.Repo.Project.Name,
+		Status:         azPR.Status,
+		MergeStatus:    azPR.MergeStatus,
+		CreatedBy:      azPR.CreatedBy.DisplayName,
+		URL:            azPR.URL,
+		IsDraft:        azPR.IsDraft,
+		Created:        azPR.Dates.Created,
+	}
 }
