@@ -20,8 +20,7 @@ var listCmd = &cobra.Command{
 	Long: `List all Pull Requests in all the projects and repositores
 	stated in the config file azure section`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Arguments: %+v \n", args)
-		if len(args) != 1 || args[0] != "" {
+		if len(args) != 1 || args[0] == "" {
 			fmt.Println("Error : expected one argument")
 			return
 		}
