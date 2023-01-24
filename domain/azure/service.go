@@ -9,6 +9,7 @@ import (
 	"github.com/cgxarrie/pr-go/domain/errors"
 	"github.com/cgxarrie/pr-go/domain/models"
 	"github.com/cgxarrie/pr-go/domain/ports"
+	"golang.org/x/sync/errgroup"
 )
 
 type azureSvc struct {
@@ -24,10 +25,34 @@ func (svc azureSvc) GetPRs(req interface{}) (prs []models.PullRequest, err error
 		return prs, errors.NewErrInvalidRequestType(getReq, req)
 	}
 
-	url := fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/git/repositories/"+
-		"%s/pullrequests?searchCriteria.status=%d&$top=1001&api-version=5.1",
-		svc.conpanyName, getReq.ProjectID, getReq.RepositoryID, getReq.Status)
+	g := errgroup.Group{}
 
+	for projectID, repositoryIDs := range getReq.ProjectRepos {
+		for _, repositoryID := range repositoryIDs {
+			projectID, repositoryID := projectID, repositoryID
+			g.Go(func() error {
+				url := svc.buildURL(projectID, repositoryID, getReq.Status)
+				azPRs, err := svc.getData(url)
+				if err == nil {
+					prs = append(prs, azPRs...)
+				}
+				return err
+			})
+		}
+	}
+
+	return prs, g.Wait()
+}
+
+func (svc azureSvc) buildURL(projectID string, repositoryID string, status int) string {
+	return fmt.Sprintf("https://dev.azure.com"+
+		"/%s/%s/_apis/git/repositories/"+
+		"%s/pullrequests?searchCriteria."+
+		"status=%d&$top=1001&api-version=5.1",
+		svc.conpanyName, projectID, repositoryID, status)
+}
+
+func (svc azureSvc) getData(url string) (prs []models.PullRequest, err error) {
 	azPRs := GetPRsResponse{}
 	err = svc.doGet(url, &azPRs)
 	if err != nil {

@@ -9,12 +9,21 @@ import (
 
 func main() {
 
-	svc := azure.NewAzureService("companyNamw", "azurePAT")
-
+	svc := azure.NewAzureService("companyName", "azurePAT")
 	req := azure.GetPRsRequest{
-		ProjectID:    "projectID",
-		RepositoryID: "repoID",
-		Status:       1,
+		ProjectRepos: map[string][]string{
+			"proj.A": {
+				"Repo.A.1",
+				"Repo.A.2",
+				"Repo.A.3",
+			},
+			"proj.B": {
+				"Repo.B.1",
+				"Repo.B.2",
+				"Repo.B.3",
+			},
+		},
+		Status: 1,
 	}
 
 	prs, err := svc.GetPRs(req)
