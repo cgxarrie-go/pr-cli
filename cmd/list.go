@@ -1,6 +1,5 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
@@ -53,6 +52,7 @@ var listCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		fmt.Printf("Number of PRs : %d \n", len(prs))
 		for _, pr := range prs {
 			fmt.Printf("%+v \n", pr)
 		}
