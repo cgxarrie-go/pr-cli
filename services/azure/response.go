@@ -1,16 +1,19 @@
 package azure
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/cgxarrie/pr-go/domain/models"
 )
 
+// GetPRsResponse response from GetPRS fro Azure Service
 type GetPRsResponse struct {
 	Value []GetPRsResponsePullRequest `json:"value"`
 	Count int                         `json:"count"`
 }
 
+// GetPRsResponsePullRequest Pull request response item
 type GetPRsResponsePullRequest struct {
 	ID          int                      `json:"pullRequestId"`
 	Title       string                   `json:"title"`
@@ -26,20 +29,25 @@ type GetPRsResponsePullRequest struct {
 	Reviewers   []GetPRsResponseUser `json:"reviewers"`
 }
 
+// GetPRsResponseDates pull request response dates
 type GetPRsResponseDates struct {
 	Created time.Time `json:"creationDate"`
 	Closed  time.Time `json:"closedDate"`
 }
+
+// GetPRsResponseBranches pull request response branches
 type GetPRsResponseBranches struct {
 	Source string `json:"sourceRefName"`
 	Target string `json:"targetRefName"`
 }
 
+// GetPRsResponseUser Pull request response user
 type GetPRsResponseUser struct {
 	DisplayName string `json:"displayName"`
 	Email       string `json:"uniqueName"`
 }
 
+// GetPRsResponseRepository pull request response repository
 type GetPRsResponseRepository struct {
 	ID      string                `json:"id"`
 	Name    string                `json:"name"`
@@ -47,6 +55,7 @@ type GetPRsResponseRepository struct {
 	Project GetPRsResponseProject `json:"project"`
 }
 
+// GetPRsResponseProject pull request response project
 type GetPRsResponseProject struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -55,7 +64,7 @@ type GetPRsResponseProject struct {
 // ToPullRequest converts a GetPRsResponsePullRequest to a models.PullRequest
 func (azPR GetPRsResponsePullRequest) ToPullRequest() models.PullRequest {
 	return models.PullRequest{
-		ID:             azPR.ID,
+		ID:             strconv.Itoa(azPR.ID),
 		Title:          azPR.Title,
 		Description:    azPR.Description,
 		RepositoryID:   azPR.Repo.ID,
