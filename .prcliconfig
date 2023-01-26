@@ -1,0 +1,26 @@
+{
+    "azure": {
+        "companyName": "myCompanyName",
+        "pat": "myPAT",
+        "projects": [
+            {
+                "id": "Project.A",
+                "repositoryIDs": [
+                    "Project.A.1",
+                    "Project.A.2",
+                    "Project.A.3",
+                    "Project.A.4"
+                ]
+            },
+            {
+                "id": "Project.B",
+                "repositoryIDs": [
+                    "Project.B.1",
+                    "Project.B.2",
+                    "Project.B.3",
+                    "Project.B.4"
+                ]
+            }
+        ]
+    }
+}

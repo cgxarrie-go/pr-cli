@@ -48,7 +48,7 @@ func (svc azureSvc) buildURL(projectID string, repositoryID string, status int) 
 	return fmt.Sprintf("https://dev.azure.com"+
 		"/%s/%s/_apis/git/repositories/"+
 		"%s/pullrequests?searchCriteria."+
-		"status=%d&$top=1001&api-version=5.1",
+		"status=%d&api-version=5.1",
 		svc.conpanyName, projectID, repositoryID, status)
 }
 

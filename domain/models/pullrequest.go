@@ -1,9 +1,12 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
+// PullRequest is the abstraction of a Pull Request from any provider
 type PullRequest struct {
-	ID             int
+	ID             string
 	Title          string
 	Description    string
 	RepositoryID   string
