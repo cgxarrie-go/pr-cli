@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/cgxarrie/pr-go/config"
 	"github.com/cgxarrie/pr-go/domain/models"
 	"github.com/cgxarrie/pr-go/services/azure"
 	"github.com/spf13/cobra"
@@ -34,23 +35,17 @@ var azlsCmd = &cobra.Command{
 			return
 		}
 
-		companyName := "Derivco"
-		pat := "qlsy74tzev2n6ir27cbd3wwbccqfkt7uu6l5nojblurmxupvfkpa"
-		svc := azure.NewAzureService(companyName, pat)
+		cfg := config.GetInstance().Azure
+		svc := azure.NewAzureService(cfg.CompanyName, cfg.PAT)
+		projectRepos := make(map[string][]string)
+
+		for _, project := range cfg.Projects {
+			projectRepos[project.ID] = project.RepositoryIDs
+		}
+
 		req := azure.GetPRsRequest{
-			ProjectRepos: map[string][]string{
-				"proj.A": {
-					"Repo.A.1",
-					"Repo.A.2",
-					"Repo.A.3",
-				},
-				"proj.B": {
-					"Repo.B.1",
-					"Repo.B.2",
-					"Repo.B.3",
-				},
-			},
-			Status: status,
+			ProjectRepos: projectRepos,
+			Status:       status,
 		}
 
 		prs, err := svc.GetPRs(req)
@@ -64,7 +59,7 @@ var azlsCmd = &cobra.Command{
 				fmt.Println(printableTitle())
 			}
 			url := fmt.Sprintf("https://dev.azure.com/%s/%s/_git/%s/"+
-				"pullrequest/%s", companyName, pr.ProjectName,
+				"pullrequest/%s", cfg.CompanyName, pr.ProjectName,
 				pr.RepositoryName, pr.ID)
 			fmt.Println(printable(pr, url))
 		}
