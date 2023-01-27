@@ -59,24 +59,30 @@ type GetPRsResponseRepository struct {
 type GetPRsResponseProject struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+	URL  string `json:"url"`
 }
 
 // ToPullRequest converts a GetPRsResponsePullRequest to a models.PullRequest
 func (azPR GetPRsResponsePullRequest) ToPullRequest() models.PullRequest {
 	return models.PullRequest{
-		ID:             strconv.Itoa(azPR.ID),
-		Title:          azPR.Title,
-		Description:    azPR.Description,
-		RepositoryID:   azPR.Repo.ID,
-		RepositoryName: azPR.Repo.Name,
-		RepositoryURL:  azPR.Repo.URL,
-		ProjectID:      azPR.Repo.Project.ID,
-		ProjectName:    azPR.Repo.Project.Name,
-		Status:         azPR.Status,
-		MergeStatus:    azPR.MergeStatus,
-		CreatedBy:      azPR.CreatedBy.DisplayName,
-		URL:            azPR.URL,
-		IsDraft:        azPR.IsDraft,
-		Created:        azPR.Dates.Created,
+		ID:          strconv.Itoa(azPR.ID),
+		Title:       azPR.Title,
+		Description: azPR.Description,
+		Repository: models.Hierarchy{
+			ID:   azPR.Repo.ID,
+			Name: azPR.Repo.Name,
+			URL:  azPR.Repo.URL,
+		},
+		Project: models.Hierarchy{
+			ID:   azPR.Repo.Project.ID,
+			Name: azPR.Repo.Project.Name,
+			URL:  azPR.Repo.Project.URL,
+		},
+		Status:      azPR.Status,
+		MergeStatus: azPR.MergeStatus,
+		CreatedBy:   azPR.CreatedBy.DisplayName,
+		URL:         azPR.URL,
+		IsDraft:     azPR.IsDraft,
+		Created:     azPR.Dates.Created,
 	}
 }
