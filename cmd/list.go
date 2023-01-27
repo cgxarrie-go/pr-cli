@@ -9,18 +9,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// azCmd represents the az command
-var azCmd = &cobra.Command{
-	Use:   "az",
-	Short: "Access to azure PRs",
-	Long:  `Access to azure PRs`,
+// listCmd represents the az command
+var listCmd = &cobra.Command{
+	Use:     "list",
+	Aliases: []string{"l", "ls"},
+	Short:   "list PRs",
+	Long:    `List PRs`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("az called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(azCmd)
+	rootCmd.AddCommand(listCmd)
 
 	// Here you will define your flags and configuration settings.
 
