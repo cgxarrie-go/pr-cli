@@ -8,6 +8,7 @@ import (
 	"github.com/cgxarrie/pr-go/config"
 	"github.com/cgxarrie/pr-go/domain/models"
 	"github.com/cgxarrie/pr-go/services/azure"
+	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 )
 
@@ -97,17 +98,19 @@ func azlsPrint(prs []models.PullRequest, companyName string) {
 		url := fmt.Sprintf("https://dev.azure.com/%s/%s/_git/%s/"+
 			"pullrequest/%s", companyName, pr.Project.Name,
 			pr.Repository.Name, pr.ID)
+
+		lnk := termenv.Hyperlink(url, "open")
 		prInfo := fmt.Sprintf("        %8s | %-70s | %-20s | %-10s | %s", pr.ID,
-			pr.Title, pr.CreatedBy, pr.Status, url)
+			pr.Title, pr.CreatedBy, pr.Status, lnk)
 		fmt.Println(prInfo)
 	}
 }
 
 func azlsPrintableTitle() string {
 
-	head := fmt.Sprintf("%s\n    %s\n        %8s | %-70s | %-20s | %-10s | %s",
+	head := fmt.Sprintf("%s\n    %s\n        %8s | %-70s | %-20s | %-10s",
 		"Project", "Repository", "ID",
-		"Title", "Created By", "Status", "URL")
+		"Title", "Created By", "Status")
 	line := strings.Repeat("-", len(head)+5)
 
 	return fmt.Sprintf("%s\n%s", head, line)
