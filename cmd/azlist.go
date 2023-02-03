@@ -100,15 +100,18 @@ func azlsPrint(prs []models.PullRequest, companyName string) {
 			pr.Repository.Name, pr.ID)
 
 		lnk := termenv.Hyperlink(url, "open")
-		prInfo := fmt.Sprintf("        %8s | %-70s | %-20s | %-10s | %s", pr.ID,
-			pr.Title, pr.CreatedBy, pr.Status, lnk)
+		created := fmt.Sprintf("%s (%v-%d-%d)",
+			strings.Split(pr.CreatedBy, " ")[0],
+			pr.Created.Year(), pr.Created.Month(), pr.Created.Day())
+		prInfo := fmt.Sprintf("        %8s | %-70s | %-25s | %-10s | %s", pr.ID,
+			pr.Title, created, pr.Status, lnk)
 		fmt.Println(prInfo)
 	}
 }
 
 func azlsPrintableTitle() string {
 
-	head := fmt.Sprintf("%s\n    %s\n        %8s | %-70s | %-20s | %-10s",
+	head := fmt.Sprintf("%s\n    %s\n        %8s | %-70s | %-25s | %-10s",
 		"Project", "Repository", "ID",
 		"Title", "Created By", "Status")
 	line := strings.Repeat("-", len(head)+5)

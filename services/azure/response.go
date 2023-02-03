@@ -24,15 +24,10 @@ type GetPRsResponsePullRequest struct {
 	CreatedBy   GetPRsResponseUser       `json:"createdBy"`
 	URL         string                   `json:"url"`
 	Branches    GetPRsResponseBranches
-	IsDraft     bool `json:"isDraft"`
-	Dates       GetPRsResponseDates
+	IsDraft     bool                 `json:"isDraft"`
 	Reviewers   []GetPRsResponseUser `json:"reviewers"`
-}
-
-// GetPRsResponseDates pull request response dates
-type GetPRsResponseDates struct {
-	Created time.Time `json:"creationDate"`
-	Closed  time.Time `json:"closedDate"`
+	Created     time.Time            `json:"creationDate"`
+	Closed      time.Time            `json:"closedDate"`
 }
 
 // GetPRsResponseBranches pull request response branches
@@ -83,6 +78,6 @@ func (azPR GetPRsResponsePullRequest) ToPullRequest() models.PullRequest {
 		CreatedBy:   azPR.CreatedBy.DisplayName,
 		URL:         azPR.URL,
 		IsDraft:     azPR.IsDraft,
-		Created:     azPR.Dates.Created,
+		Created:     azPR.Created,
 	}
 }
