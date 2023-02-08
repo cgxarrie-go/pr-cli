@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"sync"
 )
 
@@ -24,6 +25,10 @@ func GetInstance() *Config {
 	return cfg
 }
 
+var (
+	configFileName string = ".prcliconfig"
+)
+
 // Config main configuration for CLI
 type Config struct {
 	Azure AzureConfig
@@ -36,6 +41,13 @@ type AzureConfig struct {
 	Projects    []AzureProjectConfig
 }
 
+// NewConfig creates a new instance of Config
+func NewConfig() Config {
+	return Config{
+		Azure: AzureConfig{},
+	}
+}
+
 // AzureProjectConfig configuration for Azure Projects
 type AzureProjectConfig struct {
 	ID            string
@@ -44,7 +56,16 @@ type AzureProjectConfig struct {
 
 // Load read config file into config struct
 func (c *Config) Load() (err error) {
-	file, err := ioutil.ReadFile(".prcliconfig")
+
+	if _, err := os.Stat(configFileName); err != nil {
+		cfg := NewConfig()
+		err = cfg.save()
+		if err != nil {
+			return err
+		}
+	}
+
+	file, err := ioutil.ReadFile(configFileName)
 	if err != nil {
 		return fmt.Errorf("Error loading config file: %s", err.Error())
 
@@ -56,4 +77,20 @@ func (c *Config) Load() (err error) {
 	}
 
 	return nil
+}
+
+func (c *Config) save() (err error) {
+	f, err := os.Create(configFileName)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	b, err := json.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+	_, err = f.WriteString(string(b))
+
+	return err
 }
