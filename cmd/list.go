@@ -4,8 +4,6 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -15,9 +13,6 @@ var listCmd = &cobra.Command{
 	Aliases: []string{"l", "ls"},
 	Short:   "list PRs",
 	Long:    `List PRs`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("az called")
-	},
 }
 
 func init() {

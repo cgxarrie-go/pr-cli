@@ -5,11 +5,12 @@ import (
 	"log"
 	"strings"
 
+	"github.com/muesli/termenv"
+	"github.com/spf13/cobra"
+
 	"github.com/cgxarrie/pr-go/config"
 	"github.com/cgxarrie/pr-go/domain/models"
 	"github.com/cgxarrie/pr-go/services/azure"
-	"github.com/muesli/termenv"
-	"github.com/spf13/cobra"
 )
 
 // azlsCmd represents the list command
