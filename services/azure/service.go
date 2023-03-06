@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cgxarrie/pr-go/domain/errors"
-	"github.com/cgxarrie/pr-go/domain/models"
-	"github.com/cgxarrie/pr-go/domain/ports"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/cgxarrie-go/pr-cli/domain/errors"
+	"github.com/cgxarrie-go/pr-cli/domain/models"
+	"github.com/cgxarrie-go/pr-cli/domain/ports"
 )
 
 type azureSvc struct {

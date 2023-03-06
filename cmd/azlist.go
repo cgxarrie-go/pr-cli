@@ -8,9 +8,9 @@ import (
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 
-	"github.com/cgxarrie/pr-go/config"
-	"github.com/cgxarrie/pr-go/domain/models"
-	"github.com/cgxarrie/pr-go/services/azure"
+	"github.com/cgxarrie-go/pr-cli/config"
+	"github.com/cgxarrie-go/pr-cli/domain/models"
+	"github.com/cgxarrie-go/pr-cli/services/azure"
 )
 
 // azlsCmd represents the list command
