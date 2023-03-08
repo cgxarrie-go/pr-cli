@@ -13,6 +13,13 @@ import (
 	"github.com/cgxarrie-go/pr-cli/services/azure"
 )
 
+const (
+	prIDColLength      int = 8
+	prTitleColLength   int = 70
+	prCreatedColLength int = 25
+	prStatusColLength  int = 10
+)
+
 // azlsCmd represents the list command
 var azlsCmd = &cobra.Command{
 	Use:        "azure",
@@ -104,18 +111,27 @@ func azlsPrint(prs []models.PullRequest, companyName string) {
 		created := fmt.Sprintf("%s (%v-%d-%d)",
 			strings.Split(pr.CreatedBy, " ")[0],
 			pr.Created.Year(), pr.Created.Month(), pr.Created.Day())
-		prInfo := fmt.Sprintf("        %8s | %-70s | %-25s | %-10s | %s", pr.ID,
-			pr.Title, created, pr.Status, lnk)
+		format := getColumnFormat()
+		prInfo := fmt.Sprintf(format, pr.ID, pr.ShortenedTitle(70), created,
+			pr.Status, lnk)
 		fmt.Println(prInfo)
 	}
 }
 
 func azlsPrintableTitle() string {
 
-	head := fmt.Sprintf("%s\n    %s\n        %8s | %-70s | %-25s | %-10s",
-		"Project", "Repository", "ID",
-		"Title", "Created By", "Status")
+	format := "%s\n    %s\n" + getColumnFormat()
+	head := fmt.Sprintf(format, "Project", "Repository", "ID", "Title",
+		"Created By", "Status", "Link")
 	line := strings.Repeat("-", len(head)+5)
 
 	return fmt.Sprintf("%s\n%s", head, line)
+}
+
+func getColumnFormat() string {
+	return "        %" + fmt.Sprintf("%d", prIDColLength) + "s " +
+		"| %-" + fmt.Sprintf("%d", prTitleColLength) + "s " +
+		"| %-" + fmt.Sprintf("%d", prCreatedColLength) + "s " +
+		"| %-" + fmt.Sprintf("%d", prStatusColLength) + "s " +
+		"| %s"
 }

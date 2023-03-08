@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -24,4 +25,15 @@ type Hierarchy struct {
 	ID   string
 	Name string
 	URL  string
+}
+
+// ShortenedTitle returns title shortened to maxlength...
+func (p PullRequest) ShortenedTitle(maxLength int) string {
+
+	if len(p.Title) <= maxLength {
+		return p.Title
+	}
+
+	title := fmt.Sprintf("%s...", p.Title[0:maxLength-3])
+	return title
 }
