@@ -6,8 +6,8 @@ package main
 import (
 	"log"
 
-	"github.com/cgxarrie-go/pr-cli/cmd"
-	"github.com/cgxarrie-go/pr-cli/config"
+	"github.com/cgxarrie-go/prcli/cmd"
+	"github.com/cgxarrie-go/prcli/config"
 )
 
 func main() {

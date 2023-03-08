@@ -1,7 +1,7 @@
 package ports
 
 import (
-	"github.com/cgxarrie-go/pr-cli/domain/models"
+	"github.com/cgxarrie-go/prcli/domain/models"
 )
 
 // PRReader Contract for all services reading Pull requests from providers

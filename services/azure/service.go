@@ -8,9 +8,9 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/cgxarrie-go/pr-cli/domain/errors"
-	"github.com/cgxarrie-go/pr-cli/domain/models"
-	"github.com/cgxarrie-go/pr-cli/domain/ports"
+	"github.com/cgxarrie-go/prcli/domain/errors"
+	"github.com/cgxarrie-go/prcli/domain/models"
+	"github.com/cgxarrie-go/prcli/domain/ports"
 )
 
 type azureSvc struct {
