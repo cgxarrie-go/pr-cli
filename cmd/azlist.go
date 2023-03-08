@@ -8,9 +8,9 @@ import (
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 
-	"github.com/cgxarrie-go/pr-cli/config"
-	"github.com/cgxarrie-go/pr-cli/domain/models"
-	"github.com/cgxarrie-go/pr-cli/services/azure"
+	"github.com/cgxarrie-go/prcli/config"
+	"github.com/cgxarrie-go/prcli/domain/models"
+	"github.com/cgxarrie-go/prcli/services/azure"
 )
 
 const (
@@ -31,40 +31,44 @@ var azlsCmd = &cobra.Command{
 	ValidArgs:  []string{"", "ac", "active", "ab", "abandoned", "cl", "closed"},
 	Version:    "",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 1 {
-			fmt.Println("Error : expected one argument")
-			return
-		}
-
-		if len(args) == 0 || args[0] == "" {
-			args = []string{"ac"}
-		}
-
-		status := 1
-		switch args[0] {
-		case "ac", "active":
-			status = 1
-		case "ab", "abandoned":
-			status = 2
-		case "cl", "closed":
-			status = 3
-		default:
-			fmt.Printf("Error Invalid argument: %s", args[0])
-			return
-		}
-		cfg := config.GetInstance().Azure
-		svc := azure.NewAzureService(cfg.CompanyName, cfg.PAT)
-		projectRepos := make(map[string][]string)
-		for _, project := range cfg.Projects {
-			projectRepos[project.ID] = project.RepositoryIDs
-		}
-		req := azure.GetPRsRequest{ProjectRepos: projectRepos, Status: status}
-		prs, err := svc.GetPRs(req)
-		if err != nil {
-			log.Fatal(err)
-		}
-		azlsPrint(prs, cfg.CompanyName)
+		runAzlsCmd(cmd, args)
 	},
+}
+
+func runAzlsCmd(cmd *cobra.Command, args []string) {
+	if len(args) > 1 {
+		fmt.Println("Error : expected one argument")
+		return
+	}
+
+	if len(args) == 0 || args[0] == "" {
+		args = []string{"ac"}
+	}
+
+	status := 1
+	switch args[0] {
+	case "ac", "active":
+		status = 1
+	case "ab", "abandoned":
+		status = 2
+	case "cl", "closed":
+		status = 3
+	default:
+		fmt.Printf("Error Invalid argument: %s", args[0])
+		return
+	}
+	cfg := config.GetInstance().Azure
+	svc := azure.NewAzureService(cfg.CompanyName, cfg.PAT)
+	projectRepos := make(map[string][]string)
+	for _, project := range cfg.Projects {
+		projectRepos[project.ID] = project.RepositoryIDs
+	}
+	req := azure.GetPRsRequest{ProjectRepos: projectRepos, Status: status}
+	prs, err := svc.GetPRs(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	azlsPrint(prs, cfg.CompanyName)
 }
 
 func init() {
