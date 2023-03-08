@@ -1,16 +1,15 @@
 {
     "Azure": {
-        "CompanyName": "Derivco",
-        "PAT": "qlsy74tzev2n6ir27cbd3wwbccqfkt7uu6l5nojblurmxupvfkpa",
+        "CompanyName": "",
+        "PAT": "",
         "Projects": [
             {
-                "ID": "Sports-CoreAccount",
+                "ID": "project-name",
                 "RepositoryIDs": [
-                    "walletmock",
-                    "account",
-                    "common-code",
-                    "fxrate",
-                    "loss-limit-api"
+                    "repo-name-1",
+                    "repo-name-2",
+                    "repo-name-3",
+                    "repo-name-4"
                 ]
             }
         ]
