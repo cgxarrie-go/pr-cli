@@ -1,17 +1,16 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
 	"os"
 
+	"github.com/cgxarrie-go/prcli/cmd/list"
 	"github.com/spf13/cobra"
+
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "pr",
+	Use:   "prq",
 	Short: "Interaction with pull requests from command line",
 	Long:  `Interaction with pull requests from command line`,
 	// Uncomment the following line if your bare application
@@ -29,6 +28,7 @@ func Execute() {
 }
 
 func init() {
+		rootCmd.AddCommand(list.ListCmd)
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.

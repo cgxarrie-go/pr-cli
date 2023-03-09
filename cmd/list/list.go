@@ -1,23 +1,18 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
-package cmd
+package list
 
 import (
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the az command
-var listCmd = &cobra.Command{
+// ListCmd represents the list command
+var ListCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l", "ls"},
 	Short:   "list PRs",
-	Long:    `List PRs`,
+	Long:    `List Pull Requests from the specified provider according to config`,
 }
 
 func init() {
-	rootCmd.AddCommand(listCmd)
-
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

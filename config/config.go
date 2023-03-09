@@ -17,16 +17,14 @@ func GetInstance() *Config {
 	if cfg == nil {
 		lock.Lock()
 		defer lock.Unlock()
-		if cfg == nil {
-			cfg = &Config{}
-		}
+		cfg = &Config{}
 	}
 
 	return cfg
 }
 
 var (
-	configFileName string = ".prcliconfig"
+	configFileName string = "prqcfg.json"
 )
 
 // Config main configuration for CLI
@@ -58,11 +56,8 @@ type AzureProjectConfig struct {
 func (c *Config) Load() (err error) {
 
 	if _, err := os.Stat(configFileName); err != nil {
-		cfg := NewConfig()
-		err = cfg.save()
-		if err != nil {
-			return err
-		}
+		return fmt.Errorf("configuration file not found\n" +
+			"Use prq config to add configuration")
 	}
 
 	file, err := ioutil.ReadFile(configFileName)

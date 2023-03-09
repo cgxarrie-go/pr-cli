@@ -1,16 +1,17 @@
-package cmd
+package list
 
 import (
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/muesli/termenv"
-	"github.com/spf13/cobra"
-
 	"github.com/cgxarrie-go/prcli/config"
+	"github.com/cgxarrie-go/prcli/domain/errors"
 	"github.com/cgxarrie-go/prcli/domain/models"
 	"github.com/cgxarrie-go/prcli/services/azure"
+	"github.com/cgxarrie-go/prcli/services/azure/status"
+	"github.com/muesli/termenv"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -21,58 +22,54 @@ const (
 )
 
 // azlsCmd represents the list command
-var azlsCmd = &cobra.Command{
+var listAzureCmd = &cobra.Command{
 	Use:        "azure",
 	Aliases:    []string{"az"},
 	SuggestFor: []string{},
 	Short:      "List PRs in azure",
 	Long:       `List PRs in azure`,
-	Example:    "az list active",
-	ValidArgs:  []string{"", "ac", "active", "ab", "abandoned", "cl", "closed"},
-	Version:    "",
+	Example: fmt.Sprintf("list az -s %s\nl az -s %s\nl az -s %s\n"+
+		"l az",
+		status.Active.Name(), status.Abandoned.Name(),
+		status.Closed.Name()),
+	Version: "",
 	Run: func(cmd *cobra.Command, args []string) {
-		runAzlsCmd(cmd, args)
+		st, _ := cmd.Flags().GetString("status")
+		if st == "" {
+			st = status.Active.Name()
+		}
+		runListAzureCmd(cmd, st)
 	},
 }
 
-func runAzlsCmd(cmd *cobra.Command, args []string) {
-	if len(args) > 1 {
-		fmt.Println("Error : expected one argument")
-		return
-	}
+func runListAzureCmd(cmd *cobra.Command, state string) {
 
-	if len(args) == 0 || args[0] == "" {
-		args = []string{"ac"}
+	azCfg, err := loadConfig()
+	if err != nil {
+		errors.Print(err)
 	}
-
-	status := 1
-	switch args[0] {
-	case "ac", "active":
-		status = 1
-	case "ab", "abandoned":
-		status = 2
-	case "cl", "closed":
-		status = 3
-	default:
-		fmt.Printf("Error Invalid argument: %s", args[0])
-		return
-	}
-	cfg := config.GetInstance().Azure
-	svc := azure.NewAzureService(cfg.CompanyName, cfg.PAT)
+	svc := azure.NewAzureService(azCfg.CompanyName, azCfg.PAT)
 	projectRepos := make(map[string][]string)
-	for _, project := range cfg.Projects {
+	for _, project := range azCfg.Projects {
 		projectRepos[project.ID] = project.RepositoryIDs
 	}
-	req := azure.GetPRsRequest{ProjectRepos: projectRepos, Status: status}
+
+	azStatus, err := status.FromName(state)
+	if err != nil {
+		errors.Print(err)
+		return
+	}
+
+	req := azure.GetPRsRequest{ProjectRepos: projectRepos, Status: azStatus}
 	prs, err := svc.GetPRs(req)
 	if err != nil {
 		log.Fatal(err)
 	}
-	azlsPrint(prs, cfg.CompanyName)
+	azlsPrint(prs, azCfg.CompanyName)
 }
 
 func init() {
-	listCmd.AddCommand(azlsCmd)
+	ListCmd.AddCommand(listAzureCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -82,7 +79,7 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	listAzureCmd.Flags().StringP("status", "s", status.Active.Name(), "status of PRs to list")
 
 }
 
@@ -138,4 +135,14 @@ func getColumnFormat() string {
 		"| %-" + fmt.Sprintf("%d", prCreatedColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prStatusColLength) + "s " +
 		"| %s"
+}
+
+func loadConfig() (azcfg config.AzureConfig, err error) {
+	cfg := config.GetInstance()
+	err = cfg.Load()
+	if err != nil {
+		return azcfg, err
+	}
+
+	return cfg.Azure, nil
 }
