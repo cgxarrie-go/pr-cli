@@ -74,7 +74,8 @@ func (c *Config) Load() (err error) {
 	return nil
 }
 
-func (c *Config) save() (err error) {
+// Save saves the config file
+func (c *Config) Save() (err error) {
 	f, err := os.Create(configFileName)
 	if err != nil {
 		return err

@@ -1,19 +1,15 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
-package cmd
+package config
 
 import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/spf13/cobra"
-
 	"github.com/cgxarrie-go/prcli/config"
+	"github.com/spf13/cobra"
 )
 
-// listCmd represents the az command
-var configComd = &cobra.Command{
+// ConfigCmd represents the Config command
+var ConfigCmd = &cobra.Command{
 	Use:   "config",
 	Short: "display config",
 	Long:  `display config`,
@@ -23,7 +19,6 @@ var configComd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(configComd)
 
 	// Here you will define your flags and configuration settings.
 

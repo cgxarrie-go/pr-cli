@@ -3,9 +3,9 @@ package cmd
 import (
 	"os"
 
+	"github.com/cgxarrie-go/prcli/cmd/config"
 	"github.com/cgxarrie-go/prcli/cmd/list"
 	"github.com/spf13/cobra"
-
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -28,7 +28,8 @@ func Execute() {
 }
 
 func init() {
-		rootCmd.AddCommand(list.ListCmd)
+	rootCmd.AddCommand(list.ListCmd)
+	rootCmd.AddCommand(config.ConfigCmd)
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
