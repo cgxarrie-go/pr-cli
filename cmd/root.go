@@ -17,12 +17,12 @@ var rootCmd = &cobra.Command{
 	Long:  `Interaction with pull requests from command line`,
 	Example: `Config commands : 
 prq config : display config
-prq config az-cname	: set company name in azure config
-prq config az-pat	: set PAT in azure config
-prq config az-project -a <name>	: Adds a project with name <name> in azure config
-prq config az-project -d <name>	: Removes a project with name <name> in azure config
-prq config az-repo -a <name> -p <project-name>	: Adds a repo with name <name> to the project with name <project-name> in azure config
-prq config az-repo -d <name> -p <project-name>	: Removes a repo with name <name> from the project with name <project-name> in azure config
+prq config az cname	: set company name in azure config
+prq config az pat	: set PAT in azure config
+prq config az project -a <name>	: Adds a project with name <name> in azure config
+prq config az project -d <name>	: Removes a project with name <name> in azure config
+prq config az repo -a <name> -p <project-name>	: Adds a repo with name <name> to the project with name <project-name> in azure config
+prq config az repo -d <name> -p <project-name>	: Removes a repo with name <name> from the project with name <project-name> in azure config
 
 List PR commands : 
 prq list az : Lists all PR in status Active for azure projects and repos

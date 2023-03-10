@@ -3,14 +3,15 @@ package config
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	appCfg "github.com/cgxarrie-go/prq/config"
 	"github.com/cgxarrie-go/prq/domain/errors"
-	"github.com/spf13/cobra"
 )
 
 // azureCompanyNameCmd represents the companyName command
 var azureCompanyNameCmd = &cobra.Command{
-	Use:   "az-cname",
+	Use:   "cname",
 	Short: "set azure company name",
 	Long:  `Set the Azure Conpmany-Name in the configuration file`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -23,7 +24,7 @@ var azureCompanyNameCmd = &cobra.Command{
 }
 
 func init() {
-	ConfigCmd.AddCommand(azureCompanyNameCmd)
+	azureCmd.AddCommand(azureCompanyNameCmd)
 
 	// Here you will define your flags and configuration settings.
 

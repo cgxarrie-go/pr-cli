@@ -3,14 +3,15 @@ package config
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	appCfg "github.com/cgxarrie-go/prq/config"
 	"github.com/cgxarrie-go/prq/domain/errors"
-	"github.com/spf13/cobra"
 )
 
 // azureProjectCmd represents the azureProject command
 var azureProjectCmd = &cobra.Command{
-	Use:   "az-project",
+	Use:   "project",
 	Short: "set azure Project",
 	Long:  `Set the Azure Project in the configuration file`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -43,7 +44,7 @@ var azureProjectCmd = &cobra.Command{
 }
 
 func init() {
-	ConfigCmd.AddCommand(azureProjectCmd)
+	azureCmd.AddCommand(azureProjectCmd)
 
 	// Here you will define your flags and configuration settings.
 

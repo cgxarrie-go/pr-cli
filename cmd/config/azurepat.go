@@ -3,14 +3,15 @@ package config
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	appCfg "github.com/cgxarrie-go/prq/config"
 	"github.com/cgxarrie-go/prq/domain/errors"
-	"github.com/spf13/cobra"
 )
 
 // azurePATCmd represents the azurePAT command
 var azurePATCmd = &cobra.Command{
-	Use:   "az-pat",
+	Use:   "pat",
 	Short: "set azure PAT",
 	Long:  `Set the Azure PAT in the configuration file`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -23,7 +24,7 @@ var azurePATCmd = &cobra.Command{
 }
 
 func init() {
-	ConfigCmd.AddCommand(azurePATCmd)
+	azureCmd.AddCommand(azurePATCmd)
 
 	// Here you will define your flags and configuration settings.
 
