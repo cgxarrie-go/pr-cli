@@ -11,7 +11,7 @@ import (
 
 // azureRepositoryCmd represents the azureRepository command
 var azureRepositoryCmd = &cobra.Command{
-	Use:   "az-project",
+	Use:   "az-repo",
 	Short: "set azure Repository",
 	Long:  `Set the Azure Repository in the configuration file`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -43,13 +43,13 @@ func init() {
 	// is called directly, e.g.:
 	azureRepositoryCmd.Flags().StringP("add", "a", "", "Add a repo")
 	azureRepositoryCmd.Flags().StringP("del", "d", "", "Remove a repo")
-	azureRepositoryCmd.Flags().StringP("p", "p", "", "The project")
+	azureRepositoryCmd.Flags().StringP("project", "p", "", "The project")
 }
 
 func getAzureRepositoryAction(cmd *cobra.Command) (
 	action func(project, repo string) error, project, repo string, err error) {
 
-	pFlag, _ := cmd.Flags().GetString("p")
+	pFlag, _ := cmd.Flags().GetString("project")
 	if pFlag == "" {
 		return action, project, repo,
 			fmt.Errorf("missing mandatory -p <project-name>")
@@ -93,7 +93,8 @@ func runAddAzureRepositoryCmd(project, repo string) error {
 		}
 	}
 
-	prj.RepositoryIDs = append(prj.RepositoryIDs, repo)
+	cfg.Azure.Projects[projectIdx].RepositoryIDs =
+		append(prj.RepositoryIDs, repo)
 	err = cfg.Save()
 	if err != nil {
 		return err
@@ -129,8 +130,8 @@ func runDeleteAzureRepositoryCmd(project, repo string) error {
 
 	for i, v := range prj.RepositoryIDs {
 		if v == repo {
-			prj.RepositoryIDs = append(prj.RepositoryIDs[:i],
-				prj.RepositoryIDs[i+1:]...)
+			cfg.Azure.Projects[projectIdx].RepositoryIDs =
+				append(prj.RepositoryIDs[:i], prj.RepositoryIDs[i+1:]...)
 			err := cfg.Save()
 			if err != nil {
 				return err

@@ -2,7 +2,6 @@ package list
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/muesli/termenv"
@@ -63,7 +62,7 @@ func runListAzureCmd(cmd *cobra.Command, state string) error {
 	req := azure.GetPRsRequest{ProjectRepos: projectRepos, Status: azStatus}
 	prs, err := svc.GetPRs(req)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	azlsPrint(prs, azCfg.CompanyName)
 

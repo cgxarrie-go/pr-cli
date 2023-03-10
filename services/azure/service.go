@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/cgxarrie-go/prq/domain/errors"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/domain/ports"
 	"github.com/cgxarrie-go/prq/services/azure/status"
-	"golang.org/x/sync/errgroup"
 )
 
 type azureSvc struct {
@@ -80,6 +81,10 @@ func (svc azureSvc) doGet(url string, resp interface{}) (err error) {
 	azResp, err := client.Do(azReq)
 	if err != nil {
 		return err
+	}
+
+	if azResp.StatusCode != http.StatusOK {
+		return fmt.Errorf("%d - %s", azResp.StatusCode, azResp.Status)
 	}
 
 	defer azResp.Body.Close()
