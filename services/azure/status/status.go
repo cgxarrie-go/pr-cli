@@ -10,7 +10,7 @@ const (
 	Closed    Status = 3
 )
 
-var enumMapName = map[Status]string{
+var statusMapName = map[Status]string{
 	Active:    `active`,
 	Abandoned: `abandoned`,
 	Closed:    `cancelled`,
@@ -18,12 +18,12 @@ var enumMapName = map[Status]string{
 
 // Name return the name of the Status
 func (t Status) Name() string {
-	return enumMapName[t]
+	return statusMapName[t]
 }
 
-// FromName returns a enumMapName matching the provided name.
+// FromName returns a statusMapName matching the provided name.
 func FromName(name string) (Status, error) {
-	for id, n := range enumMapName {
+	for id, n := range statusMapName {
 		if n == name {
 			return id, nil
 		}

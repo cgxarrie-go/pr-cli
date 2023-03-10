@@ -20,35 +20,13 @@ const (
 	prStatusColLength  int = 10
 )
 
-// azlsCmd represents the list command
-var listAzureCmd = &cobra.Command{
-	Use:        "azure",
-	Aliases:    []string{"az"},
-	SuggestFor: []string{},
-	Short:      "List PRs in azure",
-	Long:       `List PRs in azure`,
-	Example: fmt.Sprintf("list az -s %s\nl az -s %s\nl az -s %s\n"+
-		"l az",
-		status.Active.Name(), status.Abandoned.Name(),
-		status.Closed.Name()),
-	Version: "",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		st, _ := cmd.Flags().GetString("status")
-		if st == "" {
-			st = status.Active.Name()
-		}
-		err := runListAzureCmd(cmd, st)
-		return err
-	},
-}
-
 func runListAzureCmd(cmd *cobra.Command, state string) error {
 
 	azCfg, err := loadConfig()
 	if err != nil {
 		return err
 	}
-	svc := azure.NewAzureService(azCfg.CompanyName, azCfg.PAT)
+	svc := azure.NewAzureService(azCfg.Organization, azCfg.PAT)
 	projectRepos := make(map[string][]string)
 	for _, project := range azCfg.Projects {
 		projectRepos[project.ID] = project.RepositoryIDs
@@ -64,27 +42,12 @@ func runListAzureCmd(cmd *cobra.Command, state string) error {
 	if err != nil {
 		return err
 	}
-	azlsPrint(prs, azCfg.CompanyName)
+	azlsPrint(prs, azCfg.Organization)
 
 	return nil
 }
 
-func init() {
-	ListCmd.AddCommand(listAzureCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	listAzureCmd.Flags().StringP("status", "s", status.Active.Name(), "status of PRs to list")
-
-}
-
-func azlsPrint(prs []models.PullRequest, companyName string) {
+func azlsPrint(prs []models.PullRequest, organization string) {
 	fmt.Printf("Number of PRs : %d \n", len(prs))
 	lastProject := ""
 	lastRepository := ""
@@ -106,7 +69,7 @@ func azlsPrint(prs []models.PullRequest, companyName string) {
 		}
 
 		url := fmt.Sprintf("https://dev.azure.com/%s/%s/_git/%s/"+
-			"pullrequest/%s", companyName, pr.Project.Name,
+			"pullrequest/%s", organization, pr.Project.Name,
 			pr.Repository.Name, pr.ID)
 
 		lnk := termenv.Hyperlink(url, "open")

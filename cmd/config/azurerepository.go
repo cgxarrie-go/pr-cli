@@ -11,7 +11,7 @@ import (
 
 // azureRepositoryCmd represents the azureRepository command
 var azureRepositoryCmd = &cobra.Command{
-	Use:   "az-repo",
+	Use:   "repo",
 	Short: "set azure Repository",
 	Long:  `Set the Azure Repository in the configuration file`,
 	Run: func(cmd *cobra.Command, args []string) {
