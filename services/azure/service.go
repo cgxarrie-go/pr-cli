@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/cgxarrie-go/prq/domain/errors"
+	"github.com/cgxarrie-go/prq/domain/models"
+	"github.com/cgxarrie-go/prq/domain/ports"
+	"github.com/cgxarrie-go/prq/services/azure/status"
 	"golang.org/x/sync/errgroup"
-
-	"github.com/cgxarrie-go/prcli/domain/errors"
-	"github.com/cgxarrie-go/prcli/domain/models"
-	"github.com/cgxarrie-go/prcli/domain/ports"
 )
 
 type azureSvc struct {
@@ -45,7 +45,8 @@ func (svc azureSvc) GetPRs(req interface{}) (prs []models.PullRequest, err error
 	return prs, g.Wait()
 }
 
-func (svc azureSvc) buildURL(projectID string, repositoryID string, status int) string {
+func (svc azureSvc) buildURL(projectID string, repositoryID string,
+	status status.Status) string {
 	return fmt.Sprintf("https://dev.azure.com"+
 		"/%s/%s/_apis/git/repositories/"+
 		"%s/pullrequests?searchCriteria."+
