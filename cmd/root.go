@@ -12,7 +12,23 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "prq",
 	Short: "Interaction with pull requests from command line",
-	Long:  `Interaction with pull requests from command line`,
+	Long: `Interaction with pull requests from command line
+	
+Config commands : 
+config : display config
+config az-cname	: set company name in azure config
+config az-pat	: set PAT in azure config
+config az-project -a <name>	: Adds a project with name <name> in azure config
+config az-project -d <name>	: Removes a project with name <name> in azure config
+config az-repo -a <name> -p <project-name>	: Adds a repo with name <name> to the project with name <project-name> in azure config
+config az-repo -d <name> -p <project-name>	: Removes a repo with name <name> from the project with name <project-name> in azure config
+
+List PR commands : 
+list az : Lists all PR in status Active for azure projects and repos
+list az active: Lists all PR in status Active for azure projects and repos
+list az abandoned: Lists all PR in status Abandoned for azure projects and repos
+list az cancelled: Lists all PR in status Cancelled for azure projects and repos
+`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },

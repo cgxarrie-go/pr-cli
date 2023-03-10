@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/cgxarrie-go/prcli/config"
+	appcfg "github.com/cgxarrie-go/prcli/config"
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +34,8 @@ func init() {
 
 func runConfigCmd(cmd *cobra.Command, args []string) {
 
-	cfg := config.GetInstance().Azure
+	cfg := appcfg.GetInstance()
+	err := cfg.Load()
 	b, err := json.Marshal(cfg)
 	if err != nil {
 		fmt.Printf("ERROR : %s\n", err.Error())
