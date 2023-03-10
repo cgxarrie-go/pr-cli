@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"sync"
+
+	"github.com/cgxarrie-go/prq/cache/providers"
 )
 
 var lock = &sync.Mutex{}
@@ -29,7 +31,8 @@ var (
 
 // Config main configuration for CLI
 type Config struct {
-	Azure AzureConfig
+	DefaultProvider providers.Provider
+	Azure           AzureConfig
 }
 
 // AzureConfig configuration for Azure
