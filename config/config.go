@@ -37,9 +37,9 @@ type Config struct {
 
 // AzureConfig configuration for Azure
 type AzureConfig struct {
-	CompanyName string
-	PAT         string
-	Projects    []AzureProjectConfig
+	Organization string
+	PAT          string
+	Projects     []AzureProjectConfig
 }
 
 // NewConfig creates a new instance of Config

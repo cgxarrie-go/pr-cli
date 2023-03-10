@@ -9,13 +9,13 @@ import (
 	"github.com/cgxarrie-go/prq/domain/errors"
 )
 
-// azureCompanyNameCmd represents the companyName command
-var azureCompanyNameCmd = &cobra.Command{
-	Use:   "cname",
+// azureOrganizationCmd represents the organization command
+var azureOrganizationCmd = &cobra.Command{
+	Use:   "org",
 	Short: "set azure company name",
 	Long:  `Set the Azure Conpmany-Name in the configuration file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := runCompanyNameCmd(args)
+		err := runOrganizationCmd(args)
 		if err != nil {
 			errors.Print(err)
 			return
@@ -24,27 +24,27 @@ var azureCompanyNameCmd = &cobra.Command{
 }
 
 func init() {
-	azureCmd.AddCommand(azureCompanyNameCmd)
+	ConfigCmd.AddCommand(azureOrganizationCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// companyNameCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// organizationCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// companyNameCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// organizationCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func runCompanyNameCmd(args []string) error {
+func runOrganizationCmd(args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("invalid number of arguments")
 	}
 	cfg := appCfg.GetInstance()
 	cfg.Load()
 
-	cfg.Azure.CompanyName = args[0]
+	cfg.Azure.Organization = args[0]
 	err := cfg.Save()
 	if err != nil {
 		return err

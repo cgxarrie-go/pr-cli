@@ -93,9 +93,9 @@ func (svc azureSvc) doGet(url string, resp interface{}) (err error) {
 }
 
 // NewAzureService return new instnce of azure service
-func NewAzureService(companyName string, pat string) ports.ProviderService {
+func NewAzureService(organization string, pat string) ports.ProviderService {
 	return azureSvc{
-		conpanyName: companyName,
+		conpanyName: organization,
 		pat:         fmt.Sprintf("`:%s", pat),
 	}
 }

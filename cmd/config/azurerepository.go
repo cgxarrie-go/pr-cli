@@ -31,7 +31,7 @@ var azureRepositoryCmd = &cobra.Command{
 }
 
 func init() {
-	azureCmd.AddCommand(azureRepositoryCmd)
+	ConfigCmd.AddCommand(azureRepositoryCmd)
 
 	// Here you will define your flags and configuration settings.
 

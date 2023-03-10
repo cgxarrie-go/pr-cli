@@ -44,7 +44,7 @@ var azureProjectCmd = &cobra.Command{
 }
 
 func init() {
-	azureCmd.AddCommand(azureProjectCmd)
+	ConfigCmd.AddCommand(azureProjectCmd)
 
 	// Here you will define your flags and configuration settings.
 

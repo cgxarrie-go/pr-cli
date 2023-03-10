@@ -20,7 +20,7 @@ var azurePATCmd = &cobra.Command{
 }
 
 func init() {
-	azureCmd.AddCommand(azurePATCmd)
+	ConfigCmd.AddCommand(azurePATCmd)
 
 	// Here you will define your flags and configuration settings.
 
