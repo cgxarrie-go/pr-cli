@@ -5,13 +5,13 @@ import (
 	"log"
 	"strings"
 
-	"github.com/cgxarrie-go/prcli/config"
-	"github.com/cgxarrie-go/prcli/domain/errors"
-	"github.com/cgxarrie-go/prcli/domain/models"
-	"github.com/cgxarrie-go/prcli/services/azure"
-	"github.com/cgxarrie-go/prcli/services/azure/status"
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
+
+	"github.com/cgxarrie-go/prq/config"
+	"github.com/cgxarrie-go/prq/domain/models"
+	"github.com/cgxarrie-go/prq/services/azure"
+	"github.com/cgxarrie-go/prq/services/azure/status"
 )
 
 const (
@@ -33,20 +33,21 @@ var listAzureCmd = &cobra.Command{
 		status.Active.Name(), status.Abandoned.Name(),
 		status.Closed.Name()),
 	Version: "",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		st, _ := cmd.Flags().GetString("status")
 		if st == "" {
 			st = status.Active.Name()
 		}
-		runListAzureCmd(cmd, st)
+		err := runListAzureCmd(cmd, st)
+		return err
 	},
 }
 
-func runListAzureCmd(cmd *cobra.Command, state string) {
+func runListAzureCmd(cmd *cobra.Command, state string) error {
 
 	azCfg, err := loadConfig()
 	if err != nil {
-		errors.Print(err)
+		return err
 	}
 	svc := azure.NewAzureService(azCfg.CompanyName, azCfg.PAT)
 	projectRepos := make(map[string][]string)
@@ -56,8 +57,7 @@ func runListAzureCmd(cmd *cobra.Command, state string) {
 
 	azStatus, err := status.FromName(state)
 	if err != nil {
-		errors.Print(err)
-		return
+		return err
 	}
 
 	req := azure.GetPRsRequest{ProjectRepos: projectRepos, Status: azStatus}
@@ -66,6 +66,8 @@ func runListAzureCmd(cmd *cobra.Command, state string) {
 		log.Fatal(err)
 	}
 	azlsPrint(prs, azCfg.CompanyName)
+
+	return nil
 }
 
 func init() {

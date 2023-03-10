@@ -3,35 +3,32 @@ package cmd
 import (
 	"os"
 
-	"github.com/cgxarrie-go/prcli/cmd/config"
-	"github.com/cgxarrie-go/prcli/cmd/list"
 	"github.com/spf13/cobra"
+
+	"github.com/cgxarrie-go/prq/cmd/config"
+	"github.com/cgxarrie-go/prq/cmd/list"
+	"github.com/cgxarrie-go/prq/domain/errors"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "prq",
 	Short: "Interaction with pull requests from command line",
-	Long: `Interaction with pull requests from command line
-	
-Config commands : 
-config : display config
-config az-cname	: set company name in azure config
-config az-pat	: set PAT in azure config
-config az-project -a <name>	: Adds a project with name <name> in azure config
-config az-project -d <name>	: Removes a project with name <name> in azure config
-config az-repo -a <name> -p <project-name>	: Adds a repo with name <name> to the project with name <project-name> in azure config
-config az-repo -d <name> -p <project-name>	: Removes a repo with name <name> from the project with name <project-name> in azure config
+	Long:  `Interaction with pull requests from command line`,
+	Example: `Config commands : 
+prq config : display config
+prq config az-cname	: set company name in azure config
+prq config az-pat	: set PAT in azure config
+prq config az-project -a <name>	: Adds a project with name <name> in azure config
+prq config az-project -d <name>	: Removes a project with name <name> in azure config
+prq config az-repo -a <name> -p <project-name>	: Adds a repo with name <name> to the project with name <project-name> in azure config
+prq config az-repo -d <name> -p <project-name>	: Removes a repo with name <name> from the project with name <project-name> in azure config
 
 List PR commands : 
-list az : Lists all PR in status Active for azure projects and repos
-list az active: Lists all PR in status Active for azure projects and repos
-list az abandoned: Lists all PR in status Abandoned for azure projects and repos
-list az cancelled: Lists all PR in status Cancelled for azure projects and repos
-`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+prq list az : Lists all PR in status Active for azure projects and repos
+prq list az active: Lists all PR in status Active for azure projects and repos
+prq list az abandoned: Lists all PR in status Abandoned for azure projects and repos
+prq list az cancelled: Lists all PR in status Cancelled for azure projects and repos`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -39,6 +36,7 @@ list az cancelled: Lists all PR in status Cancelled for azure projects and repos
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
+		errors.Print(err)
 		os.Exit(1)
 	}
 }

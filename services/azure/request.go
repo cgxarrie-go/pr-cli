@@ -1,6 +1,6 @@
 package azure
 
-import "github.com/cgxarrie-go/prcli/services/azure/status"
+import "github.com/cgxarrie-go/prq/services/azure/status"
 
 // GetPRsRequest is the request for Azure service
 type GetPRsRequest struct {

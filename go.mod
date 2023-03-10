@@ -1,4 +1,4 @@
-module github.com/cgxarrie-go/prcli
+module github.com/cgxarrie-go/prq
 
 go 1.19
 

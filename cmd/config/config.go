@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	appcfg "github.com/cgxarrie-go/prcli/config"
+	appcfg "github.com/cgxarrie-go/prq/config"
 	"github.com/spf13/cobra"
 )
 

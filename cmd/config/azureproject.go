@@ -3,8 +3,8 @@ package config
 import (
 	"fmt"
 
-	appCfg "github.com/cgxarrie-go/prcli/config"
-	"github.com/cgxarrie-go/prcli/domain/errors"
+	appCfg "github.com/cgxarrie-go/prq/config"
+	"github.com/cgxarrie-go/prq/domain/errors"
 	"github.com/spf13/cobra"
 )
 

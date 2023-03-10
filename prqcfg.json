@@ -1,1 +1,7 @@
-{"Azure":{"CompanyName":"Derivco","PAT":"my-pat-here","Projects":[]}}
+{
+    "Azure": {
+        "CompanyName": "c",
+        "PAT": "my-pat-here",
+        "Projects": []
+    }
+}

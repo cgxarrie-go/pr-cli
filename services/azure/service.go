@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cgxarrie-go/prcli/domain/errors"
-	"github.com/cgxarrie-go/prcli/domain/models"
-	"github.com/cgxarrie-go/prcli/domain/ports"
-	"github.com/cgxarrie-go/prcli/services/azure/status"
+	"github.com/cgxarrie-go/prq/domain/errors"
+	"github.com/cgxarrie-go/prq/domain/models"
+	"github.com/cgxarrie-go/prq/domain/ports"
+	"github.com/cgxarrie-go/prq/services/azure/status"
 	"golang.org/x/sync/errgroup"
 )
 
