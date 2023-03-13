@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/cgxarrie-go/prq/cache/providers"
+
 )
 
 var lock = &sync.Mutex{}
@@ -92,4 +94,13 @@ func (c *Config) Save() (err error) {
 	_, err = f.WriteString(string(b))
 
 	return err
+}
+
+func (c *Config) fileName() (folder string, err error) {
+	ex, err := os.Executable()
+	if err != nil {
+		return folder, err
+	}
+	exPath := filepath.Dir(ex)
+	return fmt.Sprintf("%s/%s", exPath, configFileName), nil
 }
