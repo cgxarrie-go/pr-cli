@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"github.com/cgxarrie-go/prq/cache/providers"
-
 )
 
 var lock = &sync.Mutex{}
@@ -59,8 +58,12 @@ type AzureProjectConfig struct {
 
 // Load read config file into config struct
 func (c *Config) Load() (err error) {
+	fileName, err := c.fileName()
+	if err != nil {
+		return err
+	}
 
-	if _, err := os.Stat(configFileName); err != nil {
+	if _, err := os.Stat(fileName); err != nil {
 		return fmt.Errorf("configuration file not found\n" +
 			"Use prq config to add configuration")
 	}
@@ -81,7 +84,12 @@ func (c *Config) Load() (err error) {
 
 // Save saves the config file
 func (c *Config) Save() (err error) {
-	f, err := os.Create(configFileName)
+	fileName, err := c.fileName()
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Create(fileName)
 	if err != nil {
 		return err
 	}
@@ -102,5 +110,6 @@ func (c *Config) fileName() (folder string, err error) {
 		return folder, err
 	}
 	exPath := filepath.Dir(ex)
-	return fmt.Sprintf("%s/%s", exPath, configFileName), nil
+	fileName := fmt.Sprintf("%s/%s", exPath, configFileName)
+	return fileName, nil
 }
