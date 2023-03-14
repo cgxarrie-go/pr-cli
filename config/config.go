@@ -68,7 +68,7 @@ func (c *Config) Load() (err error) {
 			"Use prq config to add configuration")
 	}
 
-	file, err := ioutil.ReadFile(configFileName)
+	file, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return fmt.Errorf("Error loading config file: %s", err.Error())
 
@@ -111,5 +111,6 @@ func (c *Config) fileName() (folder string, err error) {
 	}
 	exPath := filepath.Dir(ex)
 	fileName := fmt.Sprintf("%s/%s", exPath, configFileName)
+	fmt.Printf("config file : %s\n", fileName)
 	return fileName, nil
 }

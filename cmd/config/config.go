@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	appcfg "github.com/cgxarrie-go/prq/config"
 	"github.com/spf13/cobra"
+
+	appcfg "github.com/cgxarrie-go/prq/config"
 )
 
 // ConfigCmd represents the Config command
@@ -13,8 +14,8 @@ var ConfigCmd = &cobra.Command{
 	Use:   "config",
 	Short: "display config",
 	Long:  `display config`,
-	Run: func(cmd *cobra.Command, args []string) {
-		runConfigCmd(cmd, args)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runConfigCmd(cmd, args)
 	},
 }
 
@@ -32,14 +33,14 @@ func init() {
 
 }
 
-func runConfigCmd(cmd *cobra.Command, args []string) {
+func runConfigCmd(cmd *cobra.Command, args []string) error {
 
 	cfg := appcfg.GetInstance()
-	err := cfg.Load()
+	cfg.Load()
 	b, err := json.Marshal(cfg)
 	if err != nil {
-		fmt.Printf("ERROR : %s\n", err.Error())
-		return
+		return err
 	}
 	fmt.Println(string(b))
+	return nil
 }

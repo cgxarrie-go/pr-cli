@@ -103,7 +103,7 @@ func getColumnFormat() string {
 
 func loadConfig() (azcfg config.AzureConfig, err error) {
 	cfg := config.GetInstance()
-	err = cfg.Load()
+	cfg.Load()
 	if err != nil {
 		return azcfg, err
 	}

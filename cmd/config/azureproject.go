@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 
 	appCfg "github.com/cgxarrie-go/prq/config"
-	"github.com/cgxarrie-go/prq/domain/errors"
 )
 
 // azureProjectCmd represents the azureProject command
@@ -14,31 +13,14 @@ var azureProjectCmd = &cobra.Command{
 	Use:   "project",
 	Short: "set azure Project",
 	Long:  `Set the Azure Project in the configuration file`,
-	Run: func(cmd *cobra.Command, args []string) {
-		nextFlag := true
-		var err error
-		addFlag, _ := cmd.Flags().GetString("add")
-		if addFlag != "" {
-			nextFlag = false
-			err = runAddAzureProjectCmd(addFlag)
-		}
-
-		if nextFlag {
-			delFlag, _ := cmd.Flags().GetString("del")
-			if delFlag != "" {
-				nextFlag = false
-				err = runDeleteAzureProjectCmd(delFlag)
-			}
-		}
-
-		if nextFlag {
-			err = fmt.Errorf("missig action flag for azure project command")
-		}
-
+	RunE: func(cmd *cobra.Command, args []string) error {
+		action, name, err := getActionAndValue(cmd)
 		if err != nil {
-			errors.Print(err)
-			return
+			return err
 		}
+
+		err = action(name)
+		return err
 
 	},
 }
@@ -56,6 +38,23 @@ func init() {
 	// is called directly, e.g.:
 	azureProjectCmd.Flags().StringP("add", "a", "", "Add a project")
 	azureProjectCmd.Flags().StringP("del", "d", "", "Remove a project")
+}
+func getActionAndValue(cmd *cobra.Command) (action func(string) error,
+	name string, err error) {
+
+	addFlag, _ := cmd.Flags().GetString("add")
+	if addFlag != "" {
+		return runAddAzureProjectCmd, addFlag, nil
+	}
+
+	delFlag, _ := cmd.Flags().GetString("del")
+	if delFlag != "" {
+		return runDeleteAzureProjectCmd, delFlag, nil
+	}
+
+	return action, name,
+		fmt.Errorf("missig action flag for azure project command")
+
 }
 
 func runAddAzureProjectCmd(name string) error {
