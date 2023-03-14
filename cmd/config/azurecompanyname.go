@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 
 	appCfg "github.com/cgxarrie-go/prq/config"
-	"github.com/cgxarrie-go/prq/domain/errors"
 )
 
 // azureOrganizationCmd represents the organization command
@@ -14,12 +13,9 @@ var azureOrganizationCmd = &cobra.Command{
 	Use:   "org",
 	Short: "set azure company name",
 	Long:  `Set the Azure Conpmany-Name in the configuration file`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		err := runOrganizationCmd(args)
-		if err != nil {
-			errors.Print(err)
-			return
-		}
+		return err
 	},
 }
 

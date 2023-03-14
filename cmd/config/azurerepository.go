@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 
 	appCfg "github.com/cgxarrie-go/prq/config"
-	"github.com/cgxarrie-go/prq/domain/errors"
 )
 
 // azureRepositoryCmd represents the azureRepository command
@@ -14,19 +13,18 @@ var azureRepositoryCmd = &cobra.Command{
 	Use:   "repo",
 	Short: "set azure Repository",
 	Long:  `Set the Azure Repository in the configuration file`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		action, project, repo, err := getAzureRepositoryAction(cmd)
 		if err != nil {
-			errors.Print(err)
-			return
+			return err
 		}
 
 		err = action(project, repo)
 		if err != nil {
-			errors.Print(err)
-			return
+			return err
 		}
 
+		return nil
 	},
 }
 
