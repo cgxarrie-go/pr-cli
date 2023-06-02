@@ -9,7 +9,12 @@ type PRReader interface {
 	GetPRs(req interface{}) (prs []models.PullRequest, err error)
 }
 
+type PRCreator interface {
+	Create(req interface{}) (err error)
+}
+
 // ProviderService Contract for all providers
 type ProviderService interface {
 	PRReader
+	PRCreator
 }
