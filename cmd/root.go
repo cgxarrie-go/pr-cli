@@ -1,13 +1,14 @@
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/cgxarrie-go/prq/cmd/config"
+	"github.com/cgxarrie-go/prq/cmd/create"
 	"github.com/cgxarrie-go/prq/cmd/list"
-	"github.com/cgxarrie-go/prq/domain/errors"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -36,7 +37,7 @@ prq list --status cancelled: Lists all PR in status Cancelled for azure projects
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		errors.Print(err)
+		log.Print(err)
 		os.Exit(1)
 	}
 }
@@ -44,6 +45,7 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(list.ListCmd)
 	rootCmd.AddCommand(config.ConfigCmd)
+	rootCmd.AddCommand(create.CreateCmd)
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.

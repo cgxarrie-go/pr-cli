@@ -11,16 +11,28 @@ import (
 	"github.com/cgxarrie-go/prq/domain/errors"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/domain/ports"
-	"github.com/cgxarrie-go/prq/services/azure/status"
 )
 
-type azureSvc struct {
-	conpanyName string
+type readPRSvc struct {
+	companyName string
 	pat         string
 }
 
+// NewAzureReadPullRequestsService return new instnce of azure service
+func NewAzureReadPullRequestsService(organization string, pat string) ports.PRReader {
+	return readPRSvc{
+		companyName: organization,
+		pat:         fmt.Sprintf("`:%s", pat),
+	}
+}
+
+func (svc readPRSvc) baseUrl(projectID string) string {
+	return fmt.Sprintf("https://dev.azure.com"+
+		"/%s/%s/_apis/git/repositories", svc.companyName, projectID)
+}
+
 // GetPRs implements ports.ProviderService
-func (svc azureSvc) GetPRs(req interface{}) (prs []models.PullRequest, err error) {
+func (svc readPRSvc) GetPRs(req interface{}) (prs []models.PullRequest, err error) {
 
 	getReq, ok := req.(GetPRsRequest)
 	if !ok {
@@ -33,7 +45,10 @@ func (svc azureSvc) GetPRs(req interface{}) (prs []models.PullRequest, err error
 		for _, repositoryID := range repositoryIDs {
 			projectID, repositoryID := projectID, repositoryID
 			g.Go(func() error {
-				url := svc.buildURL(projectID, repositoryID, getReq.Status)
+				url := fmt.Sprintf("%s/%s/pullrequests?searchCriteria."+
+					"status=%d&api-version=5.1",
+					svc.baseUrl(projectID), repositoryID, getReq.Status)
+
 				azPRs, err := svc.getData(url)
 				if err == nil {
 					prs = append(prs, azPRs...)
@@ -46,16 +61,7 @@ func (svc azureSvc) GetPRs(req interface{}) (prs []models.PullRequest, err error
 	return prs, g.Wait()
 }
 
-func (svc azureSvc) buildURL(projectID string, repositoryID string,
-	status status.Status) string {
-	return fmt.Sprintf("https://dev.azure.com"+
-		"/%s/%s/_apis/git/repositories/"+
-		"%s/pullrequests?searchCriteria."+
-		"status=%d&api-version=5.1",
-		svc.conpanyName, projectID, repositoryID, status)
-}
-
-func (svc azureSvc) getData(url string) (prs []models.PullRequest, err error) {
+func (svc readPRSvc) getData(url string) (prs []models.PullRequest, err error) {
 	azPRs := GetPRsResponse{}
 	err = svc.doGet(url, &azPRs)
 	if err != nil {
@@ -70,7 +76,7 @@ func (svc azureSvc) getData(url string) (prs []models.PullRequest, err error) {
 	return
 }
 
-func (svc azureSvc) doGet(url string, resp interface{}) (err error) {
+func (svc readPRSvc) doGet(url string, resp interface{}) (err error) {
 	b64PAT := base64.RawStdEncoding.EncodeToString([]byte(svc.pat))
 	bearer := fmt.Sprintf("Basic %s", b64PAT)
 
@@ -90,12 +96,4 @@ func (svc azureSvc) doGet(url string, resp interface{}) (err error) {
 	defer azResp.Body.Close()
 	return json.NewDecoder(azResp.Body).Decode(resp)
 
-}
-
-// NewAzureService return new instnce of azure service
-func NewAzureService(organization string, pat string) ports.ProviderService {
-	return azureSvc{
-		conpanyName: organization,
-		pat:         fmt.Sprintf("`:%s", pat),
-	}
 }

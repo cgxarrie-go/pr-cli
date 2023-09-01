@@ -9,7 +9,6 @@ type PRReader interface {
 	GetPRs(req interface{}) (prs []models.PullRequest, err error)
 }
 
-// ProviderService Contract for all providers
-type ProviderService interface {
-	PRReader
+type PRCreator interface {
+	Create(req interface{}) (id string, err error)
 }

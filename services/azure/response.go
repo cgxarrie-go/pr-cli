@@ -81,3 +81,7 @@ func (azPR GetPRsResponsePullRequest) ToPullRequest() models.PullRequest {
 		Created:     azPR.Created,
 	}
 }
+
+type CreatePRResponse struct {
+	ID int `json:"pullRequestId"`
+}

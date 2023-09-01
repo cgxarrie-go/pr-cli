@@ -9,3 +9,11 @@ type GetPRsRequest struct {
 	ProjectRepos map[string][]string
 	Status       status.Status
 }
+
+type CreatePRRequest struct {
+	Project    string
+	Repository string
+	Source     string
+	Target     string
+	Title      string
+}
