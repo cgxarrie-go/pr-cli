@@ -9,6 +9,7 @@ import (
 
 	"github.com/cgxarrie-go/prq/domain/errors"
 	"github.com/cgxarrie-go/prq/domain/ports"
+	"github.com/cgxarrie-go/prq/utils"
 )
 
 type createPRSvc struct {
@@ -27,7 +28,7 @@ func NewAzureCreatePullRequestService(organization string, pat string) ports.PRC
 func (svc createPRSvc) baseUrl(projectID, repository string) string {
 	return fmt.Sprintf(
 		"https://dev.azure.com/%s/%s/_apis/git/repositories/%s/pullrequests?"+
-			"api-version=6.1-preview.1",
+			"api-version=7.0&supportsIterations=true",
 		svc.conpanyName,
 		projectID,
 		repository,
@@ -46,6 +47,10 @@ func (svc createPRSvc) Create(req interface{}) (id string, err error) {
 
 	err = svc.doPOST(createReq, resp)
 
+	if err != nil {
+		return "", fmt.Errorf("creating PR: %w", err)
+	}
+
 	return fmt.Sprintf("%d", resp.ID), nil
 }
 
@@ -57,12 +62,17 @@ func (svc createPRSvc) doPOST(req CreatePRRequest,
 	b64PAT := base64.RawStdEncoding.EncodeToString([]byte(svc.pat))
 	bearer := fmt.Sprintf("Basic %s", b64PAT)
 
-	pullRequest := map[string]interface{}{
-		"sourceRefName": req.Source, // Source branch
-		"targetRefName": req.Target, // Target branch
-		"title":         req.Title,
-		"description":   "",
+	sourceBranch, err := utils.GitCurrentBranchName()
+	if err != nil {
+		return fmt.Errorf("getting current branch name: %w", err)
 	}
+
+	pullRequest := map[string]interface{}{
+		"sourceRefName": sourceBranch, // Source branch
+		"targetRefName": req.Target,   // Target branch
+		"title":         req.Title,
+	}
+
 	body, err := json.Marshal(pullRequest)
 	if err != nil {
 		return fmt.Errorf("marshalling request body: %w", err)

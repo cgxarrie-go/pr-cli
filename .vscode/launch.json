@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "List azure",
+            "name": "az List",
             "type": "go",
             "request": "launch",
             "mode": "auto",
@@ -16,7 +16,7 @@
             ]
         },
         {
-            "name": "Create in Azure",
+            "name": "az Create",
             "type": "go",
             "request": "launch",
             "mode": "auto",
@@ -26,7 +26,24 @@
                 "-p Sports-CoreAccount",
                 "-r account",
                 "-s test-branch",
-                "-t master"
+                "-d master",
+                "-t test-pr"
+            ]
+        },
+        {
+            "name": "az Create def dest",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "./main.go",
+            "args": [
+                "t",
+                "-p",
+                "Sports-CoreAccount",
+                "-r",
+                "account",
+                "-s",
+                "test-branch"
             ]
         }
     ]

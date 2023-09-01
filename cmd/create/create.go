@@ -13,10 +13,11 @@ var CreateCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		prj, _ := cmd.Flags().GetString("project")
 		repo, _ := cmd.Flags().GetString("repository")
+		dest, _ := cmd.Flags().GetString("destination")
 		src, _ := cmd.Flags().GetString("source")
-		tgt, _ := cmd.Flags().GetString("target")
+		ttl, _ := cmd.Flags().GetString("title")
 
-		err := runCreateAzureCmd(cmd, prj, repo, src, tgt)
+		err := runCreateAzureCmd(cmd, prj, repo, src, dest, ttl)
 		return err
 	},
 }
@@ -35,6 +36,7 @@ func init() {
 	CreateCmd.Flags().StringP("project", "p", "", "project")
 	CreateCmd.Flags().StringP("repository", "r", "", "repository where the PR is to be created")
 	CreateCmd.Flags().StringP("source", "s", "", "source branch")
-	CreateCmd.Flags().StringP("target", "t", "", "target branch")
+	CreateCmd.Flags().StringP("destination", "d", "", "target branch")
+	CreateCmd.Flags().StringP("title", "t", "", "title")
 
 }

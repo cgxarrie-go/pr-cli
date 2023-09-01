@@ -7,16 +7,10 @@ import (
 
 	"github.com/cgxarrie-go/prq/config"
 	"github.com/cgxarrie-go/prq/services/azure"
+	"github.com/cgxarrie-go/prq/utils"
 )
 
-const (
-	prIDColLength      int = 8
-	prTitleColLength   int = 70
-	prCreatedColLength int = 25
-	prStatusColLength  int = 10
-)
-
-func runCreateAzureCmd(cmd *cobra.Command, prj, repo, src, tgt string) error {
+func runCreateAzureCmd(cmd *cobra.Command, prj, repo, src, tgt, ttl string) error {
 
 	azCfg, err := loadConfig()
 	if err != nil {
@@ -24,11 +18,27 @@ func runCreateAzureCmd(cmd *cobra.Command, prj, repo, src, tgt string) error {
 	}
 	svc := azure.NewAzureCreatePullRequestService(azCfg.Organization, azCfg.PAT)
 
+	if src == "" {
+		src, err = utils.GitCurrentBranchName()
+		if err != nil {
+			return err
+		}
+	}
+
+	if tgt == "" {
+		tgt = "master"
+	}
+
+	if ttl == "" {
+		ttl = fmt.Sprintf("PR from %s to %s", src, tgt)
+	}
+
 	req := azure.CreatePRRequest{
 		Project:    prj,
 		Repository: repo,
 		Source:     src,
 		Target:     tgt,
+		Title:      ttl,
 	}
 	id, err := svc.Create(req)
 	if err != nil {
