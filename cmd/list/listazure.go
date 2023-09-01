@@ -26,7 +26,7 @@ func runListAzureCmd(cmd *cobra.Command, state string) error {
 	if err != nil {
 		return err
 	}
-	svc := azure.NewAzureService(azCfg.Organization, azCfg.PAT)
+	svc := azure.NewAzureReadPullRequestsService(azCfg.Organization, azCfg.PAT)
 	projectRepos := make(map[string][]string)
 	for _, project := range azCfg.Projects {
 		projectRepos[project.ID] = project.RepositoryIDs

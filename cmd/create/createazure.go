@@ -16,23 +16,26 @@ const (
 	prStatusColLength  int = 10
 )
 
-func runCreateAzureCmd(cmd *cobra.Command, repo, src, tgt string) error {
+func runCreateAzureCmd(cmd *cobra.Command, prj, repo, src, tgt string) error {
 
 	azCfg, err := loadConfig()
 	if err != nil {
 		return err
 	}
-	svc := azure.NewAzureService(azCfg.Organization, azCfg.PAT)
+	svc := azure.NewAzureCreatePullRequestService(azCfg.Organization, azCfg.PAT)
 
 	req := azure.CreatePRRequest{
+		Project:    prj,
 		Repository: repo,
 		Source:     src,
 		Target:     tgt,
 	}
-	err = svc.Create(req)
+	id, err := svc.Create(req)
 	if err != nil {
 		return fmt.Errorf("failed to create PR: %w", err)
 	}
+
+	fmt.Printf("PR created with ID: %s\n", id)
 
 	return nil
 }

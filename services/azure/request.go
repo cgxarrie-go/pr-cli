@@ -11,7 +11,9 @@ type GetPRsRequest struct {
 }
 
 type CreatePRRequest struct {
+	Project    string
 	Repository string
 	Source     string
 	Target     string
+	Title      string
 }

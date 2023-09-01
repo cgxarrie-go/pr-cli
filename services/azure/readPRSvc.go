@@ -13,26 +13,26 @@ import (
 	"github.com/cgxarrie-go/prq/domain/ports"
 )
 
-type azureSvc struct {
+type readPRSvc struct {
 	conpanyName string
 	pat         string
 }
 
-// NewAzureService return new instnce of azure service
-func NewAzureService(organization string, pat string) ports.ProviderService {
-	return azureSvc{
+// NewAzureReadPullRequestsService return new instnce of azure service
+func NewAzureReadPullRequestsService(organization string, pat string) ports.PRReader {
+	return readPRSvc{
 		conpanyName: organization,
 		pat:         fmt.Sprintf("`:%s", pat),
 	}
 }
 
-func (svc azureSvc) baseUrl(projectID string) string {
+func (svc readPRSvc) baseUrl(projectID string) string {
 	return fmt.Sprintf("https://dev.azure.com"+
 		"/%s/%s/_apis/git/repositories", svc.conpanyName, projectID)
 }
 
 // GetPRs implements ports.ProviderService
-func (svc azureSvc) GetPRs(req interface{}) (prs []models.PullRequest, err error) {
+func (svc readPRSvc) GetPRs(req interface{}) (prs []models.PullRequest, err error) {
 
 	getReq, ok := req.(GetPRsRequest)
 	if !ok {
@@ -61,7 +61,7 @@ func (svc azureSvc) GetPRs(req interface{}) (prs []models.PullRequest, err error
 	return prs, g.Wait()
 }
 
-func (svc azureSvc) getData(url string) (prs []models.PullRequest, err error) {
+func (svc readPRSvc) getData(url string) (prs []models.PullRequest, err error) {
 	azPRs := GetPRsResponse{}
 	err = svc.doGet(url, &azPRs)
 	if err != nil {
@@ -76,7 +76,7 @@ func (svc azureSvc) getData(url string) (prs []models.PullRequest, err error) {
 	return
 }
 
-func (svc azureSvc) doGet(url string, resp interface{}) (err error) {
+func (svc readPRSvc) doGet(url string, resp interface{}) (err error) {
 	b64PAT := base64.RawStdEncoding.EncodeToString([]byte(svc.pat))
 	bearer := fmt.Sprintf("Basic %s", b64PAT)
 
@@ -95,14 +95,5 @@ func (svc azureSvc) doGet(url string, resp interface{}) (err error) {
 
 	defer azResp.Body.Close()
 	return json.NewDecoder(azResp.Body).Decode(resp)
-
-}
-
-func (svc azureSvc) Create(req interface{}) (err error) {
-
-	getReq, ok := req.(CreatePRRequest)
-
-	url := fmt.Sprintf("%s/%s/pullrequests?api-version=6.0",
-		svc.baseUrl(projectID), repositoryID, getReq.Status)
 
 }

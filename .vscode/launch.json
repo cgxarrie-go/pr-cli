@@ -11,8 +11,11 @@
             "mode": "auto",
             "program": "./main.go",
             "args": [
-                "l",
-                "az"
+                "t",
+                "-p Sports-CoreAccount",
+                "-r account",
+                "-s test-branch",
+                "-t master"
             ]
         }
     ]
