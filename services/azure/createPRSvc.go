@@ -25,10 +25,9 @@ func NewAzureCreatePullRequestService(organization string, pat string) ports.PRC
 	}
 }
 
-func (svc createPRSvc) baseUrl(projectID, repository string) string {
-	return fmt.Sprintf(
-		"https://dev.azure.com/%s/%s/_apis/git/repositories/%s/pullrequests?"+
-			"api-version=7.0&supportsIterations=true",
+func (svc createPRSvc) url(projectID, repository string) string {
+	return fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/git/"+
+		"repositories/%s/pullRequests?supportsIterations=true",
 		svc.conpanyName,
 		projectID,
 		repository,
@@ -57,7 +56,7 @@ func (svc createPRSvc) Create(req interface{}) (id string, err error) {
 func (svc createPRSvc) doPOST(req CreatePRRequest,
 	resp interface{}) (err error) {
 
-	url := svc.baseUrl(req.Project, req.Repository)
+	url := svc.url(req.Project, req.Repository)
 
 	b64PAT := base64.RawStdEncoding.EncodeToString([]byte(svc.pat))
 	bearer := fmt.Sprintf("Basic %s", b64PAT)
