@@ -5,6 +5,7 @@
 *.so
 *.dylib
 data.txt
+.DS_Store
 
 bin/
 
