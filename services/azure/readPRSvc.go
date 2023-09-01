@@ -14,21 +14,21 @@ import (
 )
 
 type readPRSvc struct {
-	conpanyName string
+	companyName string
 	pat         string
 }
 
 // NewAzureReadPullRequestsService return new instnce of azure service
 func NewAzureReadPullRequestsService(organization string, pat string) ports.PRReader {
 	return readPRSvc{
-		conpanyName: organization,
+		companyName: organization,
 		pat:         fmt.Sprintf("`:%s", pat),
 	}
 }
 
 func (svc readPRSvc) baseUrl(projectID string) string {
 	return fmt.Sprintf("https://dev.azure.com"+
-		"/%s/%s/_apis/git/repositories", svc.conpanyName, projectID)
+		"/%s/%s/_apis/git/repositories", svc.companyName, projectID)
 }
 
 // GetPRs implements ports.ProviderService
