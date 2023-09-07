@@ -23,11 +23,16 @@
             "program": "./main.go",
             "args": [
                 "t",
-                "-p Sports-CoreAccount",
-                "-r account",
-                "-s test-branch",
-                "-d master",
-                "-t test-pr"
+                "-p",
+                "Sports-CoreAccount",
+                "-r",
+                "common-code",
+                "-s",
+                "test-branch",
+                "-d",
+                "master",
+                "-t",
+                "test-pr -> ABANDON!!!!"
             ]
         },
         {

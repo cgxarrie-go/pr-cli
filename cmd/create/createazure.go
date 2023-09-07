@@ -7,39 +7,21 @@ import (
 
 	"github.com/cgxarrie-go/prq/config"
 	"github.com/cgxarrie-go/prq/services/azure"
-	"github.com/cgxarrie-go/prq/utils"
 )
 
-func runCreateAzureCmd(cmd *cobra.Command, prj, repo, src, tgt, ttl string) error {
+func runCreateAzureCmd(cmd *cobra.Command, tgt, ttl string) error {
 
 	azCfg, err := loadConfig()
 	if err != nil {
 		return err
 	}
-	svc := azure.NewAzureCreatePullRequestService(azCfg.Organization, azCfg.PAT)
-
-	if src == "" {
-		src, err = utils.GitCurrentBranchName()
-		if err != nil {
-			return err
-		}
-	}
-
-	if tgt == "" {
-		tgt = "master"
-	}
-
-	if ttl == "" {
-		ttl = fmt.Sprintf("PR from %s to %s", src, tgt)
-	}
+	svc := azure.NewAzureCreatePullRequestService(azCfg.PAT)
 
 	req := azure.CreatePRRequest{
-		Project:    prj,
-		Repository: repo,
-		Source:     src,
-		Target:     tgt,
-		Title:      ttl,
+		Target: tgt,
+		Title:  ttl,
 	}
+
 	id, err := svc.Create(req)
 	if err != nil {
 		return fmt.Errorf("failed to create PR: %w", err)
