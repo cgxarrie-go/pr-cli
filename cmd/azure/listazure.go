@@ -1,13 +1,11 @@
-package list
+package azure
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 
-	"github.com/cgxarrie-go/prq/config"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/services/azure"
 	"github.com/cgxarrie-go/prq/services/azure/status"
@@ -20,7 +18,7 @@ const (
 	prStatusColLength  int = 10
 )
 
-func runListAzureCmd(cmd *cobra.Command, state string) error {
+func RunListAzureCmd(cmd *cobra.Command, state string) error {
 
 	azCfg, err := loadConfig()
 	if err != nil {
@@ -68,11 +66,8 @@ func azlsPrint(prs []models.PullRequest, organization string) {
 			lastRepository = pr.Repository.ID
 		}
 
-		url := fmt.Sprintf("https://dev.azure.com/%s/%s/_git/%s/"+
-			"pullrequest/%s", organization, pr.Project.Name,
-			pr.Repository.Name, pr.ID)
-
-		lnk := termenv.Hyperlink(url, "open")
+		lnk := getPRLink("open", organization, pr.Project.ID, pr.Repository.ID,
+			pr.ID)
 		created := fmt.Sprintf("%s (%v-%d-%d)",
 			strings.Split(pr.CreatedBy, " ")[0],
 			pr.Created.Year(), pr.Created.Month(), pr.Created.Day())
@@ -99,14 +94,4 @@ func getColumnFormat() string {
 		"| %-" + fmt.Sprintf("%d", prCreatedColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prStatusColLength) + "s " +
 		"| %s"
-}
-
-func loadConfig() (azcfg config.AzureConfig, err error) {
-	cfg := config.GetInstance()
-	cfg.Load()
-	if err != nil {
-		return azcfg, err
-	}
-
-	return cfg.Azure, nil
 }

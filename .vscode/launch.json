@@ -23,11 +23,10 @@
             "program": "./main.go",
             "args": [
                 "t",
-                "-p Sports-CoreAccount",
-                "-r account",
-                "-s test-branch",
-                "-d master",
-                "-t test-pr"
+                "-d",
+                "master",
+                "-t",
+                "test-pr -> ABANDON!!!!"
             ]
         },
         {
@@ -38,12 +37,6 @@
             "program": "./main.go",
             "args": [
                 "t",
-                "-p",
-                "Sports-CoreAccount",
-                "-r",
-                "account",
-                "-s",
-                "test-branch"
             ]
         }
     ]

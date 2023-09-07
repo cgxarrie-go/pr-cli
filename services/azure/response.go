@@ -82,6 +82,33 @@ func (azPR GetPRsResponsePullRequest) ToPullRequest() models.PullRequest {
 	}
 }
 
+// CreatePRResponse .
 type CreatePRResponse struct {
-	ID int `json:"pullRequestId"`
+	ID          int                      `json:"pullRequestId"`
+	Title       string                   `json:"title"`
+	Description string                   `json:"description"`
+	Repo        GetPRsResponseRepository `json:"repository"`
+	URL         string                   `json:"url"`
+	IsDraft     bool                     `json:"isDraft"`
+}
+
+func (azPR CreatePRResponse) ToPullRequest(organization string) models.CreatedPullRequest {
+	return models.CreatedPullRequest{
+		ID:          strconv.Itoa(azPR.ID),
+		Title:       azPR.Title,
+		Description: azPR.Description,
+		Repository: models.Hierarchy{
+			ID:   azPR.Repo.ID,
+			Name: azPR.Repo.Name,
+			URL:  azPR.Repo.URL,
+		},
+		Project: models.Hierarchy{
+			ID:   azPR.Repo.Project.ID,
+			Name: azPR.Repo.Project.Name,
+			URL:  azPR.Repo.Project.URL,
+		},
+		URL:          azPR.URL,
+		IsDraft:      azPR.IsDraft,
+		Organization: organization,
+	}
 }

@@ -1,13 +1,14 @@
-package list
+package cmd
 
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/cgxarrie-go/prq/cmd/azure"
 	"github.com/cgxarrie-go/prq/services/azure/status"
 )
 
-// ListCmd represents the list command
-var ListCmd = &cobra.Command{
+// listCmd represents the list command
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l", "ls"},
 	Short:   "list PRs",
@@ -17,7 +18,7 @@ var ListCmd = &cobra.Command{
 		if st == "" {
 			st = status.Active.Name()
 		}
-		err := runListAzureCmd(cmd, st)
+		err := azure.RunListAzureCmd(cmd, st)
 		return err
 	},
 }
@@ -32,6 +33,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// azCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	ListCmd.Flags().StringP("status", "s", status.Active.Name(), "status of PRs to list")
+	listCmd.Flags().StringP("status", "s", status.Active.Name(), "status of PRs to list")
 
 }
