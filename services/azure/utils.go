@@ -7,7 +7,7 @@ import (
 	"github.com/cgxarrie-go/prq/utils"
 )
 
-func getRepoParams() (companyName string, projectName string, repoName string,
+func getRepoParams() (organization string, projectName string, repoName string,
 	err error) {
 
 	origin, err := utils.GitCurrentOriginURL()
@@ -19,7 +19,7 @@ func getRepoParams() (companyName string, projectName string, repoName string,
 	split := strings.Split(origin, "/")
 	repoName = split[len(split)-1]
 	projectName = split[len(split)-3]
-	companyName = split[len(split)-4]
+	organization = split[len(split)-4]
 
 	return
 }

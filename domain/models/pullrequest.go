@@ -20,6 +20,17 @@ type PullRequest struct {
 	Created     time.Time
 }
 
+type CreatedPullRequest struct {
+	ID           string
+	Title        string
+	Description  string
+	Repository   Hierarchy
+	Project      Hierarchy
+	URL          string
+	IsDraft      bool
+	Organization string
+}
+
 // Hierarchy of a PR
 type Hierarchy struct {
 	ID   string

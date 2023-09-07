@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/cgxarrie-go/prq/domain/errors"
+	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/domain/ports"
 	"github.com/cgxarrie-go/prq/utils"
 )
@@ -25,32 +26,29 @@ func NewAzureCreatePullRequestService(pat string) ports.PRCreator {
 	}
 }
 
-func (svc createPRSvc) url() (string, error) {
-
-	companyName, projectName, repoName, err := getRepoParams()
-	if err != nil {
-		return "", fmt.Errorf("getting repo params: %w", err)
-	}
+func (svc createPRSvc) url(organization, projectName, repoName string) (
+	string, error) {
 
 	return fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/git/"+
 		"repositories/%s/pullRequests?supportsIterations=true&api-version=7.0",
-		companyName,
+		organization,
 		projectName,
 		repoName,
 	), nil
 }
 
 // Create .
-func (svc createPRSvc) Create(req interface{}) (id string, err error) {
+func (svc createPRSvc) Create(req any) (pr models.CreatedPullRequest,
+	err error) {
 
 	createReq, ok := req.(CreatePRRequest)
 	if !ok {
-		return "", errors.NewErrInvalidRequestType(createReq, req)
+		return pr, errors.NewErrInvalidRequestType(createReq, req)
 	}
 
 	src, err := utils.GitCurrentBranchName()
 	if err != nil {
-		return "", fmt.Errorf("getting current branch name: %w", err)
+		return pr, fmt.Errorf("getting current branch name: %w", err)
 	}
 
 	if !strings.HasPrefix(src, "refs/heads/") {
@@ -69,19 +67,28 @@ func (svc createPRSvc) Create(req interface{}) (id string, err error) {
 			fmt.Sprintf("PR from %s to %s", src, createReq.Target)
 	}
 
-	resp := CreatePRResponse{}
-	err = svc.doPOST(src, createReq.Target, createReq.Title, true, &resp)
+	organization, projectName, repoName, err := getRepoParams()
 	if err != nil {
-		return "", fmt.Errorf("creating PR: %w", err)
+		return pr, fmt.Errorf("getting repo params: %w", err)
 	}
 
-	return fmt.Sprintf("%d", resp.ID), nil
+	svcResp := CreatePRResponse{}
+	err = svc.doPOST(src, createReq.Target, createReq.Title, true,
+		organization, projectName, repoName, &svcResp)
+	if err != nil {
+		return pr, fmt.Errorf("creating PR: %w", err)
+	}
+
+	pr = svcResp.ToPullRequest(organization)
+
+	return pr, nil
 }
 
 func (svc createPRSvc) doPOST(src, tgt, ttl string, draft bool,
+	organization, projectName, repoName string,
 	resp *CreatePRResponse) (err error) {
 
-	url, err := svc.url()
+	url, err := svc.url(organization, projectName, repoName)
 	if err != nil {
 		return fmt.Errorf("getting url: %w", err)
 	}
