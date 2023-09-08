@@ -12,10 +12,9 @@ type Branch struct {
 }
 
 func NewBranch(name string) Branch {
-	if strings.HasPrefix(name, prefix) {
-		name = name[len(prefix):]
+	return Branch{
+		name: strings.TrimPrefix(name, prefix),
 	}
-	return Branch{name: name}
 }
 
 func (b Branch) Name() string {
@@ -23,5 +22,5 @@ func (b Branch) Name() string {
 }
 
 func (b Branch) FullName() string {
-	return fmt.Sprintf("%s/%s", prefix, b.name)
+	return fmt.Sprintf("%s%s", prefix, b.name)
 }

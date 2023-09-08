@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"log"
-	"os"
-
 	"github.com/spf13/cobra"
 
 	"github.com/cgxarrie-go/prq/cmd/config"
@@ -33,11 +30,7 @@ prq list --status cancelled: Lists all PR in status Cancelled for azure projects
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		log.Print(err)
-		os.Exit(1)
-	}
+	rootCmd.Execute()
 }
 
 func init() {

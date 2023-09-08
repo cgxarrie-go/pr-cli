@@ -93,10 +93,10 @@ func (svc createPRSvc) doPOST(src, dest branch.Branch, ttl string, draft bool,
 	bearer := fmt.Sprintf("Basic %s", b64PAT)
 
 	pullRequest := map[string]interface{}{
-		"sourceRefName": src.FullName(), // Source branch
-		"targetRefName": tgt.FullName(), // Target branch
-		"title":         dest,           // Title of PR
-		"isDraft":       draft,          // Draft PR
+		"sourceRefName": src.FullName(),  // Source branch
+		"targetRefName": dest.FullName(), // Target branch
+		"title":         ttl,             // Title of PR
+		"isDraft":       draft,           // Draft PR
 	}
 
 	body, err := json.Marshal(pullRequest)
@@ -133,11 +133,18 @@ func (svc createPRSvc) doPOST(src, dest branch.Branch, ttl string, draft bool,
 	}
 
 	if azResp.StatusCode != http.StatusCreated {
-		body, err := ioutil.ReadAll(azResp.Body)
+		respBody, err := ioutil.ReadAll(azResp.Body)
 		if err != nil {
-			body = []byte("cannot read body content")
+			respBody = []byte("cannot read response body content")
 		}
-		return fmt.Errorf("%d - %s", azResp.StatusCode, body)
+
+		return fmt.Errorf("response code: %d\n"+
+			"response body: %+v\n"+
+			"pull request: %+v\n"+
+			"url: %s\n"+
+			"request: %+v\n",
+			azResp.StatusCode, string(respBody), pullRequest, url, azReq)
+
 	}
 
 	defer azResp.Body.Close()
