@@ -11,6 +11,6 @@ type GetPRsRequest struct {
 }
 
 type CreatePRRequest struct {
-	Target string
-	Title  string
+	Destination string
+	Title       string
 }

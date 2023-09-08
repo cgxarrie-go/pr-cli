@@ -17,8 +17,8 @@ func RunCreatCmd(cmd *cobra.Command, tgt, ttl string) error {
 	svc := azure.NewAzureCreatePullRequestService(azCfg.PAT)
 
 	req := azure.CreatePRRequest{
-		Target: tgt,
-		Title:  ttl,
+		Destination: tgt,
+		Title:       ttl,
 	}
 
 	pr, err := svc.Create(req)

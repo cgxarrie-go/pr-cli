@@ -53,10 +53,10 @@ func (svc createPRSvc) Create(req any) (pr models.CreatedPullRequest,
 
 	source := branch.NewBranch(src)
 
-	if createReq.Target == "" {
-		createReq.Target = "master"
+	if createReq.Destination == "" {
+		createReq.Destination = "master"
 	}
-	destination := branch.NewBranch(createReq.Target)
+	destination := branch.NewBranch(createReq.Destination)
 
 	if createReq.Title == "" {
 		createReq.Title =
@@ -69,7 +69,7 @@ func (svc createPRSvc) Create(req any) (pr models.CreatedPullRequest,
 	}
 
 	svcResp := CreatePRResponse{}
-	err = svc.doPOST(src, createReq.Target, createReq.Title, true,
+	err = svc.doPOST(source, destination, createReq.Title, true,
 		organization, projectName, repoName, &svcResp)
 	if err != nil {
 		return pr, fmt.Errorf("creating PR: %w", err)
@@ -80,7 +80,7 @@ func (svc createPRSvc) Create(req any) (pr models.CreatedPullRequest,
 	return pr, nil
 }
 
-func (svc createPRSvc) doPOST(src, tgt, ttl string, draft bool,
+func (svc createPRSvc) doPOST(src, dest branch.Branch, ttl string, draft bool,
 	organization, projectName, repoName string,
 	resp *CreatePRResponse) (err error) {
 
@@ -93,10 +93,10 @@ func (svc createPRSvc) doPOST(src, tgt, ttl string, draft bool,
 	bearer := fmt.Sprintf("Basic %s", b64PAT)
 
 	pullRequest := map[string]interface{}{
-		"sourceRefName": src, // Source branch
-		"targetRefName": tgt, // Target branch
-		"title":         ttl, // Title of PR
-		"isDraft":       draft,
+		"sourceRefName": src.FullName(), // Source branch
+		"targetRefName": tgt.FullName(), // Target branch
+		"title":         dest,           // Title of PR
+		"isDraft":       draft,          // Draft PR
 	}
 
 	body, err := json.Marshal(pullRequest)
@@ -115,7 +115,10 @@ func (svc createPRSvc) doPOST(src, tgt, ttl string, draft bool,
 	azReq.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0")
 	azReq.Header.Add("Accept", "application/json;api-version=5.0-preview.1;excludeUrls=true;enumsAsNumbers=true;msDateFormat=true;noArrayWrap=true")
 	azReq.Header.Add("Accept-Encoding", "gzip,deflate,br")
-	azReq.Header.Add("Referer", "https://dev.azure.com/Derivco/Sports-CoreAccount/_git/account/pullrequestcreate?sourceRef=test-branch&targetRef=master&sourceRepositoryId=479b17a4-7d15-48cf-9098-1a7e9dfdaf26&targetRepositoryId=479b17a4-7d15-48cf-9098-1a7e9dfdaf26")
+	azReq.Header.Add("Referer", fmt.Sprintf("https://dev.azure.com/%s/%s/_git/"+
+		"%s/pullrequestcreate?sourceRef=%s&targetRef=%s"+
+		"&sourceRepositoryId=%s&targetRepositoryId=%s", organization,
+		projectName, repoName, src.Name(), dest.Name(), repoName, repoName))
 	azReq.Header.Add("Origin", "https://dev.azure.com")
 	azReq.Header.Add("Connection", "keep-alive")
 	azReq.Header.Add("Sec-Fetch-Dest", "empty")
