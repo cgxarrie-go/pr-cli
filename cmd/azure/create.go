@@ -8,7 +8,7 @@ import (
 	"github.com/cgxarrie-go/prq/services/azure"
 )
 
-func RunCreateAzureCmd(cmd *cobra.Command, tgt, ttl string) error {
+func RunCreatCmd(cmd *cobra.Command, tgt, ttl string) error {
 
 	azCfg, err := loadConfig()
 	if err != nil {

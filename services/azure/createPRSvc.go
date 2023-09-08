@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"github.com/cgxarrie-go/prq/domain/errors"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/domain/ports"
+	"github.com/cgxarrie-go/prq/services/azure/branch"
 	"github.com/cgxarrie-go/prq/utils"
 )
 
@@ -51,20 +51,16 @@ func (svc createPRSvc) Create(req any) (pr models.CreatedPullRequest,
 		return pr, fmt.Errorf("getting current branch name: %w", err)
 	}
 
-	if !strings.HasPrefix(src, "refs/heads/") {
-		src = fmt.Sprintf("refs/heads/%s", src)
-	}
+	source := branch.NewBranch(src)
 
 	if createReq.Target == "" {
-		createReq.Target = "refs/heads/master"
+		createReq.Target = "master"
 	}
-	if !strings.HasPrefix(createReq.Target, "refs/heads/") {
-		createReq.Target = fmt.Sprintf("refs/heads/%s", createReq.Target)
-	}
+	destination := branch.NewBranch(createReq.Target)
 
 	if createReq.Title == "" {
 		createReq.Title =
-			fmt.Sprintf("PR from %s to %s", src, createReq.Target)
+			fmt.Sprintf("PR from %s to %s", source.Name(), destination.Name())
 	}
 
 	organization, projectName, repoName, err := getRepoParams()
@@ -119,7 +115,7 @@ func (svc createPRSvc) doPOST(src, tgt, ttl string, draft bool,
 	azReq.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0")
 	azReq.Header.Add("Accept", "application/json;api-version=5.0-preview.1;excludeUrls=true;enumsAsNumbers=true;msDateFormat=true;noArrayWrap=true")
 	azReq.Header.Add("Accept-Encoding", "gzip,deflate,br")
-	// azReq.Header.Add("Referer", "https://dev.azure.com/Derivco/Sports-CoreAccount/_git/account/pullrequestcreate?sourceRef=test-branch&targetRef=master&sourceRepositoryId=479b17a4-7d15-48cf-9098-1a7e9dfdaf26&targetRepositoryId=479b17a4-7d15-48cf-9098-1a7e9dfdaf26")
+	azReq.Header.Add("Referer", "https://dev.azure.com/Derivco/Sports-CoreAccount/_git/account/pullrequestcreate?sourceRef=test-branch&targetRef=master&sourceRepositoryId=479b17a4-7d15-48cf-9098-1a7e9dfdaf26&targetRepositoryId=479b17a4-7d15-48cf-9098-1a7e9dfdaf26")
 	azReq.Header.Add("Origin", "https://dev.azure.com")
 	azReq.Header.Add("Connection", "keep-alive")
 	azReq.Header.Add("Sec-Fetch-Dest", "empty")

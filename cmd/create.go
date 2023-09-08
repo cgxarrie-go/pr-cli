@@ -18,7 +18,7 @@ var createCmd = &cobra.Command{
 		dest, _ := cmd.Flags().GetString("destination")
 		ttl, _ := cmd.Flags().GetString("title")
 
-		err := azure.RunCreateAzureCmd(cmd, dest, ttl)
+		err := azure.RunCreatCmd(cmd, dest, ttl)
 		return err
 	},
 }
