@@ -18,7 +18,7 @@ const (
 	prStatusColLength  int = 10
 )
 
-func RunListAzureCmd(cmd *cobra.Command, state string) error {
+func RunListCmd(cmd *cobra.Command, state string) error {
 
 	azCfg, err := loadConfig()
 	if err != nil {

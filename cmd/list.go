@@ -18,7 +18,7 @@ var listCmd = &cobra.Command{
 		if st == "" {
 			st = status.Active.Name()
 		}
-		err := azure.RunListAzureCmd(cmd, st)
+		err := azure.RunListCmd(cmd, st)
 		return err
 	},
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/cgxarrie-go/prq/services/azure"
 )
 
-func RunCreateAzureCmd(cmd *cobra.Command, tgt, ttl string) error {
+func RunCreatCmd(cmd *cobra.Command, tgt, ttl string) error {
 
 	azCfg, err := loadConfig()
 	if err != nil {
@@ -17,8 +17,8 @@ func RunCreateAzureCmd(cmd *cobra.Command, tgt, ttl string) error {
 	svc := azure.NewAzureCreatePullRequestService(azCfg.PAT)
 
 	req := azure.CreatePRRequest{
-		Target: tgt,
-		Title:  ttl,
+		Destination: tgt,
+		Title:       ttl,
 	}
 
 	pr, err := svc.Create(req)
