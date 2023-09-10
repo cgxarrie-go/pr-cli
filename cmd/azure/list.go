@@ -9,6 +9,7 @@ import (
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/services/azure"
 	"github.com/cgxarrie-go/prq/services/azure/status"
+	"github.com/cgxarrie-go/prq/utils"
 )
 
 const (
@@ -18,24 +19,20 @@ const (
 	prStatusColLength  int = 10
 )
 
-func RunListCmd(cmd *cobra.Command, state string) error {
+func RunListCmd(cmd *cobra.Command, origins utils.Origins, state string) error {
 
 	azCfg, err := loadConfig()
 	if err != nil {
 		return err
 	}
-	svc := azure.NewAzureReadPullRequestsService(azCfg.Organization, azCfg.PAT)
-	projectRepos := make(map[string][]string)
-	for _, project := range azCfg.Projects {
-		projectRepos[project.ID] = project.RepositoryIDs
-	}
+	svc := azure.NewAzureReadPullRequestsService(azCfg.PAT)
 
 	azStatus, err := status.FromName(state)
 	if err != nil {
 		return err
 	}
 
-	req := azure.GetPRsRequest{ProjectRepos: projectRepos, Status: azStatus}
+	req := azure.GetPRsRequest{Origins: origins, Status: azStatus}
 	prs, err := svc.GetPRs(req)
 	if err != nil {
 		return err

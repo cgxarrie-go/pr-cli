@@ -14,21 +14,19 @@ import (
 )
 
 type readPRSvc struct {
-	organization string
-	pat          string
+	pat string
 }
 
 // NewAzureReadPullRequestsService return new instnce of azure service
-func NewAzureReadPullRequestsService(organization string, pat string) ports.PRReader {
+func NewAzureReadPullRequestsService(pat string) ports.PRReader {
 	return readPRSvc{
-		organization: organization,
-		pat:          fmt.Sprintf("`:%s", pat),
+		pat: fmt.Sprintf("`:%s", pat),
 	}
 }
 
-func (svc readPRSvc) baseUrl(projectID string) string {
+func (svc readPRSvc) baseUrl(organization, projectName string) string {
 	return fmt.Sprintf("https://dev.azure.com"+
-		"/%s/%s/_apis/git/repositories", svc.organization, projectID)
+		"/%s/%s/_apis/git/repositories", organization, projectName)
 }
 
 // GetPRs implements ports.ProviderService
@@ -41,21 +39,27 @@ func (svc readPRSvc) GetPRs(req interface{}) (prs []models.PullRequest, err erro
 
 	g := errgroup.Group{}
 
-	for projectID, repositoryIDs := range getReq.ProjectRepos {
-		for _, repositoryID := range repositoryIDs {
-			projectID, repositoryID := projectID, repositoryID
-			g.Go(func() error {
-				url := fmt.Sprintf("%s/%s/pullrequests?searchCriteria."+
-					"status=%d&api-version=5.1",
-					svc.baseUrl(projectID), repositoryID, getReq.Status)
+	for _, origin := range getReq.Origins {
+		organization, projectName, repoName, err :=
+			getRepoParamsFromOrigin(origin)
 
-				azPRs, err := svc.getData(url)
-				if err == nil {
-					prs = append(prs, azPRs...)
-				}
-				return err
-			})
+		if err != nil {
+			return prs, fmt.Errorf("getting repo params from origin %s: %w",
+				origin, err)
 		}
+
+		g.Go(func() error {
+			url := fmt.Sprintf("%s/%s/pullrequests?searchCriteria."+
+				"status=%d&api-version=5.1",
+				svc.baseUrl(organization, projectName), repoName, getReq.Status)
+
+			azPRs, err := svc.getData(url)
+			if err == nil {
+				prs = append(prs, azPRs...)
+			}
+			return err
+		})
+
 	}
 
 	return prs, g.Wait()

@@ -5,6 +5,7 @@ import (
 
 	"github.com/cgxarrie-go/prq/cmd/azure"
 	"github.com/cgxarrie-go/prq/services/azure/status"
+	"github.com/cgxarrie-go/prq/utils"
 )
 
 // listCmd represents the list command
@@ -14,12 +15,31 @@ var listCmd = &cobra.Command{
 	Short:   "list PRs",
 	Long:    `List Pull Requests from the specified provider according to config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+
+		gitOrigins, err := utils.GitOrigins(".")
+		if err != nil {
+			return err
+		}
+
+		azureOrigins := utils.Origins{}
+		githubOrigins := utils.Origins{}
+
+		for _, origin := range gitOrigins {
+			if origin.IsAzure() {
+				azureOrigins = azureOrigins.Append(origin)
+			}
+			if origin.IsGithub() {
+				githubOrigins = githubOrigins.Append(origin)
+			}
+		}
+
 		st, _ := cmd.Flags().GetString("status")
 		if st == "" {
 			st = status.Active.Name()
 		}
-		err := azure.RunListCmd(cmd, st)
+		err = azure.RunListCmd(cmd, azureOrigins, st)
 		return err
+
 	},
 }
 
