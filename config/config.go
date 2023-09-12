@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-
-	"github.com/cgxarrie-go/prq/cache/providers"
 )
 
 var lock = &sync.Mutex{}
@@ -32,15 +30,12 @@ var (
 
 // Config main configuration for CLI
 type Config struct {
-	DefaultProvider providers.Provider
-	Azure           AzureConfig
+	Azure AzureConfig
 }
 
 // AzureConfig configuration for Azure
 type AzureConfig struct {
-	Organization string
-	PAT          string
-	Projects     []AzureProjectConfig
+	PAT string
 }
 
 // NewConfig creates a new instance of Config
@@ -70,13 +65,13 @@ func (c *Config) Load() (err error) {
 
 	file, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		return fmt.Errorf("Error loading config file: %s", err.Error())
+		return fmt.Errorf("loading config file: %w", err)
 
 	}
 
 	err = json.Unmarshal(file, c)
 	if err != nil {
-		return fmt.Errorf("Error parsing config: %s", err.Error())
+		return fmt.Errorf("error parsing config: %w", err)
 	}
 
 	return nil
@@ -111,6 +106,5 @@ func (c *Config) fileName() (folder string, err error) {
 	}
 	exPath := filepath.Dir(ex)
 	fileName := fmt.Sprintf("%s/%s", exPath, configFileName)
-	fmt.Printf("config file : %s\n", fileName)
 	return fileName, nil
 }

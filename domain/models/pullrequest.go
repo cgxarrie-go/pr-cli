@@ -7,17 +7,18 @@ import (
 
 // PullRequest is the abstraction of a Pull Request from any provider
 type PullRequest struct {
-	ID          string
-	Title       string
-	Description string
-	Repository  Hierarchy
-	Project     Hierarchy
-	Status      string
-	MergeStatus string
-	CreatedBy   string
-	URL         string
-	IsDraft     bool
-	Created     time.Time
+	Orgenization string
+	ID           string
+	Title        string
+	Description  string
+	Repository   Hierarchy
+	Project      Hierarchy
+	Status       string
+	MergeStatus  string
+	CreatedBy    string
+	URL          string
+	IsDraft      bool
+	Created      time.Time
 }
 
 type CreatedPullRequest struct {
@@ -39,12 +40,19 @@ type Hierarchy struct {
 }
 
 // ShortenedTitle returns title shortened to maxlength...
-func (p PullRequest) ShortenedTitle(maxLength int) string {
+func (p PullRequest) ShortenedTitle(maxLength int, isDraft bool) string {
 
 	if len(p.Title) <= maxLength {
 		return p.Title
 	}
 
-	title := fmt.Sprintf("%s...", p.Title[0:maxLength-3])
+	draftText := ""
+	if isDraft {
+		draftText = " (Draft)"
+	}
+
+	shortenLenght := maxLength - 3 - len(draftText)
+
+	title := fmt.Sprintf("%s...", p.Title[0:shortenLenght])
 	return title
 }

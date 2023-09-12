@@ -9,6 +9,7 @@ import (
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/services/azure"
 	"github.com/cgxarrie-go/prq/services/azure/status"
+	"github.com/cgxarrie-go/prq/utils"
 )
 
 const (
@@ -18,34 +19,30 @@ const (
 	prStatusColLength  int = 10
 )
 
-func RunListCmd(cmd *cobra.Command, state string) error {
+func RunListCmd(cmd *cobra.Command, origins utils.Origins, state string) error {
 
 	azCfg, err := loadConfig()
 	if err != nil {
 		return err
 	}
-	svc := azure.NewAzureReadPullRequestsService(azCfg.Organization, azCfg.PAT)
-	projectRepos := make(map[string][]string)
-	for _, project := range azCfg.Projects {
-		projectRepos[project.ID] = project.RepositoryIDs
-	}
+	svc := azure.NewAzureReadPullRequestsService(azCfg.PAT)
 
 	azStatus, err := status.FromName(state)
 	if err != nil {
 		return err
 	}
 
-	req := azure.GetPRsRequest{ProjectRepos: projectRepos, Status: azStatus}
+	req := azure.GetPRsRequest{Origins: origins, Status: azStatus}
 	prs, err := svc.GetPRs(req)
 	if err != nil {
 		return err
 	}
-	azlsPrint(prs, azCfg.Organization)
+	azlsPrint(prs)
 
 	return nil
 }
 
-func azlsPrint(prs []models.PullRequest, organization string) {
+func azlsPrint(prs []models.PullRequest) {
 	fmt.Printf("Number of PRs : %d \n", len(prs))
 	lastProject := ""
 	lastRepository := ""
@@ -66,14 +63,14 @@ func azlsPrint(prs []models.PullRequest, organization string) {
 			lastRepository = pr.Repository.ID
 		}
 
-		lnk := getPRLink("open", organization, pr.Project.ID, pr.Repository.ID,
+		lnk := getPRLink("open", pr.Orgenization, pr.Project.ID, pr.Repository.ID,
 			pr.ID)
 		created := fmt.Sprintf("%s (%v-%d-%d)",
 			strings.Split(pr.CreatedBy, " ")[0],
 			pr.Created.Year(), pr.Created.Month(), pr.Created.Day())
 		format := getColumnFormat()
-		prInfo := fmt.Sprintf(format, pr.ID, pr.ShortenedTitle(70), created,
-			pr.Status, lnk)
+		prInfo := fmt.Sprintf(format, pr.ID, pr.ShortenedTitle(70, pr.IsDraft),
+			created, pr.Status, lnk)
 		fmt.Println(prInfo)
 	}
 }

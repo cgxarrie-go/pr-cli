@@ -142,7 +142,7 @@ func (svc createPRSvc) doPOST(src, dest branch.Branch, ttl string, draft bool,
 			"response body: %+v\n"+
 			"pull request: %+v\n"+
 			"url: %s\n"+
-			"request: %+v\n",
+			"request: %+v",
 			azResp.StatusCode, string(respBody), pullRequest, url, azReq)
 
 	}
