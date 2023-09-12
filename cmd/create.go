@@ -8,7 +8,7 @@ import (
 // ListCmd represents the list command
 var createCmd = &cobra.Command{
 	Use:     "create",
-	Aliases: []string{"t"},
+	Aliases: []string{"c"},
 	Short:   "Create Pull Request",
 	Long: "Create a Pull Request." +
 		"\n\tSource branch is the current repository active brnach" +
