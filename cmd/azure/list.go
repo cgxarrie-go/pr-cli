@@ -69,8 +69,8 @@ func azlsPrint(prs []models.PullRequest, organization string) {
 			strings.Split(pr.CreatedBy, " ")[0],
 			pr.Created.Year(), pr.Created.Month(), pr.Created.Day())
 		format := getColumnFormat()
-		prInfo := fmt.Sprintf(format, pr.ID, pr.ShortenedTitle(70), created,
-			pr.Status, lnk)
+		prInfo := fmt.Sprintf(format, pr.ID, pr.ShortenedTitle(70, pr.IsDraft),
+			created, pr.Status, lnk)
 		fmt.Println(prInfo)
 	}
 }

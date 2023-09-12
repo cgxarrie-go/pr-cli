@@ -111,6 +111,5 @@ func (c *Config) fileName() (folder string, err error) {
 	}
 	exPath := filepath.Dir(ex)
 	fileName := fmt.Sprintf("%s/%s", exPath, configFileName)
-	fmt.Printf("config file : %s\n", fileName)
 	return fileName, nil
 }

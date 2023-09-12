@@ -39,12 +39,19 @@ type Hierarchy struct {
 }
 
 // ShortenedTitle returns title shortened to maxlength...
-func (p PullRequest) ShortenedTitle(maxLength int) string {
+func (p PullRequest) ShortenedTitle(maxLength int, isDraft bool) string {
 
 	if len(p.Title) <= maxLength {
 		return p.Title
 	}
 
-	title := fmt.Sprintf("%s...", p.Title[0:maxLength-3])
+	draftText := ""
+	if isDraft {
+		draftText = " (Draft)"
+	}
+
+	shortenLenght := maxLength - 3 - len(draftText)
+
+	title := fmt.Sprintf("%s...", p.Title[0:shortenLenght])
 	return title
 }
