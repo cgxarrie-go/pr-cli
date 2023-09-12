@@ -58,11 +58,12 @@ type GetPRsResponseProject struct {
 }
 
 // ToPullRequest converts a GetPRsResponsePullRequest to a models.PullRequest
-func (azPR GetPRsResponsePullRequest) ToPullRequest() models.PullRequest {
+func (azPR GetPRsResponsePullRequest) ToPullRequest(organization string) models.PullRequest {
 	return models.PullRequest{
-		ID:          strconv.Itoa(azPR.ID),
-		Title:       azPR.Title,
-		Description: azPR.Description,
+		Orgenization: organization,
+		ID:           strconv.Itoa(azPR.ID),
+		Title:        azPR.Title,
+		Description:  azPR.Description,
 		Repository: models.Hierarchy{
 			ID:   azPR.Repo.ID,
 			Name: azPR.Repo.Name,

@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-
-	"github.com/cgxarrie-go/prq/cmd/config"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -34,7 +32,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.AddCommand(config.ConfigCmd)
+	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(createCmd)
 

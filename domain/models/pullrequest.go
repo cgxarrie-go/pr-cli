@@ -7,17 +7,18 @@ import (
 
 // PullRequest is the abstraction of a Pull Request from any provider
 type PullRequest struct {
-	ID          string
-	Title       string
-	Description string
-	Repository  Hierarchy
-	Project     Hierarchy
-	Status      string
-	MergeStatus string
-	CreatedBy   string
-	URL         string
-	IsDraft     bool
-	Created     time.Time
+	Orgenization string
+	ID           string
+	Title        string
+	Description  string
+	Repository   Hierarchy
+	Project      Hierarchy
+	Status       string
+	MergeStatus  string
+	CreatedBy    string
+	URL          string
+	IsDraft      bool
+	Created      time.Time
 }
 
 type CreatedPullRequest struct {

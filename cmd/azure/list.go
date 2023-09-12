@@ -37,12 +37,12 @@ func RunListCmd(cmd *cobra.Command, origins utils.Origins, state string) error {
 	if err != nil {
 		return err
 	}
-	azlsPrint(prs, azCfg.Organization)
+	azlsPrint(prs)
 
 	return nil
 }
 
-func azlsPrint(prs []models.PullRequest, organization string) {
+func azlsPrint(prs []models.PullRequest) {
 	fmt.Printf("Number of PRs : %d \n", len(prs))
 	lastProject := ""
 	lastRepository := ""
@@ -63,7 +63,7 @@ func azlsPrint(prs []models.PullRequest, organization string) {
 			lastRepository = pr.Repository.ID
 		}
 
-		lnk := getPRLink("open", organization, pr.Project.ID, pr.Repository.ID,
+		lnk := getPRLink("open", pr.Orgenization, pr.Project.ID, pr.Repository.ID,
 			pr.ID)
 		created := fmt.Sprintf("%s (%v-%d-%d)",
 			strings.Split(pr.CreatedBy, " ")[0],

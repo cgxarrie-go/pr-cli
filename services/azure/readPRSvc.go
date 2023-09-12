@@ -53,7 +53,7 @@ func (svc readPRSvc) GetPRs(req interface{}) (prs []models.PullRequest, err erro
 				"status=%d&api-version=5.1",
 				svc.baseUrl(organization, projectName), repoName, getReq.Status)
 
-			azPRs, err := svc.getData(url)
+			azPRs, err := svc.getData(url, organization)
 			if err == nil {
 				prs = append(prs, azPRs...)
 			}
@@ -65,7 +65,9 @@ func (svc readPRSvc) GetPRs(req interface{}) (prs []models.PullRequest, err erro
 	return prs, g.Wait()
 }
 
-func (svc readPRSvc) getData(url string) (prs []models.PullRequest, err error) {
+func (svc readPRSvc) getData(url, organization string) (
+	prs []models.PullRequest, err error) {
+
 	azPRs := GetPRsResponse{}
 	err = svc.doGet(url, &azPRs)
 	if err != nil {
@@ -73,7 +75,7 @@ func (svc readPRSvc) getData(url string) (prs []models.PullRequest, err error) {
 	}
 
 	for _, azPR := range azPRs.Value {
-		pr := azPR.ToPullRequest()
+		pr := azPR.ToPullRequest(organization)
 		prs = append(prs, pr)
 	}
 

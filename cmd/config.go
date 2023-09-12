@@ -1,4 +1,4 @@
-package config
+package cmd
 
 import (
 	"encoding/json"
@@ -6,11 +6,12 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/cgxarrie-go/prq/cmd/config"
 	appcfg "github.com/cgxarrie-go/prq/config"
 )
 
-// ConfigCmd represents the Config command
-var ConfigCmd = &cobra.Command{
+// configCmd represents the Config command
+var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "display config",
 	Long:  `display config`,
@@ -20,6 +21,7 @@ var ConfigCmd = &cobra.Command{
 }
 
 func init() {
+	configCmd.AddCommand(config.AzurePATCmd)
 
 	// Here you will define your flags and configuration settings.
 
