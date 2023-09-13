@@ -31,10 +31,16 @@ var (
 // Config main configuration for CLI
 type Config struct {
 	Azure AzureConfig
+	Github GithubConfig
 }
 
 // AzureConfig configuration for Azure
 type AzureConfig struct {
+	PAT string
+}
+
+// GithubConfig configuration for Github
+type GithubConfig struct {
 	PAT string
 }
 

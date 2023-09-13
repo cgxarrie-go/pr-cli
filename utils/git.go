@@ -18,22 +18,6 @@ func GitCurrentBranchName() (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
-func GitCurrentOrigin() (Origin, error) {
-	return GitOrigin("")
-}
-
-func GitOrigin(path string) (Origin, error) {
-	cmd := exec.Command("git", "config", "--get", "remote.origin.url")
-	if path != "" {
-		cmd.Dir = path
-	}
-	out, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("failed to get origin url: %w", err)
-	}
-	return Origin(strings.TrimSpace(string(out))), nil
-}
-
 func IsGitRepo(path string) bool {
 	cmd := exec.Command("git", "rev-parse", "--is-inside-work-tree")
 	cmd.Dir = path

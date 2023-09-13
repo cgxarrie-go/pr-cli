@@ -1,4 +1,4 @@
-package azure
+package createpr
 
 import (
 	"strconv"
@@ -6,33 +6,33 @@ import (
 	"github.com/cgxarrie-go/prq/domain/models"
 )
 
-// GetPRsResponseRepository pull request response repository
-type GetPRsResponseRepository struct {
+// ResponseRepository pull request response repository
+type ResponseRepository struct {
 	ID      string                `json:"id"`
 	Name    string                `json:"name"`
 	URL     string                `json:"url"`
-	Project GetPRsResponseProject `json:"project"`
+	Project ResponseProject `json:"project"`
 }
 
-// GetPRsResponseProject pull request response project
-type GetPRsResponseProject struct {
+// ResponseProject pull request response project
+type ResponseProject struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 	URL  string `json:"url"`
 }
 
 
-// CreatePRResponse .
-type CreatePRResponse struct {
+// Response .
+type Response struct {
 	ID          int                      `json:"pullRequestId"`
 	Title       string                   `json:"title"`
 	Description string                   `json:"description"`
-	Repo        GetPRsResponseRepository `json:"repository"`
+	Repo        ResponseRepository `json:"repository"`
 	URL         string                   `json:"url"`
 	IsDraft     bool                     `json:"isDraft"`
 }
 
-func (azPR CreatePRResponse) ToPullRequest(organization string) models.CreatedPullRequest {
+func (azPR Response) ToPullRequest(organization string) models.CreatedPullRequest {
 	return models.CreatedPullRequest{
 		ID:          strconv.Itoa(azPR.ID),
 		Title:       azPR.Title,

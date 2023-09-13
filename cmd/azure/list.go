@@ -6,9 +6,10 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/cgxarrie-go/prq/domain/azure/listprs"
+	"github.com/cgxarrie-go/prq/domain/azure/origin"
+	"github.com/cgxarrie-go/prq/domain/azure/status"
 	"github.com/cgxarrie-go/prq/domain/models"
-	"github.com/cgxarrie-go/prq/services/azure"
-	"github.com/cgxarrie-go/prq/services/azure/status"
 	"github.com/cgxarrie-go/prq/utils"
 )
 
@@ -25,31 +26,32 @@ func RunListCmd(cmd *cobra.Command, origins utils.Origins, state string) error {
 	if err != nil {
 		return err
 	}
-	svc := azure.NewAzureReadPullRequestsService(azCfg.PAT)
+	originSvc := origin.NewService()
+	svc := listprs.NewService(azCfg.PAT, originSvc)
 
 	azStatus, err := status.FromName(state)
 	if err != nil {
 		return err
 	}
 
-	req := azure.GetPRsRequest{Origins: origins, Status: azStatus}
+	req := listprs.NewRequest(origins, azStatus)
 	prs, err := svc.GetPRs(req)
 	if err != nil {
 		return err
 	}
-	azlsPrint(prs)
+	printList(prs)
 
 	return nil
 }
 
-func azlsPrint(prs []models.PullRequest) {
+func printList(prs []models.PullRequest) {
 	fmt.Printf("Number of PRs : %d \n", len(prs))
 	lastProject := ""
 	lastRepository := ""
 
 	for i, pr := range prs {
 		if i == 0 {
-			fmt.Println(azlsPrintableTitle())
+			fmt.Println(prinTableTitle())
 		}
 		if pr.Project.ID != lastProject {
 			fmt.Println(pr.Project.Name)
@@ -75,7 +77,7 @@ func azlsPrint(prs []models.PullRequest) {
 	}
 }
 
-func azlsPrintableTitle() string {
+func prinTableTitle() string {
 
 	format := "%s\n    %s\n" + getColumnFormat()
 	head := fmt.Sprintf(format, "Project", "Repository", "ID", "Title",
