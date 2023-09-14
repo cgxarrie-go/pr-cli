@@ -22,6 +22,7 @@ var configCmd = &cobra.Command{
 
 func init() {
 	configCmd.AddCommand(config.AzurePATCmd)
+	configCmd.AddCommand(config.GithubPATCmd)
 
 	// Here you will define your flags and configuration settings.
 
