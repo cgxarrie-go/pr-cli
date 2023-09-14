@@ -8,8 +8,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/cgxarrie-go/prq/domain/azure/branch"
-	"github.com/cgxarrie-go/prq/domain/azure/origin"
+	"github.com/cgxarrie-go/prq/domain/github/branch"
+	"github.com/cgxarrie-go/prq/domain/github/origin"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/domain/ports"
 	"github.com/cgxarrie-go/prq/utils"
@@ -20,7 +20,7 @@ type service struct {
 	originSvc ports.OriginSvc
 }
 
-// NewService return new instnce of azure service
+// NewService return new instnce of github service
 func NewService(pat string, originSvc ports.OriginSvc) ports.PRCreator {
 	return service{
 		pat: fmt.Sprintf("`:%s", pat),
@@ -56,22 +56,22 @@ func (svc service) Run(req ports.CreatePRRequest) (
 		return pr, fmt.Errorf("getting repository origin: %w", err)
 	}
 
-	azOrigin := origin.NewAzureOrigin(o)
+	ghOrigin := origin.NewGithubOrigin(o)
 
 	svcResp := Response{}
-	err = svc.doPOST(source, destination, title, true, azOrigin, &svcResp)
+	err = svc.doPOST(source, destination, title, true, ghOrigin, &svcResp)
 	if err != nil {
 		return pr, fmt.Errorf("creating PR: %w", err)
 	}
 
-	pr = svcResp.ToPullRequest(azOrigin.Organizaion())
+	pr = svcResp.ToPullRequest(ghOrigin.User())
 	pr.Link, err = svc.originSvc.PRLink(o, pr.ID, "open")
-
+	
 	return pr, nil
 }
 
 func (svc service) doPOST(src, dest branch.Branch, ttl string, draft bool,
-	o origin.AzureOrigin, resp *Response) (err error) {
+	o origin.GithubOrigin, resp *Response) (err error) {
 
 	url, err := svc.originSvc.CreatePRsURL(o.Origin)
 	if err != nil {
@@ -85,7 +85,7 @@ func (svc service) doPOST(src, dest branch.Branch, ttl string, draft bool,
 		"sourceRefName": src.FullName(),  // Source branch
 		"targetRefName": dest.FullName(), // Target branch
 		"title":         ttl,             // Title of PR
-		"isDraft":       draft,           // Draft PR
+		"draft":       draft,           // Draft PR
 	}
 
 	body, err := json.Marshal(pullRequest)
@@ -99,21 +99,8 @@ func (svc service) doPOST(src, dest branch.Branch, ttl string, draft bool,
 	}
 
 	azReq.Header.Add("Authorization", bearer)
-	azReq.Header.Add("Content-Type", "application/json")
-	azReq.Header.Add("Host", "dev.azure.com")
-	azReq.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0")
-	azReq.Header.Add("Accept", "application/json;api-version=5.0-preview.1;excludeUrls=true;enumsAsNumbers=true;msDateFormat=true;noArrayWrap=true")
-	azReq.Header.Add("Accept-Encoding", "gzip,deflate,br")
-	azReq.Header.Add("Referer", fmt.Sprintf("https://dev.azure.com/%s/%s/_git/"+
-		"%s/pullrequestcreate?sourceRef=%s&targetRef=%s"+
-		"&sourceRepositoryId=%s&targetRepositoryId=%s", o.Organizaion(),
-		o.Project(), o.Repository(), src.Name(), dest.Name(), o.Repository(), 
-		o.Repository()))
-	azReq.Header.Add("Origin", "https://dev.azure.com")
-	azReq.Header.Add("Connection", "keep-alive")
-	azReq.Header.Add("Sec-Fetch-Dest", "empty")
-	azReq.Header.Add("Sec-Fetch-Mode", "cors")
-	azReq.Header.Add("Sec-Fetch-Site", "same-origin")
+	azReq.Header.Add("Accept", "application/vnd.github+json")
+	azReq.Header.Add("X-GitHub-Api-Version", "2022-11-28")
 
 	client := &http.Client{}
 	azResp, err := client.Do(azReq)

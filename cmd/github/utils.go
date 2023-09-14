@@ -1,4 +1,4 @@
-package azure
+package github
 
 import (
 	"github.com/cgxarrie-go/prq/config"

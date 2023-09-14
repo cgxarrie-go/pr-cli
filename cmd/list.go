@@ -3,8 +3,13 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/hashicorp/go-multierror"
+
 	"github.com/cgxarrie-go/prq/cmd/azure"
-	"github.com/cgxarrie-go/prq/services/azure/status"
+	"github.com/cgxarrie-go/prq/cmd/github"
+	"github.com/cgxarrie-go/prq/domain/azure/status"
+	azStatus "github.com/cgxarrie-go/prq/domain/azure/status"
+	ghStatus "github.com/cgxarrie-go/prq/domain/github/status"
 	"github.com/cgxarrie-go/prq/utils"
 )
 
@@ -34,10 +39,26 @@ var listCmd = &cobra.Command{
 		}
 
 		st, _ := cmd.Flags().GetString("status")
-		if st == "" {
-			st = status.Active.Name()
+		azSt := azStatus.Active.Name()
+		if st != "" {
+			azSt = st
 		}
-		err = azure.RunListCmd(cmd, azureOrigins, st)
+		azErr := azure.RunListCmd(cmd, azureOrigins, azSt)
+		if azErr != nil {
+			multierror.Append(err, azErr)
+		}
+		
+
+		ghSt := ghStatus.Active.Name()
+		if st != "" {
+			st = azStatus.Active.Name()
+		}
+		ghErr := github.RunListCmd(cmd, githubOrigins, ghSt)
+
+		if ghErr != nil {
+			multierror.Append(err, ghErr)
+		}
+
 		return err
 
 	},

@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/cgxarrie-go/prq/domain/azure/origin"
+	"github.com/cgxarrie-go/prq/domain/github/origin"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/domain/ports"
 )
@@ -18,7 +18,7 @@ type service struct {
 	originSvc ports.OriginSvc
 }
 
-// NewService return new instnce of azure service
+// NewService return new instnce of github service
 func NewService(pat string, originSvc ports.OriginSvc) ports.PRReader {
 	return service{
 		pat: fmt.Sprintf("`:%s", pat),
@@ -33,23 +33,22 @@ func (svc service) GetPRs(req ports.ListPRRequest) (
 	g := errgroup.Group{}
 
 	for _, o := range req.Origins() {
-		azOrigin := origin.NewAzureOrigin(o)
+		ghOrigin := origin.NewGithubOrigin(o)
 		url, err := svc.originSvc.GetPRsURL(o, req.Status())
 		if err != nil {
 			return prs, fmt.Errorf("gettig url from origin %s: %w", 
 			o, err)
 		}		
 		g.Go(func() error {
-			azPRs, err := svc.getData(url)
+			ghPRs, err := svc.getData(url)
 			if err == nil {
-				for _, azPR := range azPRs {
-					pr := azPR.ToPullRequest(azOrigin.Organizaion())
-					pr.Link, err = svc.originSvc.PRLink(azOrigin.Origin, pr.ID, 
+				for _, ghPR := range ghPRs {
+					pr := ghPR.ToPullRequest(ghOrigin.User())
+					pr.Link, err = svc.originSvc.PRLink(ghOrigin.Origin, pr.ID, 
 						"open")
 					prs = append(prs, pr)
-				}
+				}				
 			}
-
 			return err
 		})
 
@@ -69,11 +68,13 @@ func (svc service) doGet(url string, resp interface{}) (err error) {
 	b64PAT := base64.RawStdEncoding.EncodeToString([]byte(svc.pat))
 	bearer := fmt.Sprintf("Basic %s", b64PAT)
 
-	azReq, err := http.NewRequest("GET", url, nil)
-	azReq.Header.Add("Authorization", bearer)
+	ghReq, err := http.NewRequest("GET", url, nil)
+	ghReq.Header.Add("Authorization", bearer)
+	ghReq.Header.Add("Accept", "application/vnd.github+json")
+	ghReq.Header.Add("X-GitHub-Api-Version", "2022-11-28")
 
 	client := &http.Client{}
-	azResp, err := client.Do(azReq)
+	azResp, err := client.Do(ghReq)
 	if err != nil {
 		return err
 	}

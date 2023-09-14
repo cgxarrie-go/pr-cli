@@ -1,4 +1,4 @@
-package azure
+package github
 
 import (
 	"fmt"
@@ -10,7 +10,6 @@ import (
 	"github.com/cgxarrie-go/prq/domain/azure/origin"
 	"github.com/cgxarrie-go/prq/domain/azure/status"
 	"github.com/cgxarrie-go/prq/domain/models"
-	"github.com/cgxarrie-go/prq/domain/ports"
 	"github.com/cgxarrie-go/prq/utils"
 )
 
@@ -40,12 +39,12 @@ func RunListCmd(cmd *cobra.Command, origins utils.Origins, state string) error {
 	if err != nil {
 		return err
 	}
-	printList(prs, originSvc)
+	printList(prs)
 
 	return nil
 }
 
-func printList(prs []models.PullRequest, originSvc ports.OriginSvc) {
+func printList(prs []models.PullRequest) {
 	fmt.Printf("Number of PRs : %d \n", len(prs))
 	lastProject := ""
 	lastRepository := ""

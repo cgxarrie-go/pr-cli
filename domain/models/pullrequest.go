@@ -19,6 +19,7 @@ type PullRequest struct {
 	URL          string
 	IsDraft      bool
 	Created      time.Time
+	Link 		 string
 }
 
 type CreatedPullRequest struct {
@@ -30,6 +31,7 @@ type CreatedPullRequest struct {
 	URL          string
 	IsDraft      bool
 	Organization string
+	Link 		 string
 }
 
 // Hierarchy of a PR
