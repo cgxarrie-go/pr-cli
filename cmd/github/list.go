@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cgxarrie-go/prq/domain/azure/listprs"
-	"github.com/cgxarrie-go/prq/domain/azure/origin"
-	"github.com/cgxarrie-go/prq/domain/azure/status"
+	"github.com/cgxarrie-go/prq/domain/github/listprs"
+	"github.com/cgxarrie-go/prq/domain/github/origin"
+	"github.com/cgxarrie-go/prq/domain/github/status"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/utils"
 )
@@ -29,12 +29,12 @@ func RunListCmd(cmd *cobra.Command, origins utils.Origins, state string) error {
 	originSvc := origin.NewService()
 	svc := listprs.NewService(ghCfg.PAT, originSvc)
 
-	azStatus, err := status.FromName(state)
+	ghStatus, err := status.FromName(state)
 	if err != nil {
 		return err
 	}
 
-	req := listprs.NewRequest(origins, azStatus)
+	req := listprs.NewRequest(origins, ghStatus)
 	prs, err := svc.GetPRs(req)
 	if err != nil {
 		return err

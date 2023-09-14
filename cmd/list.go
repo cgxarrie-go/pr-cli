@@ -39,24 +39,28 @@ var listCmd = &cobra.Command{
 		}
 
 		st, _ := cmd.Flags().GetString("status")
-		azSt := azStatus.Active.Name()
-		if st != "" {
-			azSt = st
+		if len(azureOrigins) > 0 {
+			azSt := azStatus.Active.Name()
+			if st != "" {
+				azSt = st
+			}
+			azErr := azure.RunListCmd(cmd, azureOrigins, azSt)
+			if azErr != nil {
+				multierror.Append(err, azErr)
+			}
 		}
-		azErr := azure.RunListCmd(cmd, azureOrigins, azSt)
-		if azErr != nil {
-			multierror.Append(err, azErr)
-		}
+
 		
+		if len(githubOrigins) > 0 {
+			ghSt := ghStatus.Active.Name()
+			if st != "" {
+				ghSt = st
+			}
+			ghErr := github.RunListCmd(cmd, githubOrigins, ghSt)
 
-		ghSt := ghStatus.Active.Name()
-		if st != "" {
-			st = azStatus.Active.Name()
-		}
-		ghErr := github.RunListCmd(cmd, githubOrigins, ghSt)
-
-		if ghErr != nil {
-			multierror.Append(err, ghErr)
+			if ghErr != nil {
+				multierror.Append(err, ghErr)
+			}
 		}
 
 		return err

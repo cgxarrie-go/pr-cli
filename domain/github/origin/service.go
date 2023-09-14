@@ -13,7 +13,7 @@ type service struct{}
 
 // CreatePRsURL implements ports.OriginSvc.
 func (s service) CreatePRsURL(o utils.Origin) (url string, err error) {
-	if !o.IsAzure() {
+	if !o.IsGithub() {
 		return url, errors.NewErrInvalidRepositoryType(o)
 	}
 
@@ -26,12 +26,13 @@ func (s service) CreatePRsURL(o utils.Origin) (url string, err error) {
 func (s service) GetPRsURL(o utils.Origin, status ports.PRStatus) (
 	url string, err error) {
 
-	if !o.IsAzure() {
+	if !o.IsGithub() {
 		return url, errors.NewErrInvalidRepositoryType(o)
 	}
 
-	url = fmt.Sprintf("%s/pulls?q=is%3Apr+is%3A%s", s.baseUrl(o), 
-		status.Name())
+	qs := "q=is%3Apr+is%3A"
+
+	url = fmt.Sprintf("%s/pulls?%s%s", s.baseUrl(o), qs, status.Name())
 
 	return
 }
@@ -40,7 +41,7 @@ func (s service) GetPRsURL(o utils.Origin, status ports.PRStatus) (
 func (s service) PRLink(o utils.Origin, id, text string) (
 	url string, err error) {
 
-	if !o.IsAzure() {
+	if !o.IsGithub() {
 		return url, errors.NewErrInvalidRepositoryType(o)
 	}
 
@@ -55,6 +56,6 @@ func NewService() ports.OriginSvc {
 
 func (s service) baseUrl(o utils.Origin) string {
 	ghOrigin := NewGithubOrigin(o)
-	return fmt.Sprintf("https://api.github.com/repos/%s/prq/pulls",
+	return fmt.Sprintf("https://api.github.com/repos/%s/prq",
 	ghOrigin.User())
 }

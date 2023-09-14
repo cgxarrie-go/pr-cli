@@ -1,7 +1,6 @@
 package listprs
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -21,7 +20,7 @@ type service struct {
 // NewService return new instnce of github service
 func NewService(pat string, originSvc ports.OriginSvc) ports.PRReader {
 	return service{
-		pat: fmt.Sprintf("`:%s", pat),
+		pat: pat,
 		originSvc: originSvc,
 	}
 }
@@ -65,8 +64,7 @@ func (svc service) getData(url string) (
 }
 
 func (svc service) doGet(url string, resp interface{}) (err error) {
-	b64PAT := base64.RawStdEncoding.EncodeToString([]byte(svc.pat))
-	bearer := fmt.Sprintf("Basic %s", b64PAT)
+	bearer := fmt.Sprintf("Bearer %s", svc.pat)
 
 	ghReq, err := http.NewRequest("GET", url, nil)
 	ghReq.Header.Add("Authorization", bearer)

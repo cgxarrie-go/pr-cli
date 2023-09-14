@@ -17,7 +17,7 @@ func NewGithubOrigin(o utils.Origin) GithubOrigin {
 
 	return GithubOrigin{
 		Origin:       o,
-		user: split[len(split)-3],
+		user: split[len(split)-2],
 	}
 }
 
