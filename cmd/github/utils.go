@@ -4,12 +4,12 @@ import (
 	"github.com/cgxarrie-go/prq/config"
 )
 
-func loadConfig() (azcfg config.AzureConfig, err error) {
+func loadConfig() (ghcfg config.GithubConfig, err error) {
 	cfg := config.GetInstance()
 	cfg.Load()
 	if err != nil {
-		return azcfg, err
+		return ghcfg, err
 	}
 
-	return cfg.Azure, nil
+	return cfg.Github, nil
 }

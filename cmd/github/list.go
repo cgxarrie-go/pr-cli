@@ -22,12 +22,12 @@ const (
 
 func RunListCmd(cmd *cobra.Command, origins utils.Origins, state string) error {
 
-	azCfg, err := loadConfig()
+	ghCfg, err := loadConfig()
 	if err != nil {
 		return err
 	}
 	originSvc := origin.NewService()
-	svc := listprs.NewService(azCfg.PAT, originSvc)
+	svc := listprs.NewService(ghCfg.PAT, originSvc)
 
 	azStatus, err := status.FromName(state)
 	if err != nil {

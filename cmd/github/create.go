@@ -11,13 +11,13 @@ import (
 
 func RunCreatCmd(cmd *cobra.Command, tgt, ttl string) error {
 
-	azCfg, err := loadConfig()
+	ghCfg, err := loadConfig()
 	if err != nil {
 		return err
 	}
 
 	originSvc := origin.NewService()
-	svc := createpr.NewService(azCfg.PAT, originSvc)
+	svc := createpr.NewService(ghCfg.PAT, originSvc)
 
 	req := createpr.NewRequest(tgt,ttl)
 	pr, err := svc.Run(req)
