@@ -41,7 +41,7 @@ func GitOrigins(dir string) (Origins, error) {
 				return nil
 			}
 
-			origin, err := GitOrigin(fullPath)
+			origin, err := NewOrigin(fullPath)
 			if err != nil {
 				log.Printf("error getting origin for %s: %v", info.Name(), err)
 				return nil

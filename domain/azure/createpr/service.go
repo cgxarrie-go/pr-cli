@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/cgxarrie-go/prq/domain/azure/branch"
+	"github.com/cgxarrie-go/prq/domain/azure/origin"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/domain/ports"
 	"github.com/cgxarrie-go/prq/utils"
@@ -28,7 +29,7 @@ func NewService(pat string, originSvc ports.OriginSvc) ports.PRCreator {
 }
 
 // Create .
-func (svc service) Create(req ports.CreatePRRequest) (
+func (svc service) Run(req ports.CreatePRRequest) (
 	pr models.CreatedPullRequest, err error) {
 
 	src, err := utils.GitCurrentBranchName()
@@ -50,31 +51,28 @@ func (svc service) Create(req ports.CreatePRRequest) (
 		source.Name(), destination.Name())
 	}
 
-	origin, err := utils.CurrentOrigin()
+	o, err := utils.CurrentOrigin()
 	if err != nil {
 		return pr, fmt.Errorf("getting repository origin: %w", err)
 	}
 
-	organization, err := svc.originSvc.Organizaion(origin)
-	if err != nil {
-		return pr, fmt.Errorf("getting repository organization: %w", err)
-	}
+	azOrigin := origin.NewAzureOrigin(o)
 
 	svcResp := Response{}
-	err = svc.doPOST(source, destination, title, true, origin, &svcResp)
+	err = svc.doPOST(source, destination, title, true, azOrigin, &svcResp)
 	if err != nil {
 		return pr, fmt.Errorf("creating PR: %w", err)
 	}
 
-	pr = svcResp.ToPullRequest(organization)
+	pr = svcResp.ToPullRequest(azOrigin.Organizaion())
 
 	return pr, nil
 }
 
 func (svc service) doPOST(src, dest branch.Branch, ttl string, draft bool,
-	origin utils.Origin, resp *Response) (err error) {
+	o origin.AzureOrigin, resp *Response) (err error) {
 
-	url, err := svc.originSvc.CreatePRsURL(origin)
+	url, err := svc.originSvc.CreatePRsURL(o.Origin)
 	if err != nil {
 		return fmt.Errorf("getting url: %w", err)
 	}
@@ -107,8 +105,9 @@ func (svc service) doPOST(src, dest branch.Branch, ttl string, draft bool,
 	azReq.Header.Add("Accept-Encoding", "gzip,deflate,br")
 	azReq.Header.Add("Referer", fmt.Sprintf("https://dev.azure.com/%s/%s/_git/"+
 		"%s/pullrequestcreate?sourceRef=%s&targetRef=%s"+
-		"&sourceRepositoryId=%s&targetRepositoryId=%s", organization,
-		projectName, repoName, src.Name(), dest.Name(), repoName, repoName))
+		"&sourceRepositoryId=%s&targetRepositoryId=%s", o.Organizaion(),
+		o.Project(), o.Repository(), src.Name(), dest.Name(), o.Repository(), 
+		o.Repository()))
 	azReq.Header.Add("Origin", "https://dev.azure.com")
 	azReq.Header.Add("Connection", "keep-alive")
 	azReq.Header.Add("Sec-Fetch-Dest", "empty")

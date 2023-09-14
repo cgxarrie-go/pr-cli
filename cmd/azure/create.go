@@ -5,7 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cgxarrie-go/prq/services/azure"
+	"github.com/cgxarrie-go/prq/domain/azure/createpr"
+	"github.com/cgxarrie-go/prq/domain/azure/origin"
 )
 
 func RunCreatCmd(cmd *cobra.Command, tgt, ttl string) error {
@@ -14,14 +15,12 @@ func RunCreatCmd(cmd *cobra.Command, tgt, ttl string) error {
 	if err != nil {
 		return err
 	}
-	svc := azure.NewAzureCreatePullRequestService(azCfg.PAT)
 
-	req := azure.CreatePRRequest{
-		Destination: tgt,
-		Title:       ttl,
-	}
+	originSvc := origin.NewService()
+	svc := createpr.NewService(azCfg.PAT, originSvc)
 
-	pr, err := svc.Create(req)
+	req := createpr.NewRequest(tgt,ttl)
+	pr, err := svc.Run(req)
 	if err != nil {
 		return fmt.Errorf("failed to create PR: %w", err)
 	}

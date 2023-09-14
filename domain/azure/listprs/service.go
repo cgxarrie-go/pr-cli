@@ -8,6 +8,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
+	"github.com/cgxarrie-go/prq/domain/azure/origin"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/domain/ports"
 )
@@ -26,20 +27,20 @@ func NewService(pat string, originSvc ports.OriginSvc) ports.PRReader {
 }
 
 // GetPRs implements ports.ProviderService
-func (svc service) GetPRs(req ports.ListPRRequest) (prs []models.PullRequest, err error) {
+func (svc service) GetPRs(req ports.ListPRRequest) (
+	prs []models.PullRequest, err error) {
 
 	g := errgroup.Group{}
 
-	for _, origin := range req.Origins() {
-				organization, err := svc.originSvc.Organizaion(origin)
+	for _, o := range req.Origins() {
+		azOrigin := origin.NewAzureOrigin(o)
+		url, err := svc.originSvc.GetPRsURL(o, req.Status())
 		if err != nil {
-			return prs, fmt.Errorf("getting repo params from origin %s: %w",
-				origin, err)
-		}
-		url, err := svc.originSvc.GetPRsURL(origin, req.Status())
-		
+			return prs, fmt.Errorf("gettig url from origin %s: %w", 
+			o, err)
+		}		
 		g.Go(func() error {
-			azPRs, err := svc.getData(url, organization)
+			azPRs, err := svc.getData(url, azOrigin.Organizaion())
 			if err == nil {
 				prs = append(prs, azPRs...)
 			}
