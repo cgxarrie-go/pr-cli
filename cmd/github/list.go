@@ -8,7 +8,6 @@ import (
 
 	"github.com/cgxarrie-go/prq/domain/github/listprs"
 	"github.com/cgxarrie-go/prq/domain/github/origin"
-	"github.com/cgxarrie-go/prq/domain/github/status"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/utils"
 )
@@ -20,21 +19,17 @@ const (
 	prStatusColLength  int = 10
 )
 
-func RunListCmd(cmd *cobra.Command, origins utils.Origins, state string) error {
+func RunListCmd(cmd *cobra.Command, origins utils.Origins) error {
 
 	ghCfg, err := loadConfig()
 	if err != nil {
 		return err
 	}
+
 	originSvc := origin.NewService()
 	svc := listprs.NewService(ghCfg.PAT, originSvc)
 
-	ghStatus, err := status.FromName(state)
-	if err != nil {
-		return err
-	}
-
-	req := listprs.NewRequest(origins, ghStatus)
+	req := listprs.NewRequest(origins)
 	prs, err := svc.GetPRs(req)
 	if err != nil {
 		return err

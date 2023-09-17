@@ -6,8 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cgxarrie-go/prq/cmd/config"
-	appcfg "github.com/cgxarrie-go/prq/config"
+	"github.com/cgxarrie-go/prq/cmd/azure"
+	"github.com/cgxarrie-go/prq/cmd/github"
+	"github.com/cgxarrie-go/prq/config"
 )
 
 // configCmd represents the Config command
@@ -21,8 +22,8 @@ var configCmd = &cobra.Command{
 }
 
 func init() {
-	configCmd.AddCommand(config.AzurePATCmd)
-	configCmd.AddCommand(config.GithubPATCmd)
+	configCmd.AddCommand(azure.CfgPATCmd)
+	configCmd.AddCommand(github.CfgPATCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -38,11 +39,14 @@ func init() {
 
 func runConfigCmd(cmd *cobra.Command, args []string) error {
 
-	cfg := appcfg.GetInstance()
-	cfg.Load()
+	cfg := config.GetInstance()
+	err := cfg.Load()
+	if err != nil {
+		return fmt.Errorf("reading config: %w", err)
+	}
 	b, err := json.Marshal(cfg)
 	if err != nil {
-		return err
+		return fmt.Errorf("marshalling config: %w", err)
 	}
 	fmt.Println(string(b))
 	return nil

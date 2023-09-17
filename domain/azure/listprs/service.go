@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/cgxarrie-go/prq/domain/azure/origin"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/domain/ports"
@@ -30,32 +28,25 @@ func NewService(pat string, originSvc ports.OriginSvc) ports.PRReader {
 func (svc service) GetPRs(req ports.ListPRRequest) (
 	prs []models.PullRequest, err error) {
 
-	g := errgroup.Group{}
-
 	for _, o := range req.Origins() {
 		azOrigin := origin.NewAzureOrigin(o)
-		url, err := svc.originSvc.GetPRsURL(o, req.Status())
+		url, err := svc.originSvc.GetPRsURL(o)
 		if err != nil {
 			return prs, fmt.Errorf("gettig url from origin %s: %w", 
 			o, err)
 		}		
-		g.Go(func() error {
-			azPRs, err := svc.getData(url)
-			if err == nil {
-				for _, azPR := range azPRs {
-					pr := azPR.ToPullRequest(azOrigin.Organizaion())
-					pr.Link, err = svc.originSvc.PRLink(azOrigin.Origin, pr.ID, 
-						"open")
-					prs = append(prs, pr)
-				}
+		azPRs, err := svc.getData(url)
+		if err == nil {
+			for _, azPR := range azPRs {
+				pr := azPR.ToPullRequest(azOrigin.Organizaion())
+				pr.Link, err = svc.originSvc.PRLink(azOrigin.Origin, pr.ID, 
+					"open")
+				prs = append(prs, pr)
 			}
-
-			return err
-		})
-
+		}
 	}
 
-	return prs, g.Wait()
+	return prs,err
 }
 
 func (svc service) getData(url string) (

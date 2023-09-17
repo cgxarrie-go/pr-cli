@@ -7,9 +7,6 @@ import (
 
 	"github.com/cgxarrie-go/prq/cmd/azure"
 	"github.com/cgxarrie-go/prq/cmd/github"
-	"github.com/cgxarrie-go/prq/domain/azure/status"
-	azStatus "github.com/cgxarrie-go/prq/domain/azure/status"
-	ghStatus "github.com/cgxarrie-go/prq/domain/github/status"
 	"github.com/cgxarrie-go/prq/utils"
 )
 
@@ -38,13 +35,9 @@ var listCmd = &cobra.Command{
 			}
 		}
 
-		st, _ := cmd.Flags().GetString("status")
 		if len(azureOrigins) > 0 {
-			azSt := azStatus.Active.Name()
-			if st != "" {
-				azSt = st
-			}
-			azErr := azure.RunListCmd(cmd, azureOrigins, azSt)
+			
+			azErr := azure.RunListCmd(cmd, azureOrigins)
 			if azErr != nil {
 				multierror.Append(err, azErr)
 			}
@@ -52,11 +45,7 @@ var listCmd = &cobra.Command{
 
 		
 		if len(githubOrigins) > 0 {
-			ghSt := ghStatus.Active.Name()
-			if st != "" {
-				ghSt = st
-			}
-			ghErr := github.RunListCmd(cmd, githubOrigins, ghSt)
+			ghErr := github.RunListCmd(cmd, githubOrigins)
 
 			if ghErr != nil {
 				multierror.Append(err, ghErr)
@@ -78,6 +67,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// azCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	listCmd.Flags().StringP("status", "s", status.Active.Name(), "status of PRs to list")
 
 }

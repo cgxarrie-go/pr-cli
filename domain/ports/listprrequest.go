@@ -6,5 +6,4 @@ import (
 
 type ListPRRequest interface {
 	Origins() utils.Origins
-	Status()  PRStatus
 }

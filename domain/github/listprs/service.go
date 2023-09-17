@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/cgxarrie-go/prq/domain/github/origin"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/domain/ports"
@@ -29,31 +27,25 @@ func NewService(pat string, originSvc ports.OriginSvc) ports.PRReader {
 func (svc service) GetPRs(req ports.ListPRRequest) (
 	prs []models.PullRequest, err error) {
 
-	g := errgroup.Group{}
-
-	for _, o := range req.Origins() {
+	for _, o := range req.Origins() {	
 		ghOrigin := origin.NewGithubOrigin(o)
-		url, err := svc.originSvc.GetPRsURL(o, req.Status())
+		url, err := svc.originSvc.GetPRsURL(o)
 		if err != nil {
 			return prs, fmt.Errorf("gettig url from origin %s: %w", 
 			o, err)
-		}		
-		g.Go(func() error {
-			ghPRs, err := svc.getData(url)
-			if err == nil {
-				for _, ghPR := range ghPRs {
-					pr := ghPR.ToPullRequest(ghOrigin.User())
-					pr.Link, err = svc.originSvc.PRLink(ghOrigin.Origin, pr.ID, 
-						"open")
-					prs = append(prs, pr)
-				}				
-			}
-			return err
-		})
-
+		}				
+		ghPRs, err := svc.getData(url)
+		if err == nil {
+			for _, ghPR := range ghPRs {
+				pr := ghPR.ToPullRequest(ghOrigin.User())
+				pr.Link, err = svc.originSvc.PRLink(ghOrigin.Origin, pr.ID, 
+					"open")
+				prs = append(prs, pr)
+			}				
+		}
 	}
 
-	return prs, g.Wait()
+	return prs, err
 }
 
 func (svc service) getData(url string) (

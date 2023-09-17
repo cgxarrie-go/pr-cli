@@ -3,6 +3,7 @@ package origin
 import (
 	"fmt"
 
+	"github.com/cgxarrie-go/prq/domain/azure/status"
 	"github.com/cgxarrie-go/prq/domain/errors"
 	"github.com/cgxarrie-go/prq/domain/ports"
 	"github.com/cgxarrie-go/prq/utils"
@@ -23,7 +24,7 @@ func (s service) CreatePRsURL(o utils.Origin) (url string, err error) {
 }
 
 // GetPRsURL implements ports.OriginSvc.
-func (s service) GetPRsURL(o utils.Origin, status ports.PRStatus) (
+func (s service) GetPRsURL(o utils.Origin) (
 	url string, err error) {
 
 	if !o.IsGithub() {
@@ -32,7 +33,7 @@ func (s service) GetPRsURL(o utils.Origin, status ports.PRStatus) (
 
 	qs := "q=is%3Apr+is%3A"
 
-	url = fmt.Sprintf("%s/pulls?%s%s", s.baseUrl(o), qs, status.Name())
+	url = fmt.Sprintf("%s/pulls?%s%s", s.baseUrl(o), qs, status.Active.Name())
 
 	return
 }

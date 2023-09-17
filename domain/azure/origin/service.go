@@ -3,6 +3,7 @@ package origin
 import (
 	"fmt"
 
+	"github.com/cgxarrie-go/prq/domain/azure/status"
 	"github.com/cgxarrie-go/prq/domain/errors"
 	"github.com/cgxarrie-go/prq/domain/ports"
 	"github.com/cgxarrie-go/prq/utils"
@@ -26,7 +27,7 @@ func (s service) CreatePRsURL(o utils.Origin) (url string, err error) {
 }
 
 // GetPRsURL implements ports.OriginSvc.
-func (s service) GetPRsURL(o utils.Origin, status ports.PRStatus) (
+func (s service) GetPRsURL(o utils.Origin) (
 	url string, err error) {
 
 	if !o.IsAzure() {
@@ -36,7 +37,8 @@ func (s service) GetPRsURL(o utils.Origin, status ports.PRStatus) (
 	azOrigin := NewAzureOrigin(o)
 	base := s.baseUrl(azOrigin)
 	url = fmt.Sprintf("%s/repositories/%s/pullrequests?api-version=7.0"+
-		"&searchCriteria.status=%d", base, azOrigin.Repository(), status)
+		"&searchCriteria.status=%d", base, azOrigin.Repository(), 
+		status.Active.Name())
 
 	return
 }

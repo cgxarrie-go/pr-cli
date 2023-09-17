@@ -8,7 +8,6 @@ import (
 
 	"github.com/cgxarrie-go/prq/domain/azure/listprs"
 	"github.com/cgxarrie-go/prq/domain/azure/origin"
-	"github.com/cgxarrie-go/prq/domain/azure/status"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/domain/ports"
 	"github.com/cgxarrie-go/prq/utils"
@@ -21,21 +20,17 @@ const (
 	prStatusColLength  int = 10
 )
 
-func RunListCmd(cmd *cobra.Command, origins utils.Origins, state string) error {
+func RunListCmd(cmd *cobra.Command, origins utils.Origins) error {
 
 	azCfg, err := loadConfig()
 	if err != nil {
 		return err
 	}
+
 	originSvc := origin.NewService()
 	svc := listprs.NewService(azCfg.PAT, originSvc)
 
-	azStatus, err := status.FromName(state)
-	if err != nil {
-		return err
-	}
-
-	req := listprs.NewRequest(origins, azStatus)
+	req := listprs.NewRequest(origins)
 	prs, err := svc.GetPRs(req)
 	if err != nil {
 		return err
