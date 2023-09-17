@@ -40,7 +40,7 @@ func (svc service) Run(req ports.CreatePRRequest) (
 	source := branch.NewBranch(src)
 	destination := branch.Branch{}
 	if req.Destination() == "" {
-		destination = branch.NewBranch("master")
+		destination = branch.NewBranch("main")
 	} else {
 		destination = branch.NewBranch(req.Destination())
 	}
@@ -82,8 +82,8 @@ func (svc service) doPOST(src, dest branch.Branch, ttl string, draft bool,
 	bearer := fmt.Sprintf("Basic %s", b64PAT)
 
 	pullRequest := map[string]interface{}{
-		"sourceRefName": src.FullName(),  // Source branch
-		"targetRefName": dest.FullName(), // Target branch
+		"head": src.Name(),  // Source branch
+		"base": dest.Name(), // Target branch
 		"title":         ttl,             // Title of PR
 		"draft":       draft,           // Draft PR
 	}

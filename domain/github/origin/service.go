@@ -46,8 +46,9 @@ func (s service) PRLink(o utils.Origin, id, text string) (
 		return url, errors.NewErrInvalidRepositoryType(o)
 	}
 
-	base := s.baseUrl(o)
-	url = fmt.Sprintf("%s/pull/%s", base, id)
+	ghOrigin := NewGithubOrigin(o)
+	url = fmt.Sprintf("https://github.com/%s/prq/pull/%s", 
+		ghOrigin.User(), id)
 	return termenv.Hyperlink(url, text), nil
 }
 

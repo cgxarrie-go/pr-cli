@@ -20,7 +20,7 @@ type ResponsePullRequest struct {
 	Number      int 	   `json:"number"`
 	Title       string     `json:"title"`
 	Body       string      `json:"body"`
-	Status      string     `json:"status"`
+	Status      string     `json:"sate"`
 	MergeStatus string     `json:"mergeStatus"`
 	User   ResponseUser    `json:"user"`
 	IsDraft     bool       `json:"draft"`

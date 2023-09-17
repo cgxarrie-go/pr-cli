@@ -37,16 +37,6 @@ func (azPR Response) ToPullRequest(organization string) models.CreatedPullReques
 		ID:          strconv.Itoa(azPR.ID),
 		Title:       azPR.Title,
 		Description: azPR.Description,
-		Repository: models.Hierarchy{
-			ID:   azPR.Repo.ID,
-			Name: azPR.Repo.Name,
-			URL:  azPR.Repo.URL,
-		},
-		Project: models.Hierarchy{
-			ID:   azPR.Repo.Project.ID,
-			Name: azPR.Repo.Project.Name,
-			URL:  azPR.Repo.Project.URL,
-		},
 		URL:          azPR.URL,
 		IsDraft:      azPR.IsDraft,
 		Organization: organization,

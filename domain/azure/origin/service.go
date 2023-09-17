@@ -38,7 +38,7 @@ func (s service) GetPRsURL(o utils.Origin) (
 	base := s.baseUrl(azOrigin)
 	url = fmt.Sprintf("%s/repositories/%s/pullrequests?api-version=7.0"+
 		"&searchCriteria.status=%d", base, azOrigin.Repository(), 
-		status.Active.Name())
+		status.Active)
 
 	return
 }
