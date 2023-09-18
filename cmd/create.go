@@ -1,7 +1,11 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/cgxarrie-go/prq/cmd/azure"
+	"github.com/cgxarrie-go/prq/cmd/github"
+	"github.com/cgxarrie-go/prq/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -18,8 +22,21 @@ var createCmd = &cobra.Command{
 		dest, _ := cmd.Flags().GetString("destination")
 		ttl, _ := cmd.Flags().GetString("title")
 
-		err := azure.RunCreatCmd(cmd, dest, ttl)
-		return err
+		o, err := utils.CurrentOrigin()
+		if err != nil {
+			return fmt.Errorf("getting origin: %w", err)
+		}
+		if o.IsAzure() {
+			err := azure.RunCreatCmd(cmd, dest, ttl)	
+			return err
+		}
+
+		if o.IsGithub() {
+			err := github.RunCreatCmd(cmd, dest, ttl)
+			return err
+		}
+
+		return fmt.Errorf("unknown origin type: %s", o)
 	},
 }
 

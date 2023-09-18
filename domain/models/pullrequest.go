@@ -19,17 +19,17 @@ type PullRequest struct {
 	URL          string
 	IsDraft      bool
 	Created      time.Time
+	Link 		 string
 }
 
 type CreatedPullRequest struct {
 	ID           string
 	Title        string
 	Description  string
-	Repository   Hierarchy
-	Project      Hierarchy
 	URL          string
 	IsDraft      bool
 	Organization string
+	Link 		 string
 }
 
 // Hierarchy of a PR
@@ -40,19 +40,23 @@ type Hierarchy struct {
 }
 
 // ShortenedTitle returns title shortened to maxlength...
-func (p PullRequest) ShortenedTitle(maxLength int, isDraft bool) string {
-
-	if len(p.Title) <= maxLength {
-		return p.Title
-	}
+func (p PullRequest) ShortenedTitle(maxLength int) string {
 
 	draftText := ""
-	if isDraft {
+	if p.IsDraft {
 		draftText = " (Draft)"
 	}
 
+	pritntable := fmt.Sprintf("%s%s", p.Title, draftText)
+
+	if len(pritntable) <= maxLength {
+		return pritntable
+	}
+
+
+
 	shortenLenght := maxLength - 3 - len(draftText)
 
-	title := fmt.Sprintf("%s...", p.Title[0:shortenLenght])
+	title := fmt.Sprintf("%s...", pritntable[0:shortenLenght])
 	return title
 }

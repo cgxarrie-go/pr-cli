@@ -1,23 +1,23 @@
-package azure
+package github
 
 import (
 	"fmt"
 
 	"github.com/spf13/cobra"
 
-	"github.com/cgxarrie-go/prq/domain/azure/createpr"
-	"github.com/cgxarrie-go/prq/domain/azure/origin"
+	"github.com/cgxarrie-go/prq/domain/github/createpr"
+	"github.com/cgxarrie-go/prq/domain/github/origin"
 )
 
 func RunCreatCmd(cmd *cobra.Command, tgt, ttl string) error {
 
-	azCfg, err := loadConfig()
+	ghCfg, err := loadConfig()
 	if err != nil {
 		return err
 	}
 
 	originSvc := origin.NewService()
-	svc := createpr.NewService(azCfg.PAT, originSvc)
+	svc := createpr.NewService(ghCfg.PAT, originSvc)
 
 	req := createpr.NewRequest(tgt,ttl)
 	pr, err := svc.Run(req)

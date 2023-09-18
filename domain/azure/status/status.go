@@ -7,13 +7,13 @@ type Status int
 const (
 	Active    Status = 1
 	Abandoned Status = 2
-	Closed    Status = 3
+	Cancelled Status = 3
 )
 
 var statusMapName = map[Status]string{
 	Active:    `active`,
 	Abandoned: `abandoned`,
-	Closed:    `cancelled`,
+	Cancelled: `cancelled`,
 }
 
 // Name return the name of the Status

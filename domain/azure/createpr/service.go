@@ -1,50 +1,36 @@
-package azure
+package createpr
 
 import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
-	"github.com/cgxarrie-go/prq/domain/errors"
+	"github.com/cgxarrie-go/prq/domain/azure/branch"
+	"github.com/cgxarrie-go/prq/domain/azure/origin"
 	"github.com/cgxarrie-go/prq/domain/models"
 	"github.com/cgxarrie-go/prq/domain/ports"
-	"github.com/cgxarrie-go/prq/services/azure/branch"
 	"github.com/cgxarrie-go/prq/utils"
 )
 
-type createPRSvc struct {
+type service struct {
 	pat string
+	originSvc ports.OriginSvc
 }
 
-// NewAzureCreatePullRequestService return new instnce of azure service
-func NewAzureCreatePullRequestService(pat string) ports.PRCreator {
-	return createPRSvc{
+// NewService return new instnce of azure service
+func NewService(pat string, originSvc ports.OriginSvc) ports.PRCreator {
+	return service{
 		pat: fmt.Sprintf("`:%s", pat),
+		originSvc: originSvc,
 	}
-}
-
-func (svc createPRSvc) url(organization, projectName, repoName string) (
-	string, error) {
-
-	return fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/git/"+
-		"repositories/%s/pullRequests?supportsIterations=true&api-version=7.0",
-		organization,
-		projectName,
-		repoName,
-	), nil
 }
 
 // Create .
-func (svc createPRSvc) Create(req any) (pr models.CreatedPullRequest,
-	err error) {
-
-	createReq, ok := req.(CreatePRRequest)
-	if !ok {
-		return pr, errors.NewErrInvalidRequestType(createReq, req)
-	}
+func (svc service) Run(req ports.CreatePRRequest) (
+	pr models.CreatedPullRequest, err error) {
 
 	src, err := utils.GitCurrentBranchName()
 	if err != nil {
@@ -52,39 +38,42 @@ func (svc createPRSvc) Create(req any) (pr models.CreatedPullRequest,
 	}
 
 	source := branch.NewBranch(src)
-
-	if createReq.Destination == "" {
-		createReq.Destination = "master"
+	destination := branch.Branch{}
+	if req.Destination() == "" {
+		destination = branch.NewBranch("master")
+	} else {
+		destination = branch.NewBranch(req.Destination())
 	}
-	destination := branch.NewBranch(createReq.Destination)
-
-	if createReq.Title == "" {
-		createReq.Title =
-			fmt.Sprintf("PR from %s to %s", source.Name(), destination.Name())
+	
+	title := req.Title()
+	if req.Title() == "" {
+		title = fmt.Sprintf("PR from %s to %s", 
+		source.Name(), destination.Name())
 	}
 
-	organization, projectName, repoName, err := getRepoParams()
+	o, err := utils.CurrentOrigin()
 	if err != nil {
-		return pr, fmt.Errorf("getting repo params: %w", err)
+		return pr, fmt.Errorf("getting repository origin: %w", err)
 	}
 
-	svcResp := CreatePRResponse{}
-	err = svc.doPOST(source, destination, createReq.Title, true,
-		organization, projectName, repoName, &svcResp)
+	azOrigin := origin.NewAzureOrigin(o)
+
+	svcResp := Response{}
+	err = svc.doPOST(source, destination, title, true, azOrigin, &svcResp)
 	if err != nil {
 		return pr, fmt.Errorf("creating PR: %w", err)
 	}
 
-	pr = svcResp.ToPullRequest(organization)
+	pr = svcResp.ToPullRequest(azOrigin.Organizaion())
+	pr.Link, err = svc.originSvc.PRLink(o, pr.ID, "open")
 
 	return pr, nil
 }
 
-func (svc createPRSvc) doPOST(src, dest branch.Branch, ttl string, draft bool,
-	organization, projectName, repoName string,
-	resp *CreatePRResponse) (err error) {
+func (svc service) doPOST(src, dest branch.Branch, ttl string, draft bool,
+	o origin.AzureOrigin, resp *Response) (err error) {
 
-	url, err := svc.url(organization, projectName, repoName)
+	url, err := svc.originSvc.CreatePRsURL(o.Origin)
 	if err != nil {
 		return fmt.Errorf("getting url: %w", err)
 	}
@@ -117,8 +106,9 @@ func (svc createPRSvc) doPOST(src, dest branch.Branch, ttl string, draft bool,
 	azReq.Header.Add("Accept-Encoding", "gzip,deflate,br")
 	azReq.Header.Add("Referer", fmt.Sprintf("https://dev.azure.com/%s/%s/_git/"+
 		"%s/pullrequestcreate?sourceRef=%s&targetRef=%s"+
-		"&sourceRepositoryId=%s&targetRepositoryId=%s", organization,
-		projectName, repoName, src.Name(), dest.Name(), repoName, repoName))
+		"&sourceRepositoryId=%s&targetRepositoryId=%s", o.Organizaion(),
+		o.Project(), o.Repository(), src.Name(), dest.Name(), o.Repository(), 
+		o.Repository()))
 	azReq.Header.Add("Origin", "https://dev.azure.com")
 	azReq.Header.Add("Connection", "keep-alive")
 	azReq.Header.Add("Sec-Fetch-Dest", "empty")
@@ -133,7 +123,7 @@ func (svc createPRSvc) doPOST(src, dest branch.Branch, ttl string, draft bool,
 	}
 
 	if azResp.StatusCode != http.StatusCreated {
-		respBody, err := ioutil.ReadAll(azResp.Body)
+		respBody, err := io.ReadAll(azResp.Body)
 		if err != nil {
 			respBody = []byte("cannot read response body content")
 		}

@@ -11,8 +11,7 @@
             "mode": "auto",
             "program": "./main.go",
             "args": [
-                "l",
-                "az"
+                "l"
             ]
         },
         {
@@ -22,7 +21,7 @@
             "mode": "auto",
             "program": "./main.go",
             "args": [
-                "t",
+                "c",
                 "-d",
                 "master",
                 "-t",
@@ -30,13 +29,13 @@
             ]
         },
         {
-            "name": "az Create def dest",
+            "name": "Create def dest",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "./main.go",
             "args": [
-                "t",
+                "c",
             ]
         }
     ]

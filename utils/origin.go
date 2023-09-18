@@ -1,6 +1,10 @@
 package utils
 
-import "strings"
+import (
+	"fmt"
+	"os/exec"
+	"strings"
+)
 
 type Origin string
 type Origins []Origin
@@ -26,4 +30,21 @@ func (o Origins) Append(origin Origin) Origins {
 		return append(o, origin)
 	}
 	return o
+}
+
+
+func CurrentOrigin() (Origin, error) {
+	return NewOrigin("")
+}
+
+func NewOrigin(path string) (Origin, error) {
+	cmd := exec.Command("git", "config", "--get", "remote.origin.url")
+	if path != "" {
+		cmd.Dir = path
+	}
+	out, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get origin url: %w", err)
+	}
+	return Origin(strings.TrimSpace(string(out))), nil
 }

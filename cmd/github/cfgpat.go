@@ -1,20 +1,20 @@
-package config
+package github
 
 import (
 	"fmt"
 
 	"github.com/spf13/cobra"
 
-	appCfg "github.com/cgxarrie-go/prq/config"
+	"github.com/cgxarrie-go/prq/config"
 )
 
-// AzurePATCmd represents the azurePAT command
-var AzurePATCmd = &cobra.Command{
-	Use:   "pat",
-	Short: "set azure PAT",
-	Long:  `Set the Azure PAT in the configuration file`,
+// CfgPATCmd config github PAT command
+var CfgPATCmd = &cobra.Command{
+	Use:   "ghpat",
+	Short: "set Github PAT",
+	Long:  `Set the Github PAT in the configuration file`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := runAzurePATCmd(args)
+		err := runConfigPATCmd(args)
 		return err
 	},
 }
@@ -31,14 +31,14 @@ func init() {
 	// azurePATCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func runAzurePATCmd(args []string) error {
+func runConfigPATCmd(args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("invalid number of arguments")
 	}
-	cfg := appCfg.GetInstance()
+	cfg := config.GetInstance()
 	cfg.Load()
 
-	cfg.Azure.PAT = args[0]
+	cfg.Github.PAT = args[0]
 	err := cfg.Save()
 	if err != nil {
 		return err
