@@ -29,7 +29,7 @@ var listCmd = &cobra.Command{
 	Long:    `List Pull Requests from the specified provider according to config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		gitOrigins, err := utils.GitOrigins("/Users/carlos.gutierrez/projects")
+		gitOrigins, err := utils.GitOrigins(".")
 		if err != nil {
 			return err
 		}
