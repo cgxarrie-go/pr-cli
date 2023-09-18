@@ -12,14 +12,14 @@ import (
 )
 
 type service struct {
-	pat string
+	pat       string
 	originSvc ports.OriginSvc
 }
 
 // NewService return new instnce of azure service
 func NewService(pat string, originSvc ports.OriginSvc) ports.PRReader {
 	return service{
-		pat: fmt.Sprintf("`:%s", pat),
+		pat:       fmt.Sprintf("`:%s", pat),
 		originSvc: originSvc,
 	}
 }
@@ -32,25 +32,32 @@ func (svc service) GetPRs(req ports.ListPRRequest) (
 		azOrigin := origin.NewAzureOrigin(o)
 		url, err := svc.originSvc.GetPRsURL(o)
 		if err != nil {
-			return prs, fmt.Errorf("gettig url from origin %s: %w", 
-			o, err)
-		}		
+			return prs, fmt.Errorf("gettig url from origin %s: %w",
+				o, err)
+		}
 		azPRs, err := svc.getData(url)
-		if err == nil {
-			for _, azPR := range azPRs {
-				pr := azPR.ToPullRequest(azOrigin.Organizaion())
-				pr.Link, err = svc.originSvc.PRLink(azOrigin.Origin, pr.ID, 
-					"open")
-				prs = append(prs, pr)
+		if err != nil {
+			return prs, fmt.Errorf("getting PRs from %s: %w",
+				o, err)
+		}
+
+		for _, azPR := range azPRs.Value {
+			pr := azPR.ToPullRequest(azOrigin.Organizaion())
+			pr.Link, err = svc.originSvc.PRLink(azOrigin.Origin, pr.ID,
+				"open")
+			if err != nil {
+				return prs, fmt.Errorf("getting PR link from %s: %w",
+					o, err)
 			}
+			prs = append(prs, pr)
 		}
 	}
 
-	return prs,err
+	return prs, err
 }
 
 func (svc service) getData(url string) (
-	prs []ResponsePullRequest, err error) {
+	prs Response, err error) {
 
 	err = svc.doGet(url, &prs)
 	return
