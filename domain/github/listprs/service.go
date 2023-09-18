@@ -11,14 +11,14 @@ import (
 )
 
 type service struct {
-	pat string
+	pat       string
 	originSvc ports.OriginSvc
 }
 
 // NewService return new instnce of github service
 func NewService(pat string, originSvc ports.OriginSvc) ports.PRReader {
 	return service{
-		pat: pat,
+		pat:       pat,
 		originSvc: originSvc,
 	}
 }
@@ -27,21 +27,31 @@ func NewService(pat string, originSvc ports.OriginSvc) ports.PRReader {
 func (svc service) GetPRs(req ports.ListPRRequest) (
 	prs []models.PullRequest, err error) {
 
-	for _, o := range req.Origins() {	
+	for _, o := range req.Origins() {
 		ghOrigin := origin.NewGithubOrigin(o)
 		url, err := svc.originSvc.GetPRsURL(o)
 		if err != nil {
-			return prs, fmt.Errorf("gettig url from origin %s: %w", 
-			o, err)
-		}				
+			return prs, fmt.Errorf("gettig url from origin %s: %w",
+				o, err)
+		}
 		ghPRs, err := svc.getData(url)
-		if err == nil {
-			for _, ghPR := range ghPRs {
-				pr := ghPR.ToPullRequest(ghOrigin.User())
-				pr.Link, err = svc.originSvc.PRLink(ghOrigin.Origin, pr.ID, 
-					"open")
-				prs = append(prs, pr)
-			}				
+		if err != nil {
+			return prs, fmt.Errorf("getting PRs from %s: %w",
+				o, err)
+		}
+
+		for _, ghPR := range ghPRs {
+			pr := ghPR.ToPullRequest(ghOrigin.User())
+			pr.Link, err = svc.originSvc.PRLink(ghOrigin.Origin, pr.ID,
+				"open")
+			if err != nil {
+				return prs, fmt.Errorf("getting PR link from %s: %w",
+					o, err)
+			}
+			pr.Project.ID = ghOrigin.User()
+			pr.Project.Name = ghOrigin.User()
+			pr.Repository.Name = ghOrigin.Repository()
+			prs = append(prs, pr)
 		}
 	}
 
