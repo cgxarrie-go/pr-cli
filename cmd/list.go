@@ -29,7 +29,7 @@ var listCmd = &cobra.Command{
 	Long:    `List Pull Requests from the specified provider according to config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		gitOrigins, err := utils.GitOrigins(".")
+		gitOrigins, err := utils.GitOrigins("/Users/carlos.gutierrez/projects")
 		if err != nil {
 			return err
 		}
@@ -46,7 +46,7 @@ var listCmd = &cobra.Command{
 			}
 		}
 
-		prs :=[]models.PullRequest{}
+		prs := []models.PullRequest{}
 
 		if len(azureOrigins) > 0 {
 			azPrs, azErr := azure.RunListCmd(cmd, azureOrigins)
@@ -92,11 +92,8 @@ func printList(prs []models.PullRequest) {
 	lastRepository := ""
 
 	for i, pr := range prs {
-		if i == 0 {
-			fmt.Println(prinTableTitle())
-		}
 		if pr.Project.ID != lastProject {
-			fmt.Println(pr.Project.Name)
+			fmt.Println(prinTableTitle(pr.Project.Name))
 			lastProject = pr.Project.ID
 		}
 		if pr.Repository.ID != lastRepository {
@@ -118,14 +115,15 @@ func printList(prs []models.PullRequest) {
 	}
 }
 
-func prinTableTitle() string {
+func prinTableTitle(projectName string) string {
 
-	format := "%s\n    %s\n" + getColumnFormat()
-	head := fmt.Sprintf(format, "Project", "Repository", "ID", "Title",
-		"Created By", "Status", "Link")
+	format := "%s: %s\n    %s\n" + getColumnFormat()
+	head := fmt.Sprintf(format, "Project", projectName, "Repository", "ID",
+		"Title", "Created By", "Status", "Link")
 	line := strings.Repeat("-", len(head)+5)
+	doubleLine := strings.Repeat("=", len(head)+5)
 
-	return fmt.Sprintf("%s\n%s", head, line)
+	return fmt.Sprintf("%s\n%s\n%s", doubleLine, head, line)
 }
 
 func getColumnFormat() string {
