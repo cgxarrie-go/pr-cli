@@ -52,8 +52,8 @@ func (s service) PRLink(o utils.Origin, id, text string) (
 	}
 
 	azOrigin := NewAzureOrigin(o)
-	base := s.baseUrl(azOrigin)
-	url = fmt.Sprintf("%s/%s/pullrequest/%s", base, azOrigin.Repository(), id)
+	url = fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/git/%s/pullrequest/%s", 
+			  base, azOrigin.Organization(), azOrigin.Project(), azOrigin.Repository(), id)
 	return termenv.Hyperlink(url, text), nil
 }
 
