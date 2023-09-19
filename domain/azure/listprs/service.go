@@ -42,7 +42,7 @@ func (svc service) GetPRs(req ports.ListPRRequest) (
 		}
 
 		for _, azPR := range azPRs.Value {
-			pr := azPR.ToPullRequest(azOrigin.Organizaion())
+			pr := azPR.ToPullRequest(azOrigin.Organization())
 			pr.Link, err = svc.originSvc.PRLink(azOrigin.Origin, pr.ID,
 				"open")
 			if err != nil {
