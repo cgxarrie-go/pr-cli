@@ -8,7 +8,7 @@ import (
 
 	"github.com/cgxarrie-go/prq/cmd/azure"
 	"github.com/cgxarrie-go/prq/cmd/github"
-	"github.com/cgxarrie-go/prq/config"
+	"github.com/cgxarrie-go/prq/internal/config"
 )
 
 // configCmd represents the Config command

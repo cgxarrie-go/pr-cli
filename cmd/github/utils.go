@@ -1,7 +1,7 @@
 package github
 
 import (
-	"github.com/cgxarrie-go/prq/config"
+	"github.com/cgxarrie-go/prq/internal/config"
 )
 
 func loadConfig() (ghcfg config.GithubConfig, err error) {

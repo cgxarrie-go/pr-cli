@@ -3,7 +3,7 @@ package azure
 import (
 	"fmt"
 
-	"github.com/cgxarrie-go/prq/config"
+	"github.com/cgxarrie-go/prq/internal/config"
 	"github.com/spf13/cobra"
 )
 

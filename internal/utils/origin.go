@@ -17,6 +17,10 @@ func (o Origin) IsAzure() bool {
 	return strings.Contains(string(o), "dev.azure.com")
 }
 
+func (o Origin) IsEmpty() bool {
+	return o == ""
+}
+
 func (o Origins) Append(origin Origin) Origins {
 	exists := false
 	for _, o := range o {
