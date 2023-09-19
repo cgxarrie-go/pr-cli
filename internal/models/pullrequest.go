@@ -7,7 +7,8 @@ import (
 
 // PullRequest is the abstraction of a Pull Request from any provider
 type PullRequest struct {
-	Orgenization string
+	Origin 		 string
+	Organization string
 	ID           string
 	Title        string
 	Description  string

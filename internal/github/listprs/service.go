@@ -41,7 +41,9 @@ func (svc service) GetPRs(req ports.ListPRRequest) (
 		}
 
 		for _, ghPR := range ghPRs {
-			pr := ghPR.ToPullRequest(ghOrigin.User())
+			pr := ghPR.ToPullRequest()
+			pr.Organization = ghOrigin.User()
+			pr.Origin = string(o)
 			pr.Link, err = svc.originSvc.PRLink(ghOrigin.Origin, pr.ID,
 				"open")
 			if err != nil {
@@ -51,6 +53,7 @@ func (svc service) GetPRs(req ports.ListPRRequest) (
 			pr.Project.ID = ghOrigin.User()
 			pr.Project.Name = ghOrigin.User()
 			pr.Repository.Name = ghOrigin.Repository()
+			pr.Repository.ID = ghOrigin.Repository()
 			prs = append(prs, pr)
 		}
 	}

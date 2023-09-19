@@ -36,9 +36,8 @@ type ResponseUser struct {
 
 
 // ToPullRequest converts a GetPRsResponsePullRequest to a models.PullRequest
-func (ghPR ResponsePullRequest) ToPullRequest(organization string) models.PullRequest {
+func (ghPR ResponsePullRequest) ToPullRequest() models.PullRequest {
 	return models.PullRequest{
-		Orgenization: organization,
 		ID:           strconv.Itoa(ghPR.Number),
 		Title:        ghPR.Title,
 		Description:  ghPR.Body,
