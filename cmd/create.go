@@ -5,7 +5,7 @@ import (
 
 	"github.com/cgxarrie-go/prq/cmd/azure"
 	"github.com/cgxarrie-go/prq/cmd/github"
-	"github.com/cgxarrie-go/prq/utils"
+	"github.com/cgxarrie-go/prq/internal/utils"
 	"github.com/spf13/cobra"
 )
 

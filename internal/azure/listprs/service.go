@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cgxarrie-go/prq/domain/azure/origin"
-	"github.com/cgxarrie-go/prq/domain/models"
-	"github.com/cgxarrie-go/prq/domain/ports"
+	"github.com/cgxarrie-go/prq/internal/azure/origin"
+	"github.com/cgxarrie-go/prq/internal/models"
+	"github.com/cgxarrie-go/prq/internal/ports"
 )
 
 type service struct {

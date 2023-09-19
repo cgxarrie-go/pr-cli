@@ -1,7 +1,7 @@
 package ports
 
 import (
-	"github.com/cgxarrie-go/prq/utils"
+	"github.com/cgxarrie-go/prq/internal/utils"
 )
 
 type ListPRRequest interface {

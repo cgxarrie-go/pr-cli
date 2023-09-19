@@ -8,11 +8,11 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/cgxarrie-go/prq/domain/azure/branch"
-	"github.com/cgxarrie-go/prq/domain/azure/origin"
-	"github.com/cgxarrie-go/prq/domain/models"
-	"github.com/cgxarrie-go/prq/domain/ports"
-	"github.com/cgxarrie-go/prq/utils"
+	"github.com/cgxarrie-go/prq/internal/azure/branch"
+	"github.com/cgxarrie-go/prq/internal/azure/origin"
+	"github.com/cgxarrie-go/prq/internal/models"
+	"github.com/cgxarrie-go/prq/internal/ports"
+	"github.com/cgxarrie-go/prq/internal/utils"
 )
 
 type service struct {

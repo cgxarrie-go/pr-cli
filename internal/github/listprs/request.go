@@ -1,8 +1,8 @@
 package listprs
 
 import (
-	"github.com/cgxarrie-go/prq/domain/ports"
-	"github.com/cgxarrie-go/prq/utils"
+	"github.com/cgxarrie-go/prq/internal/ports"
+	"github.com/cgxarrie-go/prq/internal/utils"
 )
 
 // GetPRsRequest is the request to list PRs

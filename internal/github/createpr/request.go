@@ -1,6 +1,6 @@
 package createpr
 
-import "github.com/cgxarrie-go/prq/domain/ports"
+import "github.com/cgxarrie-go/prq/internal/ports"
 
 type Request struct {
 	destination string

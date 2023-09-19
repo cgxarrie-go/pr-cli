@@ -1,7 +1,7 @@
 package ports
 
 import (
-	"github.com/cgxarrie-go/prq/domain/models"
+	"github.com/cgxarrie-go/prq/internal/models"
 )
 
 // PRReader Contract for all services reading Pull requests from providers

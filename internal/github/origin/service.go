@@ -3,10 +3,10 @@ package origin
 import (
 	"fmt"
 
-	"github.com/cgxarrie-go/prq/domain/azure/status"
-	"github.com/cgxarrie-go/prq/domain/errors"
-	"github.com/cgxarrie-go/prq/domain/ports"
-	"github.com/cgxarrie-go/prq/utils"
+	"github.com/cgxarrie-go/prq/internal/azure/status"
+	"github.com/cgxarrie-go/prq/internal/errors"
+	"github.com/cgxarrie-go/prq/internal/ports"
+	"github.com/cgxarrie-go/prq/internal/utils"
 	"github.com/muesli/termenv"
 )
 

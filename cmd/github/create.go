@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cgxarrie-go/prq/domain/github/createpr"
-	"github.com/cgxarrie-go/prq/domain/github/origin"
+	"github.com/cgxarrie-go/prq/internal/github/createpr"
+	"github.com/cgxarrie-go/prq/internal/github/origin"
 )
 
 func RunCreatCmd(cmd *cobra.Command, tgt, ttl string) error {

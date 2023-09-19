@@ -3,7 +3,7 @@ package origin
 import (
 	"strings"
 
-	"github.com/cgxarrie-go/prq/utils"
+	"github.com/cgxarrie-go/prq/internal/utils"
 )
 
 type GithubOrigin struct {

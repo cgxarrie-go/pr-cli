@@ -3,7 +3,7 @@ package createpr
 import (
 	"strconv"
 
-	"github.com/cgxarrie-go/prq/domain/models"
+	"github.com/cgxarrie-go/prq/internal/models"
 )
 
 // Response .

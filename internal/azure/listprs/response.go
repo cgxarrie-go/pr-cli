@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cgxarrie-go/prq/domain/models"
+	"github.com/cgxarrie-go/prq/internal/models"
 )
 
 // Response response from GetPRS fro Azure Service
