@@ -16,14 +16,14 @@ import (
 )
 
 type service struct {
-	pat string
+	pat       string
 	originSvc ports.OriginSvc
 }
 
 // NewService return new instnce of azure service
 func NewService(pat string, originSvc ports.OriginSvc) ports.PRCreator {
 	return service{
-		pat: fmt.Sprintf("`:%s", pat),
+		pat:       fmt.Sprintf("`:%s", pat),
 		originSvc: originSvc,
 	}
 }
@@ -44,11 +44,11 @@ func (svc service) Run(req ports.CreatePRRequest) (
 	} else {
 		destination = branch.NewBranch(req.Destination())
 	}
-	
+
 	title := req.Title()
 	if req.Title() == "" {
-		title = fmt.Sprintf("PR from %s to %s", 
-		source.Name(), destination.Name())
+		title = fmt.Sprintf("PR from %s to %s",
+			source.Name(), destination.Name())
 	}
 
 	o, err := utils.CurrentOrigin()
@@ -64,7 +64,7 @@ func (svc service) Run(req ports.CreatePRRequest) (
 		return pr, fmt.Errorf("creating PR: %w", err)
 	}
 
-	pr = svcResp.ToPullRequest(azOrigin.Organizaion())
+	pr = svcResp.ToPullRequest(azOrigin.Organization())
 	pr.Link, err = svc.originSvc.PRLink(o, pr.ID, "open")
 
 	return pr, nil
@@ -106,8 +106,8 @@ func (svc service) doPOST(src, dest branch.Branch, ttl string, draft bool,
 	azReq.Header.Add("Accept-Encoding", "gzip,deflate,br")
 	azReq.Header.Add("Referer", fmt.Sprintf("https://dev.azure.com/%s/%s/_git/"+
 		"%s/pullrequestcreate?sourceRef=%s&targetRef=%s"+
-		"&sourceRepositoryId=%s&targetRepositoryId=%s", o.Organizaion(),
-		o.Project(), o.Repository(), src.Name(), dest.Name(), o.Repository(), 
+		"&sourceRepositoryId=%s&targetRepositoryId=%s", o.Organization(),
+		o.Project(), o.Repository(), src.Name(), dest.Name(), o.Repository(),
 		o.Repository()))
 	azReq.Header.Add("Origin", "https://dev.azure.com")
 	azReq.Header.Add("Connection", "keep-alive")
