@@ -9,8 +9,8 @@ import (
 type AzureOrigin struct {
 	utils.Origin
 	organization string
-	project string
-	repository string
+	project      string
+	repository   string
 }
 
 func NewAzureOrigin(o utils.Origin) AzureOrigin {
@@ -25,15 +25,14 @@ func NewAzureOrigin(o utils.Origin) AzureOrigin {
 	}
 }
 
-
-func (o AzureOrigin)Organizaion() string {
+func (o AzureOrigin) Organization() string {
 	return o.organization
 }
 
-func (o AzureOrigin)Project() string {
+func (o AzureOrigin) Project() string {
 	return o.project
 }
 
-func (o AzureOrigin)Repository() string {
+func (o AzureOrigin) Repository() string {
 	return o.repository
 }
