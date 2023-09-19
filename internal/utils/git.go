@@ -2,10 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 )
 
@@ -26,34 +23,4 @@ func IsGitRepo(path string) bool {
 		return false
 	}
 	return strings.TrimSpace(string(out)) == "true"
-}
-
-func GitOrigins(dir string) (Origins, error) {
-	var origins Origins
-	err := filepath.Walk(dir, 
-		func(path string, info os.FileInfo, err error) error {
-
-			if !info.IsDir() || info.Name() == dir {
-				return nil
-			}
-
-			fullPath := filepath.Join(dir, "/", info.Name())
-			if !IsGitRepo(fullPath) {
-				return nil
-			}
-			
-			origin, err := NewOrigin(fullPath)
-			if err != nil {
-				log.Printf("error getting origin for %s: %v", info.Name(), err)
-				return nil
-			}
-
-			if !origin.IsEmpty() {
-				origins = origins.Append(origin)
-			}
-
-			return filepath.SkipDir
-		})
-
-	return origins, err
 }

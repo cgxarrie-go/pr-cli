@@ -2,11 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
-
-	"github.com/hashicorp/go-multierror"
 
 	"github.com/cgxarrie-go/prq/cmd/azure"
 	"github.com/cgxarrie-go/prq/cmd/github"
@@ -29,47 +28,32 @@ var listCmd = &cobra.Command{
 	Long:    `List Pull Requests from the specified provider according to config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		gitOrigins, err := utils.GitOrigins(".")
+		origin, err := utils.NewOrigin(".")
 		if err != nil {
 			return err
 		}
-
-		azureOrigins := utils.Origins{}
-		githubOrigins := utils.Origins{}
-
-		for _, origin := range gitOrigins {
-			if origin.IsAzure() {
-				azureOrigins = azureOrigins.Append(origin)
-			}
-			if origin.IsGithub() {
-				githubOrigins = githubOrigins.Append(origin)
-			}
+		origins := utils.Origins{
+			origin,
 		}
 
-		prs := []models.PullRequest{}
-
-		if len(azureOrigins) > 0 {
-			azPrs, azErr := azure.RunListCmd(cmd, azureOrigins)
-			if azErr != nil {
-				multierror.Append(err, azErr)
+		if origin.IsAzure() {
+			prs, err := azure.RunListCmd(origins)
+			if err != nil {
+				return err
 			}
-			prs = append(prs, azPrs...)
-		}
-
-		if len(githubOrigins) > 0 {
-			ghPrs, ghErr := github.RunListCmd(cmd, githubOrigins)
-			if ghErr != nil {
-				multierror.Append(err, ghErr)
-			}
-			prs = append(prs, ghPrs...)
-		}
-
-		if len(prs) > 0 {
 			printList(prs)
+			return nil
+		}
+		if origin.IsGithub() {
+			prs, err := github.RunListCmd(origins)
+			if err != nil {
+				return err
+			}
+			printList(prs)
+			return nil
 		}
 
-		return err
-
+		return nil
 	},
 }
 
@@ -90,6 +74,19 @@ func printList(prs []models.PullRequest) {
 	fmt.Printf("Number of PRs : %d \n", len(prs))
 	lastProject := ""
 	lastRepository := ""
+
+	sort.SliceStable(prs, func(i,j int) bool {
+		if prs[i].Project.Name != prs[j].Project.Name {
+			return prs[i].Project.Name < prs[j].Project.Name
+		}
+
+		if prs[i].Repository.Name != prs[j].Repository.Name {
+			return prs[i].Repository.Name < prs[j].Repository.Name
+		}
+
+		return prs[i].ID < prs[j].ID
+	})
+	
 
 	for i, pr := range prs {
 		if pr.Project.ID != lastProject {
