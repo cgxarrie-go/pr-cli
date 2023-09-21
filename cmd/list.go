@@ -2,16 +2,16 @@ package cmd
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-
-	"github.com/hashicorp/go-multierror"
 
 	"github.com/cgxarrie-go/prq/cmd/azure"
 	"github.com/cgxarrie-go/prq/cmd/github"
-	"github.com/cgxarrie-go/prq/domain/models"
-	"github.com/cgxarrie-go/prq/utils"
+	"github.com/cgxarrie-go/prq/internal/models"
+	"github.com/cgxarrie-go/prq/internal/utils"
 )
 
 const (
@@ -29,47 +29,56 @@ var listCmd = &cobra.Command{
 	Long:    `List Pull Requests from the specified provider according to config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		gitOrigins, err := utils.GitOrigins(".")
+		currentRemote, err := utils.CurrentFolderRemote()
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "getting remote from current directory")
+		}
+		remotes := utils.Remotes{
+			currentRemote,
 		}
 
-		azureOrigins := utils.Origins{}
-		githubOrigins := utils.Origins{}
+		azRemotes := utils.Remotes{}
+		ghRemotes := utils.Remotes{}
+		unknownRemotes := utils.Remotes{}
 
-		for _, origin := range gitOrigins {
-			if origin.IsAzure() {
-				azureOrigins = azureOrigins.Append(origin)
-			}
-			if origin.IsGithub() {
-				githubOrigins = githubOrigins.Append(origin)
+		prs := []models.PullRequest{}	
+		for _, remote := range remotes {
+			switch true {
+			case remote.IsAzure():
+				azRemotes.Append(remote)
+			case remote.IsGithub():
+				ghRemotes.Append(remote)
+			default:
+				unknownRemotes.Append(remote)
 			}
 		}
 
-		prs := []models.PullRequest{}
+		if len(unknownRemotes) > 0 {
+			msg := ""
+			for _, ur := range unknownRemotes {
+				msg = fmt.Sprintf("%s%s/n", msg, ur)
+			}
+			msg = fmt.Sprintf("unknown remote types/n%s", msg)
+		}
 
-		if len(azureOrigins) > 0 {
-			azPrs, azErr := azure.RunListCmd(cmd, azureOrigins)
-			if azErr != nil {
-				multierror.Append(err, azErr)
+		if len(azRemotes) > 0 {
+			azPrs, err := azure.RunListCmd(azRemotes)
+			if err != nil {
+				return errors.Wrapf(err, "getting PRs from azure repositories")
 			}
 			prs = append(prs, azPrs...)
 		}
 
-		if len(githubOrigins) > 0 {
-			ghPrs, ghErr := github.RunListCmd(cmd, githubOrigins)
-			if ghErr != nil {
-				multierror.Append(err, ghErr)
+		if len(ghRemotes) > 0 {
+			ghPrs, err := github.RunListCmd(ghRemotes)
+			if err != nil {
+				return errors.Wrapf(err, "getting PRs from azure github")
 			}
 			prs = append(prs, ghPrs...)
 		}
 
-		if len(prs) > 0 {
-			printList(prs)
-		}
-
-		return err
-
+		printList(prs)			
+		return nil
 	},
 }
 
@@ -88,20 +97,21 @@ func init() {
 
 func printList(prs []models.PullRequest) {
 	fmt.Printf("Number of PRs : %d \n", len(prs))
-	lastProject := ""
-	lastRepository := ""
+	lastOrigin := ""
 
-	for i, pr := range prs {
-		if pr.Project.ID != lastProject {
-			fmt.Println(prinTableTitle(pr.Project.Name))
-			lastProject = pr.Project.ID
+	sort.SliceStable(prs, func(i,j int) bool {
+		if prs[i].Origin != prs[j].Origin {
+			return prs[i].Organization < prs[j].Origin
 		}
-		if pr.Repository.ID != lastRepository {
-			if i != 0 {
-				fmt.Println()
-			}
-			fmt.Printf("    %s\n", pr.Repository.Name)
-			lastRepository = pr.Repository.ID
+
+		return prs[i].ID < prs[j].ID
+	})
+	
+
+	for _, pr := range prs {
+		if pr.Origin != lastOrigin {
+			fmt.Println(prinTableTitle(pr.Origin))
+			lastOrigin = pr.Origin
 		}
 
 		created := fmt.Sprintf("%s (%v-%d-%d)",
@@ -115,10 +125,10 @@ func printList(prs []models.PullRequest) {
 	}
 }
 
-func prinTableTitle(projectName string) string {
+func prinTableTitle(remote string) string {
 
-	format := "%s: %s\n    %s\n" + getColumnFormat()
-	head := fmt.Sprintf(format, "Project", projectName, "Repository", "ID",
+	format := "%s\n" + getColumnFormat()
+	head := fmt.Sprintf(format, remote, "ID",
 		"Title", "Created By", "Status", "Link")
 	line := strings.Repeat("-", len(head)+5)
 	doubleLine := strings.Repeat("=", len(head)+5)
@@ -127,7 +137,7 @@ func prinTableTitle(projectName string) string {
 }
 
 func getColumnFormat() string {
-	return "        %" + fmt.Sprintf("%d", prIDColLength) + "s " +
+	return "%" + fmt.Sprintf("%d", prIDColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prTitleColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prCreatedColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prStatusColLength) + "s " +

@@ -1,7 +1,7 @@
 package azure
 
 import (
-	"github.com/cgxarrie-go/prq/config"
+	"github.com/cgxarrie-go/prq/internal/config"
 )
 
 func loadConfig() (azcfg config.AzureConfig, err error) {

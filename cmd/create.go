@@ -5,7 +5,7 @@ import (
 
 	"github.com/cgxarrie-go/prq/cmd/azure"
 	"github.com/cgxarrie-go/prq/cmd/github"
-	"github.com/cgxarrie-go/prq/utils"
+	"github.com/cgxarrie-go/prq/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -22,7 +22,7 @@ var createCmd = &cobra.Command{
 		dest, _ := cmd.Flags().GetString("destination")
 		ttl, _ := cmd.Flags().GetString("title")
 
-		o, err := utils.CurrentOrigin()
+		o, err := utils.CurrentFolderRemote()
 		if err != nil {
 			return fmt.Errorf("getting origin: %w", err)
 		}

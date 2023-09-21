@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cgxarrie-go/prq/config"
+	"github.com/cgxarrie-go/prq/internal/config"
 )
 
 // CfgPATCmd config github PAT command
