@@ -1,28 +1,25 @@
 # prq
 Interaction with pull requests from command line
+List and create PRs in Azure or Github repositories
 
 ## Config commands
 - prq config : display config
-- prq config pat : set PAT in azure config
+- prq config azpat : set PAT in Azure config
+- prq config ghpat : set PAT in Github config
 
 ## List PR commands 
-List will scan the current folder and subfolders searching for git repositories.
-Then, PRs in the found repositories will be listd
+List will list all active PRs in the remote of the current folder's local git 
+repository (Azure ot Github)
 
-- prq list : Lists all PR in status Active  (default)
+- prq list : Lists all PR in status Active
 
-### modifiers
--s : specify the status of the PRs to be listed
-
-- prq list -s active: Lists all PR in status Active for azure projects and repos
-- prq list -s abandoned: Lists all PR in status Abandoned for azure projects and repos
-- prq list -s cancelled: Lists all PR in status Cancelled for azure projects and repos
 
 
 ## Create PR commands 
-- prq create : creates a draft PR from current branch to default destination brnach with default title
+- prq create : creates a draft PR from current branch to default destination 
+brnach with default title
 
-default destination branch is **master**
+default destination branch is **master** in Azure and **main** in Github
 deafult title is **PR from spurce-branch-name to destination-branch-name**
 
 ### modifiers
