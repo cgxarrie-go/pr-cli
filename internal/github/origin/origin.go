@@ -7,19 +7,22 @@ import (
 )
 
 type GithubOrigin struct {
-	utils.Origin
+	utils.Remote
 	user       string
 	repository string
 }
 
-func NewGithubOrigin(o utils.Origin) GithubOrigin {
+func NewGithubOrigin(o utils.Remote) GithubOrigin {
 
 	split := strings.Split(string(o), "/")
 
+	repo := split[len(split)-1]
+	repo = strings.Split(repo,".")[0]
+
 	return GithubOrigin{
-		Origin:     o,
+		Remote:     o,
 		user:       split[len(split)-2],
-		repository: split[len(split)-1],
+		repository: repo,
 	}
 }
 

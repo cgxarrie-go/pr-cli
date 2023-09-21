@@ -22,7 +22,7 @@ var createCmd = &cobra.Command{
 		dest, _ := cmd.Flags().GetString("destination")
 		ttl, _ := cmd.Flags().GetString("title")
 
-		o, err := utils.CurrentOrigin()
+		o, err := utils.CurrentFolderRemote()
 		if err != nil {
 			return fmt.Errorf("getting origin: %w", err)
 		}

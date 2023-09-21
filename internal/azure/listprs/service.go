@@ -45,7 +45,7 @@ func (svc service) GetPRs(req ports.ListPRRequest) (
 			pr := azPR.ToPullRequest()
 			pr.Organization = azOrigin.Organization()
 			pr.Origin = string(o)
-			pr.Link, err = svc.originSvc.PRLink(azOrigin.Origin, pr.ID,
+			pr.Link, err = svc.originSvc.PRLink(azOrigin.Remote, pr.ID,
 				"open")
 			if err != nil {
 				return prs, fmt.Errorf("getting PR link from %s: %w",

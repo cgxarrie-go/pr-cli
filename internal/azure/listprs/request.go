@@ -7,15 +7,15 @@ import (
 
 // GetPRsRequest is the request to list PRs
 type request struct {
-	origins utils.Origins
+	origins utils.Remotes
 }
 
 // Origins implements ports.ListPRRequest.
-func (r request) Origins() utils.Origins {
+func (r request) Origins() utils.Remotes {
 	return r.origins
 }
 
-func NewRequest(origins utils.Origins) (req ports.ListPRRequest) {
+func NewRequest(origins utils.Remotes) (req ports.ListPRRequest) {
 	return request{
 		origins: origins,
 	}

@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/cgxarrie-go/prq/cmd/azure"
@@ -28,31 +29,55 @@ var listCmd = &cobra.Command{
 	Long:    `List Pull Requests from the specified provider according to config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		origin, err := utils.NewOrigin(".")
+		currentRemote, err := utils.CurrentFolderRemote()
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "getting remote from current directory")
 		}
-		origins := utils.Origins{
-			origin,
-		}
-
-		if origin.IsAzure() {
-			prs, err := azure.RunListCmd(origins)
-			if err != nil {
-				return err
-			}
-			printList(prs)
-			return nil
-		}
-		if origin.IsGithub() {
-			prs, err := github.RunListCmd(origins)
-			if err != nil {
-				return err
-			}
-			printList(prs)
-			return nil
+		remotes := utils.Remotes{
+			currentRemote,
 		}
 
+		azRemotes := utils.Remotes{}
+		ghRemotes := utils.Remotes{}
+		unknownRemotes := utils.Remotes{}
+
+		prs := []models.PullRequest{}	
+		for _, remote := range remotes {
+			switch true {
+			case remote.IsAzure():
+				azRemotes.Append(remote)
+			case remote.IsGithub():
+				ghRemotes.Append(remote)
+			default:
+				unknownRemotes.Append(remote)
+			}
+		}
+
+		if len(unknownRemotes) > 0 {
+			msg := ""
+			for _, ur := range unknownRemotes {
+				msg = fmt.Sprintf("%s%s/n", msg, ur)
+			}
+			msg = fmt.Sprintf("unknown remote types/n%s", msg)
+		}
+
+		if len(azRemotes) > 0 {
+			azPrs, err := azure.RunListCmd(azRemotes)
+			if err != nil {
+				return errors.Wrapf(err, "getting PRs from azure repositories")
+			}
+			prs = append(prs, azPrs...)
+		}
+
+		if len(ghRemotes) > 0 {
+			ghPrs, err := github.RunListCmd(ghRemotes)
+			if err != nil {
+				return errors.Wrapf(err, "getting PRs from azure github")
+			}
+			prs = append(prs, ghPrs...)
+		}
+
+		printList(prs)			
 		return nil
 	},
 }
@@ -72,33 +97,21 @@ func init() {
 
 func printList(prs []models.PullRequest) {
 	fmt.Printf("Number of PRs : %d \n", len(prs))
-	lastProject := ""
-	lastRepository := ""
+	lastOrigin := ""
 
 	sort.SliceStable(prs, func(i,j int) bool {
-		if prs[i].Project.Name != prs[j].Project.Name {
-			return prs[i].Project.Name < prs[j].Project.Name
-		}
-
-		if prs[i].Repository.Name != prs[j].Repository.Name {
-			return prs[i].Repository.Name < prs[j].Repository.Name
+		if prs[i].Origin != prs[j].Origin {
+			return prs[i].Organization < prs[j].Origin
 		}
 
 		return prs[i].ID < prs[j].ID
 	})
 	
 
-	for i, pr := range prs {
-		if pr.Project.ID != lastProject {
-			fmt.Println(prinTableTitle(pr.Project.Name))
-			lastProject = pr.Project.ID
-		}
-		if pr.Repository.ID != lastRepository {
-			if i != 0 {
-				fmt.Println()
-			}
-			fmt.Printf("    %s\n", pr.Repository.Name)
-			lastRepository = pr.Repository.ID
+	for _, pr := range prs {
+		if pr.Origin != lastOrigin {
+			fmt.Println(prinTableTitle(pr.Origin))
+			lastOrigin = pr.Origin
 		}
 
 		created := fmt.Sprintf("%s (%v-%d-%d)",
@@ -112,10 +125,10 @@ func printList(prs []models.PullRequest) {
 	}
 }
 
-func prinTableTitle(projectName string) string {
+func prinTableTitle(remote string) string {
 
-	format := "%s: %s\n    %s\n" + getColumnFormat()
-	head := fmt.Sprintf(format, "Project", projectName, "Repository", "ID",
+	format := "%s\n" + getColumnFormat()
+	head := fmt.Sprintf(format, remote, "ID",
 		"Title", "Created By", "Status", "Link")
 	line := strings.Repeat("-", len(head)+5)
 	doubleLine := strings.Repeat("=", len(head)+5)
@@ -124,7 +137,7 @@ func prinTableTitle(projectName string) string {
 }
 
 func getColumnFormat() string {
-	return "        %" + fmt.Sprintf("%d", prIDColLength) + "s " +
+	return "%" + fmt.Sprintf("%d", prIDColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prTitleColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prCreatedColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prStatusColLength) + "s " +

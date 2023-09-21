@@ -13,7 +13,7 @@ import (
 type service struct{}
 
 // CreatePRsURL implements ports.OriginSvc.
-func (s service) CreatePRsURL(o utils.Origin) (url string, err error) {
+func (s service) CreatePRsURL(o utils.Remote) (url string, err error) {
 	if !o.IsGithub() {
 		return url, errors.NewErrInvalidRepositoryType(o)
 	}
@@ -24,7 +24,7 @@ func (s service) CreatePRsURL(o utils.Origin) (url string, err error) {
 }
 
 // GetPRsURL implements ports.OriginSvc.
-func (s service) GetPRsURL(o utils.Origin) (
+func (s service) GetPRsURL(o utils.Remote) (
 	url string, err error) {
 
 	if !o.IsGithub() {
@@ -39,7 +39,7 @@ func (s service) GetPRsURL(o utils.Origin) (
 }
 
 // PRLink implements ports.OriginSvc.
-func (s service) PRLink(o utils.Origin, id, text string) (
+func (s service) PRLink(o utils.Remote, id, text string) (
 	url string, err error) {
 
 	if !o.IsGithub() {
@@ -47,8 +47,8 @@ func (s service) PRLink(o utils.Origin, id, text string) (
 	}
 
 	ghOrigin := NewGithubOrigin(o)
-	url = fmt.Sprintf("https://github.com/%s/prq/pull/%s", 
-		ghOrigin.User(), id)
+	url = fmt.Sprintf("https://github.com/%s/%s/pull/%s", 
+		ghOrigin.User(), ghOrigin.Repository(), id)
 	return termenv.Hyperlink(url, text), nil
 }
 
@@ -56,8 +56,8 @@ func NewService() ports.OriginSvc {
 	return service{}
 }
 
-func (s service) baseUrl(o utils.Origin) string {
+func (s service) baseUrl(o utils.Remote) string {
 	ghOrigin := NewGithubOrigin(o)
-	return fmt.Sprintf("https://api.github.com/repos/%s/prq",
-	ghOrigin.User())
+	return fmt.Sprintf("https://api.github.com/repos/%s/%s",
+	ghOrigin.User(), ghOrigin.Repository())
 }

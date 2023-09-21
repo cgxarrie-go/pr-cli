@@ -13,7 +13,7 @@ import (
 type service struct{}
 
 // CreatePRsURL implements ports.OriginSvc.
-func (s service) CreatePRsURL(o utils.Origin) (url string, err error) {
+func (s service) CreatePRsURL(o utils.Remote) (url string, err error) {
 	if !o.IsAzure() {
 		return url, errors.NewErrInvalidRepositoryType(o)
 	}
@@ -27,7 +27,7 @@ func (s service) CreatePRsURL(o utils.Origin) (url string, err error) {
 }
 
 // GetPRsURL implements ports.OriginSvc.
-func (s service) GetPRsURL(o utils.Origin) (
+func (s service) GetPRsURL(o utils.Remote) (
 	url string, err error) {
 
 	if !o.IsAzure() {
@@ -44,7 +44,7 @@ func (s service) GetPRsURL(o utils.Origin) (
 }
 
 // PRLink implements ports.OriginSvc.
-func (s service) PRLink(o utils.Origin, id, text string) (
+func (s service) PRLink(o utils.Remote, id, text string) (
 	url string, err error) {
 
 	if !o.IsAzure() {

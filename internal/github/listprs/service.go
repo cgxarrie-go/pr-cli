@@ -44,7 +44,7 @@ func (svc service) GetPRs(req ports.ListPRRequest) (
 			pr := ghPR.ToPullRequest()
 			pr.Organization = ghOrigin.User()
 			pr.Origin = string(o)
-			pr.Link, err = svc.originSvc.PRLink(ghOrigin.Origin, pr.ID,
+			pr.Link, err = svc.originSvc.PRLink(ghOrigin.Remote, pr.ID,
 				"open")
 			if err != nil {
 				return prs, fmt.Errorf("getting PR link from %s: %w",

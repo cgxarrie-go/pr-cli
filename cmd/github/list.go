@@ -8,7 +8,7 @@ import (
 )
 
 
-func RunListCmd(origins utils.Origins) (
+func RunListCmd(origins utils.Remotes) (
 	prs []models.PullRequest, err error) {
 
 	ghCfg, err := loadConfig()

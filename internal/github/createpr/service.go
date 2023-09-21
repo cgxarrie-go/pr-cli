@@ -51,7 +51,7 @@ func (svc service) Run(req ports.CreatePRRequest) (
 		source.Name(), destination.Name())
 	}
 
-	o, err := utils.CurrentOrigin()
+	o, err := utils.CurrentFolderRemote()
 	if err != nil {
 		return pr, fmt.Errorf("getting repository origin: %w", err)
 	}
@@ -73,7 +73,7 @@ func (svc service) Run(req ports.CreatePRRequest) (
 func (svc service) doPOST(src, dest branch.Branch, ttl string, draft bool,
 	o origin.GithubOrigin, resp *Response) (err error) {
 
-	url, err := svc.originSvc.CreatePRsURL(o.Origin)
+	url, err := svc.originSvc.CreatePRsURL(o.Remote)
 	if err != nil {
 		return fmt.Errorf("getting url: %w", err)
 	}

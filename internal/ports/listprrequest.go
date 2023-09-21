@@ -5,5 +5,5 @@ import (
 )
 
 type ListPRRequest interface {
-	Origins() utils.Origins
+	Origins() utils.Remotes
 }

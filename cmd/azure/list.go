@@ -7,7 +7,7 @@ import (
 	"github.com/cgxarrie-go/prq/internal/utils"
 )
 
-func RunListCmd(origins utils.Origins) (
+func RunListCmd(origins utils.Remotes) (
 	prs []models.PullRequest, err error) {
 
 	azCfg, err := loadConfig()

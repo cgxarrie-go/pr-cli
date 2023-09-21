@@ -10,7 +10,7 @@ type ErrInvalidRepositoryType struct {
 	BaseError
 }
 
-func NewErrInvalidRepositoryType(origin utils.Origin) error {
+func NewErrInvalidRepositoryType(origin utils.Remote) error {
 	return ErrInvalidRepositoryType{
 		BaseError: BaseError{
 			message: fmt.Sprintf("invalid repository type %s", origin),

@@ -7,18 +7,18 @@ import (
 )
 
 type AzureOrigin struct {
-	utils.Origin
+	utils.Remote
 	organization string
 	project      string
 	repository   string
 }
 
-func NewAzureOrigin(o utils.Origin) AzureOrigin {
+func NewAzureOrigin(o utils.Remote) AzureOrigin {
 
 	split := strings.Split(string(o), "/")
 
 	return AzureOrigin{
-		Origin:       o,
+		Remote:       o,
 		organization: split[len(split)-4],
 		project:      split[len(split)-3],
 		repository:   split[len(split)-1],
