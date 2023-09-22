@@ -2,8 +2,12 @@ package utils
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type Remote string
@@ -38,6 +42,49 @@ func (r *Remotes) Append(origin Remote) {
 
 func CurrentFolderRemote() (Remote, error) {
 	return FolderRemote("")
+}
+
+func CurrentFolderTreeRemotes() (remotes Remotes, err error) {
+    currentDir, err := os.Getwd()
+    if err != nil {
+        return remotes,
+		 errors.Wrapf(err, "getting current directory")
+    }
+
+    remotes, err = listRemotes(currentDir)
+    if err != nil {
+        return remotes, 
+		errors.Wrapf(err, "walking directories to find origins")
+    }
+
+	return
+}
+
+func listRemotes(root string) (remotes Remotes, err error) {
+
+    // Define a function to be called for each directory and subdirectory
+    visit := func(path string, info os.FileInfo, err error) error {
+        if err != nil {
+            return err
+        }
+        if info.IsDir() {
+			remote, err := FolderRemote(path)
+            if err != nil {
+				return nil
+			}
+			remotes = append(remotes, remote)
+			return filepath.SkipDir
+        }
+        return nil
+    }
+
+    // Start walking the directory tree
+    err = filepath.Walk(root, visit)
+    if err != nil {
+        return nil, errors.Wrapf(err, "getting remotes from directory tree")
+    }
+
+    return 
 }
 
 func FolderRemote(path string) (Remote, error) {
