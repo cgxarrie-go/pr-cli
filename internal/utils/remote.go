@@ -67,12 +67,14 @@ func listRemotes(root string) (remotes Remotes, err error) {
         if err != nil {
             return err
         }
+		fmt.Printf("\r\033[K%s/%s", path, info.Name())
         if info.IsDir() {
 			remote, err := FolderRemote(path)
             if err != nil {
 				return nil
 			}
 			remotes = append(remotes, remote)
+			fmt.Printf("\r\033[K%s\n", remote)
 			return filepath.SkipDir
         }
         return nil
