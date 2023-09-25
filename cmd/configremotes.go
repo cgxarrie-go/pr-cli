@@ -20,7 +20,7 @@ var ConfigRemotes = &cobra.Command{
 		errs := []error{}
 
 		if add != "" {
-			err := runAddRemote(remove)
+			err := runAddRemote(add)
 			if err != nil {
 				errs = append(errs, err)
 			}
@@ -56,16 +56,12 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 
-	listCmd.Flags().StringP("add", "a", "", "add")
-	listCmd.Flags().StringP("remove", "r", "", "remove")
+	ConfigRemotes.Flags().StringP("add", "a", "", "add")
+	ConfigRemotes.Flags().StringP("remove", "r", "", "remove")
 
 }
 
 func runAddRemote(remote string) error {
-	if remote != "" {
-		return nil
-	}
-
 	cfg := config.GetInstance()
 	cfg.Load()
 	cfg.Remotes = append(cfg.Remotes, remote)
@@ -77,10 +73,6 @@ func runAddRemote(remote string) error {
 }
 
 func runRemoveRemote(remote string) error {
-	if remote != "" {
-		return nil
-	}
-
 	cfg := config.GetInstance()
 	cfg.Load()
 
