@@ -28,16 +28,49 @@ var listCmd = &cobra.Command{
 	Short:   "list PRs",
 	Long:    `List Pull Requests from the specified provider according to config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		opt, _ := cmd.Flags().GetString("option")
 
-		currentRemote, err := utils.CurrentFolderRemote()
-		if err != nil {
-			return errors.Wrapf(err, "getting remote from current directory")
-		}
-		remotes := utils.Remotes{
-			currentRemote,
+		var remotes utils.Remotes
+		var err error
+
+		switch opt {
+		case "d":
+			remotes, err = utils.CurrentFolderTreeRemotes()
+			if err != nil {
+				return errors.Wrapf(err, "getting remotes from current directory tree")	
+			}
+		default:
+			currentRemote, err := utils.CurrentFolderRemote()
+			if err != nil {
+				return errors.Wrapf(err, "getting remote from current directory")
+			}
+			remotes = utils.Remotes{
+				currentRemote,
+			}
 		}
 
-		azRemotes := utils.Remotes{}
+		return runListCmd(remotes)
+		
+	},
+}
+
+func init() {
+	// Here you will define your flags and configuration settings.
+
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// azCmd.PersistentFlags().String("foo", "", "A help for foo")
+
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// azCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	listCmd.Flags().StringP("option", "o", "", "option")
+}
+
+func runListCmd(remotes utils.Remotes) error {
+
+	azRemotes := utils.Remotes{}
 		ghRemotes := utils.Remotes{}
 		unknownRemotes := utils.Remotes{}
 
@@ -79,19 +112,6 @@ var listCmd = &cobra.Command{
 
 		printList(prs)			
 		return nil
-	},
-}
-
-func init() {
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// azCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// azCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 }
 
