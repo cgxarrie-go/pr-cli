@@ -6,6 +6,8 @@ List and create PRs in Azure or Github repositories
 - prq config : display config
 - prq config azpat : set PAT in Azure config
 - prq config ghpat : set PAT in Github config
+- prq config remotes -a **remote** : Add a remote to config
+- prq config remotes -r **remote** : Remove remote from config
 
 ## List PR commands 
 List will list all active PRs in the remote of the current folder's local git 
@@ -13,6 +15,7 @@ repository (Azure ot Github)
 
 - prq list : Lists all PR in status Active in the repository in the current directory
 - prq list --option d : Lists all PR in status Active in all the repositories found in the current directory tree
+- prq list --option c : Lists all PR in status Active in all the repositories in config remotes
 
 
 
