@@ -32,6 +32,7 @@ var (
 type Config struct {
 	Azure AzureConfig
 	Github GithubConfig
+	Remotes []string
 }
 
 // AzureConfig configuration for Azure
