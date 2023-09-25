@@ -27,6 +27,6 @@ deafult title is **PR from spurce-branch-name to destination-branch-name**
 -d : specify destination brnach of the PR
 -t : set the title of the PR
 
-- prq create -d <branchname> : creates a draft PR from current branch to **branchname** with default title
-- prq create -t <pr-title> : crecreates a draft PR from current branch to default destination branch with title **pr-title**
-- prq create  -d <branchname> -t <pr-title> : crecreates a draft PR from current branch to **branchname** with title **pr-title**
+- prq create -d **branchname** : creates a draft PR from current branch to **branchname** with default title
+- prq create -t **pr-title** : crecreates a draft PR from current branch to default destination branch with title **pr-title**
+- prq create  -d **branchname** -t **pr-title** : crecreates a draft PR from current branch to **branchname** with title **pr-title**
