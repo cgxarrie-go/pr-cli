@@ -6,7 +6,11 @@ List and create PRs in Azure or Github repositories
 ## Installation
 
 - Use the binaries the [latest release](https://github.com/cgxarrie-go/prq/releases/tag/v0.2.6)
+
+Allocate the binay in a folder accessible from command line
+
     -prq.exe for Windows
+
     -prq for Mac
 
 -Use go install to install the latest version
