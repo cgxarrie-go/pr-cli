@@ -24,6 +24,7 @@ var configCmd = &cobra.Command{
 func init() {
 	configCmd.AddCommand(azure.CfgPATCmd)
 	configCmd.AddCommand(github.CfgPATCmd)
+	configCmd.AddCommand(ConfigRemotes)
 
 	// Here you will define your flags and configuration settings.
 

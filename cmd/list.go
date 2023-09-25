@@ -10,6 +10,7 @@ import (
 
 	"github.com/cgxarrie-go/prq/cmd/azure"
 	"github.com/cgxarrie-go/prq/cmd/github"
+	"github.com/cgxarrie-go/prq/internal/config"
 	"github.com/cgxarrie-go/prq/internal/models"
 	"github.com/cgxarrie-go/prq/internal/utils"
 )
@@ -39,6 +40,17 @@ var listCmd = &cobra.Command{
 			if err != nil {
 				return errors.Wrapf(err, "getting remotes from current directory tree")	
 			}
+		case "c":
+			cfg := config.GetInstance()
+			err := cfg.Load()
+			if err != nil {
+				return errors.Wrapf(err, "getting remotes from config")	
+			}
+			remotes = make(utils.Remotes, len(cfg.Remotes))
+			for i, c := range cfg.Remotes {
+				remotes[i] = utils.Remote(c)
+			}
+			
 		default:
 			currentRemote, err := utils.CurrentFolderRemote()
 			if err != nil {
