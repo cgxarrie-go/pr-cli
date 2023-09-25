@@ -11,7 +11,8 @@ List and create PRs in Azure or Github repositories
 List will list all active PRs in the remote of the current folder's local git 
 repository (Azure ot Github)
 
-- prq list : Lists all PR in status Active
+- prq list : Lists all PR in status Active in the repository in the current directory
+- prq list --option d : Lists all PR in status Active in all the repositories found in the current directory tree
 
 
 
