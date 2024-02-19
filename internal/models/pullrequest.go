@@ -7,7 +7,7 @@ import (
 
 // PullRequest is the abstraction of a Pull Request from any provider
 type PullRequest struct {
-	Origin 		 string
+	Origin       string
 	Organization string
 	ID           string
 	Title        string
@@ -20,7 +20,7 @@ type PullRequest struct {
 	URL          string
 	IsDraft      bool
 	Created      time.Time
-	Link 		 string
+	Link         string
 }
 
 type CreatedPullRequest struct {
@@ -30,7 +30,7 @@ type CreatedPullRequest struct {
 	URL          string
 	IsDraft      bool
 	Organization string
-	Link 		 string
+	Link         string
 }
 
 // Hierarchy of a PR
@@ -43,20 +43,13 @@ type Hierarchy struct {
 // ShortenedTitle returns title shortened to maxlength...
 func (p PullRequest) ShortenedTitle(maxLength int) string {
 
-	draftText := ""
-	if p.IsDraft {
-		draftText = " (Draft)"
-	}
-
-	pritntable := fmt.Sprintf("%s%s", p.Title, draftText)
+	pritntable := p.Title
 
 	if len(pritntable) <= maxLength {
 		return pritntable
 	}
 
-
-
-	shortenLenght := maxLength - 3 - len(draftText)
+	shortenLenght := maxLength - 3
 
 	title := fmt.Sprintf("%s...", pritntable[0:shortenLenght])
 	return title

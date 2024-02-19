@@ -38,19 +38,19 @@ var listCmd = &cobra.Command{
 		case "d":
 			remotes, err = utils.CurrentFolderTreeRemotes()
 			if err != nil {
-				return errors.Wrapf(err, "getting remotes from current directory tree")	
+				return errors.Wrapf(err, "getting remotes from current directory tree")
 			}
 		case "c":
 			cfg := config.GetInstance()
 			err := cfg.Load()
 			if err != nil {
-				return errors.Wrapf(err, "getting remotes from config")	
+				return errors.Wrapf(err, "getting remotes from config")
 			}
 			remotes = make(utils.Remotes, len(cfg.Remotes))
 			for i, c := range cfg.Remotes {
 				remotes[i] = utils.Remote(c)
 			}
-			
+
 		default:
 			currentRemote, err := utils.CurrentFolderRemote()
 			if err != nil {
@@ -62,7 +62,7 @@ var listCmd = &cobra.Command{
 		}
 
 		return runListCmd(remotes)
-		
+
 	},
 }
 
@@ -83,47 +83,48 @@ func init() {
 func runListCmd(remotes utils.Remotes) error {
 
 	azRemotes := utils.Remotes{}
-		ghRemotes := utils.Remotes{}
-		unknownRemotes := utils.Remotes{}
+	ghRemotes := utils.Remotes{}
+	unknownRemotes := utils.Remotes{}
 
-		prs := []models.PullRequest{}	
-		for _, remote := range remotes {
-			switch true {
-			case remote.IsAzure():
-				azRemotes.Append(remote)
-			case remote.IsGithub():
-				ghRemotes.Append(remote)
-			default:
-				unknownRemotes.Append(remote)
-			}
+	prs := []models.PullRequest{}
+	for _, remote := range remotes {
+		switch true {
+		case remote.IsAzure():
+			azRemotes.Append(remote)
+		case remote.IsGithub():
+			ghRemotes.Append(remote)
+		default:
+			unknownRemotes.Append(remote)
 		}
+	}
 
-		if len(unknownRemotes) > 0 {
-			msg := ""
-			for _, ur := range unknownRemotes {
-				msg = fmt.Sprintf("%s%s/n", msg, ur)
-			}
-			msg = fmt.Sprintf("unknown remote types/n%s", msg)
+	if len(unknownRemotes) > 0 {
+		msg := ""
+		for _, ur := range unknownRemotes {
+			msg = fmt.Sprintf("%s%s/n", msg, ur)
 		}
+		msg = fmt.Sprintf("unknown remote types/n%s", msg)
+		fmt.Println(msg)
+	}
 
-		if len(azRemotes) > 0 {
-			azPrs, err := azure.RunListCmd(azRemotes)
-			if err != nil {
-				return errors.Wrapf(err, "getting PRs from azure repositories")
-			}
-			prs = append(prs, azPrs...)
+	if len(azRemotes) > 0 {
+		azPrs, err := azure.RunListCmd(azRemotes)
+		if err != nil {
+			return errors.Wrapf(err, "getting PRs from azure repositories")
 		}
+		prs = append(prs, azPrs...)
+	}
 
-		if len(ghRemotes) > 0 {
-			ghPrs, err := github.RunListCmd(ghRemotes)
-			if err != nil {
-				return errors.Wrapf(err, "getting PRs from azure github")
-			}
-			prs = append(prs, ghPrs...)
+	if len(ghRemotes) > 0 {
+		ghPrs, err := github.RunListCmd(ghRemotes)
+		if err != nil {
+			return errors.Wrapf(err, "getting PRs from azure github")
 		}
+		prs = append(prs, ghPrs...)
+	}
 
-		printList(prs)			
-		return nil
+	printList(prs)
+	return nil
 
 }
 
@@ -131,14 +132,13 @@ func printList(prs []models.PullRequest) {
 	fmt.Printf("Number of PRs : %d \n", len(prs))
 	lastOrigin := ""
 
-	sort.SliceStable(prs, func(i,j int) bool {
+	sort.SliceStable(prs, func(i, j int) bool {
 		if prs[i].Origin != prs[j].Origin {
 			return prs[i].Organization < prs[j].Origin
 		}
 
 		return prs[i].ID < prs[j].ID
 	})
-	
 
 	for _, pr := range prs {
 		if pr.Origin != lastOrigin {
@@ -146,13 +146,17 @@ func printList(prs []models.PullRequest) {
 			lastOrigin = pr.Origin
 		}
 
+		status := pr.Status
+		if pr.IsDraft {
+			status = "Draft"
+		}
 		created := fmt.Sprintf("%s (%v-%d-%d)",
 			strings.Split(pr.CreatedBy, " ")[0],
 			pr.Created.Year(), pr.Created.Month(), pr.Created.Day())
 		format := getColumnFormat()
 		title := pr.ShortenedTitle(70)
-		prInfo := fmt.Sprintf(format, pr.ID, title,
-			created, pr.Status, pr.Link)
+		prInfo := fmt.Sprintf(format, pr.ID, status, title,
+			created, pr.Link)
 		fmt.Println(prInfo)
 	}
 }
@@ -160,8 +164,8 @@ func printList(prs []models.PullRequest) {
 func prinTableTitle(remote string) string {
 
 	format := "%s\n" + getColumnFormat()
-	head := fmt.Sprintf(format, remote, "ID",
-		"Title", "Created By", "Status", "Link")
+	head := fmt.Sprintf(format, remote, "ID", "Status",
+		"Title", "Created By", "Link")
 	line := strings.Repeat("-", len(head)+5)
 	doubleLine := strings.Repeat("=", len(head)+5)
 
@@ -170,8 +174,8 @@ func prinTableTitle(remote string) string {
 
 func getColumnFormat() string {
 	return "%" + fmt.Sprintf("%d", prIDColLength) + "s " +
+		"| %-" + fmt.Sprintf("%d", prStatusColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prTitleColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prCreatedColLength) + "s " +
-		"| %-" + fmt.Sprintf("%d", prStatusColLength) + "s " +
 		"| %s"
 }
