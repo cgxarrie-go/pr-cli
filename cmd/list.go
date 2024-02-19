@@ -29,6 +29,7 @@ var listCmd = &cobra.Command{
 	Short:   "list PRs",
 	Long:    `List Pull Requests from the specified provider according to config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		filter, _ := cmd.Flags().GetString("filter")
 		opt, _ := cmd.Flags().GetString("option")
 
 		var remotes utils.Remotes
@@ -38,19 +39,19 @@ var listCmd = &cobra.Command{
 		case "d":
 			remotes, err = utils.CurrentFolderTreeRemotes()
 			if err != nil {
-				return errors.Wrapf(err, "getting remotes from current directory tree")	
+				return errors.Wrapf(err, "getting remotes from current directory tree")
 			}
 		case "c":
 			cfg := config.GetInstance()
 			err := cfg.Load()
 			if err != nil {
-				return errors.Wrapf(err, "getting remotes from config")	
+				return errors.Wrapf(err, "getting remotes from config")
 			}
 			remotes = make(utils.Remotes, len(cfg.Remotes))
 			for i, c := range cfg.Remotes {
 				remotes[i] = utils.Remote(c)
 			}
-			
+
 		default:
 			currentRemote, err := utils.CurrentFolderRemote()
 			if err != nil {
@@ -61,8 +62,8 @@ var listCmd = &cobra.Command{
 			}
 		}
 
-		return runListCmd(remotes)
-		
+		return runListCmd(remotes, filter)
+
 	},
 }
 
@@ -78,100 +79,129 @@ func init() {
 	// azCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	listCmd.Flags().StringP("option", "o", "", "option")
+	listCmd.Flags().StringP("filter", "f", "", "")
 }
 
-func runListCmd(remotes utils.Remotes) error {
+func runListCmd(remotes utils.Remotes, filter string) error {
 
 	azRemotes := utils.Remotes{}
-		ghRemotes := utils.Remotes{}
-		unknownRemotes := utils.Remotes{}
+	ghRemotes := utils.Remotes{}
+	unknownRemotes := utils.Remotes{}
 
-		prs := []models.PullRequest{}	
-		for _, remote := range remotes {
-			switch true {
-			case remote.IsAzure():
-				azRemotes.Append(remote)
-			case remote.IsGithub():
-				ghRemotes.Append(remote)
-			default:
-				unknownRemotes.Append(remote)
-			}
+	prs := []models.PullRequest{}
+	for _, remote := range remotes {
+		switch true {
+		case remote.IsAzure():
+			azRemotes.Append(remote)
+		case remote.IsGithub():
+			ghRemotes.Append(remote)
+		default:
+			unknownRemotes.Append(remote)
 		}
+	}
 
-		if len(unknownRemotes) > 0 {
-			msg := ""
-			for _, ur := range unknownRemotes {
-				msg = fmt.Sprintf("%s%s/n", msg, ur)
-			}
-			msg = fmt.Sprintf("unknown remote types/n%s", msg)
+	if len(unknownRemotes) > 0 {
+		msg := ""
+		for _, ur := range unknownRemotes {
+			msg = fmt.Sprintf("%s%s/n", msg, ur)
 		}
+		msg = fmt.Sprintf("unknown remote types/n%s", msg)
+		fmt.Println(msg)
+	}
 
-		if len(azRemotes) > 0 {
-			azPrs, err := azure.RunListCmd(azRemotes)
-			if err != nil {
-				return errors.Wrapf(err, "getting PRs from azure repositories")
-			}
-			prs = append(prs, azPrs...)
+	if len(azRemotes) > 0 {
+		azPrs, err := azure.RunListCmd(azRemotes)
+		if err != nil {
+			return errors.Wrapf(err, "getting PRs from azure repositories")
 		}
+		prs = append(prs, azPrs...)
+	}
 
-		if len(ghRemotes) > 0 {
-			ghPrs, err := github.RunListCmd(ghRemotes)
-			if err != nil {
-				return errors.Wrapf(err, "getting PRs from azure github")
-			}
-			prs = append(prs, ghPrs...)
+	if len(ghRemotes) > 0 {
+		ghPrs, err := github.RunListCmd(ghRemotes)
+		if err != nil {
+			return errors.Wrapf(err, "getting PRs from azure github")
 		}
+		prs = append(prs, ghPrs...)
+	}
 
-		printList(prs)			
-		return nil
+	printList(prs, filter)
+	return nil
 
 }
 
-func printList(prs []models.PullRequest) {
-	fmt.Printf("Number of PRs : %d \n", len(prs))
-	lastOrigin := ""
+func printList(prs []models.PullRequest, filter string) {
+	filter = strings.ToLower(filter)
 
-	sort.SliceStable(prs, func(i,j int) bool {
+	sort.SliceStable(prs, func(i, j int) bool {
 		if prs[i].Origin != prs[j].Origin {
 			return prs[i].Organization < prs[j].Origin
 		}
 
-		return prs[i].ID < prs[j].ID
+		return prs[i].Created.Before(prs[j].Created)
 	})
-	
+
+	lastOrigin := ""
+	visiblePRs := []string{}
 
 	for _, pr := range prs {
 		if pr.Origin != lastOrigin {
-			fmt.Println(prinTableTitle(pr.Origin))
+			if len(visiblePRs) > 0 {
+				printRemotePRs(lastOrigin, visiblePRs)
+			}
 			lastOrigin = pr.Origin
+			visiblePRs = []string{}
 		}
 
+		status := pr.Status
+		if pr.IsDraft {
+			status = "Draft"
+		}
 		created := fmt.Sprintf("%s (%v-%d-%d)",
 			strings.Split(pr.CreatedBy, " ")[0],
 			pr.Created.Year(), pr.Created.Month(), pr.Created.Day())
 		format := getColumnFormat()
 		title := pr.ShortenedTitle(70)
-		prInfo := fmt.Sprintf(format, pr.ID, title,
-			created, pr.Status, pr.Link)
-		fmt.Println(prInfo)
+		prInfo := fmt.Sprintf(format, pr.ID, status, title,
+			created, pr.Link)
+
+		if filter != "" && !strings.Contains(strings.ToLower(prInfo), filter) {
+			continue
+		}
+
+		visiblePRs = append(visiblePRs, prInfo)
+
 	}
+	printRemotePRs(lastOrigin, visiblePRs)
 }
 
-func prinTableTitle(remote string) string {
+func printRemoteHeader(remote string, count int) {
 
-	format := "%s\n" + getColumnFormat()
-	head := fmt.Sprintf(format, remote, "ID",
-		"Title", "Created By", "Status", "Link")
+	format := getColumnFormat()
+	head := fmt.Sprintf(format, "ID", "Status", "Title", "Created By", "Link")
+
 	line := strings.Repeat("-", len(head)+5)
 	doubleLine := strings.Repeat("=", len(head)+5)
 
-	return fmt.Sprintf("%s\n%s\n%s", doubleLine, head, line)
+	fmt.Println()
+	fmt.Println(doubleLine)
+	fmt.Printf("Remote: %s\n", remote)
+	fmt.Printf("Number of PRs: %d\n", count)
+	fmt.Println(line)
 }
 
 func getColumnFormat() string {
 	return "%" + fmt.Sprintf("%d", prIDColLength) + "s " +
+		"| %-" + fmt.Sprintf("%d", prStatusColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prTitleColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prCreatedColLength) + "s " +
-		"| %-" + fmt.Sprintf("%d", prStatusColLength) + "s " +
 		"| %s"
+}
+
+func printRemotePRs(remote string, prs []string) {
+
+	printRemoteHeader(remote, len(prs))
+	for _, pr := range prs {
+		fmt.Println(pr)
+	}
 }
