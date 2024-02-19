@@ -37,6 +37,8 @@ repository (Azure ot Github)
 - prq list --option d : Lists all PR in status Active in all the repositories found in the current directory tree
 - prq list --option c : Lists all PR in status Active in all the repositories in config remotes
 
+- prq list --filter frank : Lists all PR in status Active in the repository in the current directory with the word frank in the title, authoror status
+
 ### Create PR commands 
 - prq create : creates a draft PR from current branch to default destination 
 brnach with default title

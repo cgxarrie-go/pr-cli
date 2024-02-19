@@ -29,6 +29,7 @@ var listCmd = &cobra.Command{
 	Short:   "list PRs",
 	Long:    `List Pull Requests from the specified provider according to config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		filter, _ := cmd.Flags().GetString("filter")
 		opt, _ := cmd.Flags().GetString("option")
 
 		var remotes utils.Remotes
@@ -61,7 +62,7 @@ var listCmd = &cobra.Command{
 			}
 		}
 
-		return runListCmd(remotes)
+		return runListCmd(remotes, filter)
 
 	},
 }
@@ -78,9 +79,10 @@ func init() {
 	// azCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	listCmd.Flags().StringP("option", "o", "", "option")
+	listCmd.Flags().StringP("filter", "f", "", "")
 }
 
-func runListCmd(remotes utils.Remotes) error {
+func runListCmd(remotes utils.Remotes, filter string) error {
 
 	azRemotes := utils.Remotes{}
 	ghRemotes := utils.Remotes{}
@@ -123,27 +125,32 @@ func runListCmd(remotes utils.Remotes) error {
 		prs = append(prs, ghPrs...)
 	}
 
-	printList(prs)
+	printList(prs, filter)
 	return nil
 
 }
 
-func printList(prs []models.PullRequest) {
-	fmt.Printf("Number of PRs : %d \n", len(prs))
-	lastOrigin := ""
+func printList(prs []models.PullRequest, filter string) {
+	filter = strings.ToLower(filter)
 
 	sort.SliceStable(prs, func(i, j int) bool {
 		if prs[i].Origin != prs[j].Origin {
 			return prs[i].Organization < prs[j].Origin
 		}
 
-		return prs[i].ID < prs[j].ID
+		return prs[i].Created.Before(prs[j].Created)
 	})
+
+	lastOrigin := ""
+	visiblePRs := []string{}
 
 	for _, pr := range prs {
 		if pr.Origin != lastOrigin {
-			fmt.Println(prinTableTitle(pr.Origin))
+			if len(visiblePRs) > 0 {
+				printRemotePRs(lastOrigin, visiblePRs)
+			}
 			lastOrigin = pr.Origin
+			visiblePRs = []string{}
 		}
 
 		status := pr.Status
@@ -157,19 +164,30 @@ func printList(prs []models.PullRequest) {
 		title := pr.ShortenedTitle(70)
 		prInfo := fmt.Sprintf(format, pr.ID, status, title,
 			created, pr.Link)
-		fmt.Println(prInfo)
+
+		if filter != "" && !strings.Contains(strings.ToLower(prInfo), filter) {
+			continue
+		}
+
+		visiblePRs = append(visiblePRs, prInfo)
+
 	}
+	printRemotePRs(lastOrigin, visiblePRs)
 }
 
-func prinTableTitle(remote string) string {
+func printRemoteHeader(remote string, count int) {
 
-	format := "%s\n" + getColumnFormat()
-	head := fmt.Sprintf(format, remote, "ID", "Status",
-		"Title", "Created By", "Link")
+	format := getColumnFormat()
+	head := fmt.Sprintf(format, "ID", "Status", "Title", "Created By", "Link")
+
 	line := strings.Repeat("-", len(head)+5)
 	doubleLine := strings.Repeat("=", len(head)+5)
 
-	return fmt.Sprintf("%s\n%s\n%s", doubleLine, head, line)
+	fmt.Println()
+	fmt.Println(doubleLine)
+	fmt.Printf("Remote: %s\n", remote)
+	fmt.Printf("Number of PRs: %d\n", count)
+	fmt.Println(line)
 }
 
 func getColumnFormat() string {
@@ -178,4 +196,12 @@ func getColumnFormat() string {
 		"| %-" + fmt.Sprintf("%d", prTitleColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prCreatedColLength) + "s " +
 		"| %s"
+}
+
+func printRemotePRs(remote string, prs []string) {
+
+	printRemoteHeader(remote, len(prs))
+	for _, pr := range prs {
+		fmt.Println(pr)
+	}
 }
