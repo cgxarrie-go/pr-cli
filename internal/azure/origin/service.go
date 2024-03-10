@@ -60,7 +60,7 @@ func (s service) PRLink(o utils.Remote, id, text string) (
 	return termenv.Hyperlink(url, text), nil
 }
 
-func NewService() ports.OriginSvc {
+func NewService() ports.RemoteService {
 	return service{}
 }
 

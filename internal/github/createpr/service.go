@@ -17,11 +17,11 @@ import (
 
 type service struct {
 	pat       string
-	originSvc ports.OriginSvc
+	originSvc ports.RemoteService
 }
 
 // NewService return new instnce of github service
-func NewService(pat string, originSvc ports.OriginSvc) ports.PRCreator {
+func NewService(pat string, originSvc ports.RemoteService) ports.PRCreator {
 	return service{
 		pat:       fmt.Sprintf("`:%s", pat),
 		originSvc: originSvc,
