@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	"github.com/cgxarrie-go/prq/internal/azure/branch"
 	"github.com/cgxarrie-go/prq/internal/azure/origin"
+	"github.com/cgxarrie-go/prq/internal/config"
 	"github.com/cgxarrie-go/prq/internal/models"
 	"github.com/cgxarrie-go/prq/internal/ports"
 	"github.com/cgxarrie-go/prq/internal/utils"
@@ -38,10 +40,9 @@ func (svc service) Run(req ports.CreatePRRequest) (
 	}
 
 	source := branch.NewBranch(src)
-	destination := branch.Branch{}
-	if req.Destination() == "" {
-		destination = branch.NewBranch("master")
-	} else {
+	destination :=
+		branch.NewBranch(config.GetInstance().Azure.DefaultTargetBranch)
+	if req.Destination() != "" {
 		destination = branch.NewBranch(req.Destination())
 	}
 
@@ -49,6 +50,11 @@ func (svc service) Run(req ports.CreatePRRequest) (
 	if req.Title() == "" {
 		title = fmt.Sprintf("PR from %s to %s",
 			source.Name(), destination.Name())
+	}
+
+	desc, err := os.ReadFile("./docs/pull_request_template.md")
+	if err != nil {
+		desc = []byte("")
 	}
 
 	o, err := utils.CurrentFolderRemote()
@@ -59,18 +65,20 @@ func (svc service) Run(req ports.CreatePRRequest) (
 	azOrigin := origin.NewAzureOrigin(o)
 
 	svcResp := Response{}
-	err = svc.doPOST(source, destination, title, true, azOrigin, &svcResp)
+	err = svc.doPOST(source, destination, title, string(desc), req.IsDraft(), azOrigin,
+		&svcResp)
+
 	if err != nil {
 		return pr, fmt.Errorf("creating PR: %w", err)
 	}
 
 	pr = svcResp.ToPullRequest(azOrigin.Organization())
-	pr.Link, err = svc.originSvc.PRLink(o, pr.ID, "open")
+	pr.Link, _ = svc.originSvc.PRLink(o, pr.ID, "open")
 
 	return pr, nil
 }
 
-func (svc service) doPOST(src, dest branch.Branch, ttl string, draft bool,
+func (svc service) doPOST(src, dest branch.Branch, ttl, desc string, draft bool,
 	o origin.AzureOrigin, resp *Response) (err error) {
 
 	url, err := svc.originSvc.CreatePRsURL(o.Remote)
@@ -86,6 +94,7 @@ func (svc service) doPOST(src, dest branch.Branch, ttl string, draft bool,
 		"targetRefName": dest.FullName(), // Target branch
 		"title":         ttl,             // Title of PR
 		"isDraft":       draft,           // Draft PR
+		"description":   desc,            // Description of PR
 	}
 
 	body, err := json.Marshal(pullRequest)
