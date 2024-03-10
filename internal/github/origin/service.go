@@ -2,9 +2,12 @@ package origin
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgxarrie-go/prq/internal/azure/status"
+	"github.com/cgxarrie-go/prq/internal/config"
 	"github.com/cgxarrie-go/prq/internal/errors"
+	"github.com/cgxarrie-go/prq/internal/models"
 	"github.com/cgxarrie-go/prq/internal/ports"
 	"github.com/cgxarrie-go/prq/internal/utils"
 	"github.com/muesli/termenv"
@@ -47,7 +50,7 @@ func (s service) PRLink(o utils.Remote, id, text string) (
 	}
 
 	ghOrigin := NewGithubOrigin(o)
-	url = fmt.Sprintf("https://github.com/%s/%s/pull/%s", 
+	url = fmt.Sprintf("https://github.com/%s/%s/pull/%s",
 		ghOrigin.User(), ghOrigin.Repository(), id)
 	return termenv.Hyperlink(url, text), nil
 }
@@ -59,5 +62,18 @@ func NewService() ports.OriginSvc {
 func (s service) baseUrl(o utils.Remote) string {
 	ghOrigin := NewGithubOrigin(o)
 	return fmt.Sprintf("https://api.github.com/repos/%s/%s",
-	ghOrigin.User(), ghOrigin.Repository())
+		ghOrigin.User(), ghOrigin.Repository())
+}
+
+// NewBranch implements ports.OriginSvc.
+func (s service) NewBranch(name string) models.Branch {
+	prefix := "refs/heads/"
+	bName := strings.TrimPrefix(name, prefix)
+	fullName := fmt.Sprintf("%s%s", prefix, bName)
+	return models.NewBranch(bName, fullName)
+}
+
+// DefaultTargetBranch implements ports.OriginSvc.
+func (s service) DefaultTargetBranch() models.Branch {
+	return s.NewBranch(config.GetInstance().Github.DefaultTargetBranch)
 }

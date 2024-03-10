@@ -2,9 +2,12 @@ package origin
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgxarrie-go/prq/internal/azure/status"
+	"github.com/cgxarrie-go/prq/internal/config"
 	"github.com/cgxarrie-go/prq/internal/errors"
+	"github.com/cgxarrie-go/prq/internal/models"
 	"github.com/cgxarrie-go/prq/internal/ports"
 	"github.com/cgxarrie-go/prq/internal/utils"
 	"github.com/muesli/termenv"
@@ -65,4 +68,17 @@ func (s service) baseUrl(o AzureOrigin) string {
 	return fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/git",
 		o.Organization(),
 		o.Project())
+}
+
+// NewBranch implements ports.OriginSvc.
+func (s service) NewBranch(name string) models.Branch {
+	prefix := "refs/heads/"
+	bName := strings.TrimPrefix(name, prefix)
+	fullName := fmt.Sprintf("%s%s", prefix, bName)
+	return models.NewBranch(bName, fullName)
+}
+
+// DefaultTargetBranch implements ports.OriginSvc.
+func (s service) DefaultTargetBranch() models.Branch {
+	return s.NewBranch(config.GetInstance().Azure.DefaultTargetBranch)
 }

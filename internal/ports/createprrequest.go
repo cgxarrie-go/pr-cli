@@ -1,7 +1,8 @@
 package ports
 
-type CreatePRRequest interface {
-	Destination() string
-	Title() string
-	IsDraft() bool
+type CreatePRRequest struct {
+	Destination string
+	Title       string
+	IsDraft     bool
+	PRTemplate  string
 }

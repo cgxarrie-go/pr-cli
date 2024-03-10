@@ -9,9 +9,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/cgxarrie-go/prq/internal/azure/branch"
 	"github.com/cgxarrie-go/prq/internal/azure/origin"
-	"github.com/cgxarrie-go/prq/internal/config"
 	"github.com/cgxarrie-go/prq/internal/models"
 	"github.com/cgxarrie-go/prq/internal/ports"
 	"github.com/cgxarrie-go/prq/internal/utils"
@@ -39,22 +37,24 @@ func (svc service) Run(req ports.CreatePRRequest) (
 		return pr, fmt.Errorf("getting current branch name: %w", err)
 	}
 
-	source := branch.NewBranch(src)
-	destination :=
-		branch.NewBranch(config.GetInstance().Azure.DefaultTargetBranch)
-	if req.Destination() != "" {
-		destination = branch.NewBranch(req.Destination())
+	source := svc.originSvc.NewBranch(src)
+	destination := svc.originSvc.DefaultTargetBranch()
+	if req.Destination != "" {
+		destination = svc.originSvc.NewBranch(req.Destination)
 	}
 
-	title := req.Title()
-	if req.Title() == "" {
+	title := req.Title
+	if req.Title == "" {
 		title = fmt.Sprintf("PR from %s to %s",
 			source.Name(), destination.Name())
 	}
 
-	desc, err := os.ReadFile("./docs/pull_request_template.md")
-	if err != nil {
-		desc = []byte("")
+	desc := []byte("")
+	if req.PRTemplate != "" {
+		desc, err = os.ReadFile(req.PRTemplate)
+		if err != nil {
+			desc = []byte("")
+		}
 	}
 
 	o, err := utils.CurrentFolderRemote()
@@ -65,8 +65,8 @@ func (svc service) Run(req ports.CreatePRRequest) (
 	azOrigin := origin.NewAzureOrigin(o)
 
 	svcResp := Response{}
-	err = svc.doPOST(source, destination, title, string(desc), req.IsDraft(), azOrigin,
-		&svcResp)
+	err = svc.doPOST(source, destination, title, string(desc), req.IsDraft,
+		azOrigin, &svcResp)
 
 	if err != nil {
 		return pr, fmt.Errorf("creating PR: %w", err)
@@ -78,7 +78,7 @@ func (svc service) Run(req ports.CreatePRRequest) (
 	return pr, nil
 }
 
-func (svc service) doPOST(src, dest branch.Branch, ttl, desc string, draft bool,
+func (svc service) doPOST(src, dest models.Branch, ttl, desc string, draft bool,
 	o origin.AzureOrigin, resp *Response) (err error) {
 
 	url, err := svc.originSvc.CreatePRsURL(o.Remote)
