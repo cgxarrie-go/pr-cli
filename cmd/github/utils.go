@@ -4,12 +4,8 @@ import (
 	"github.com/cgxarrie-go/prq/internal/config"
 )
 
-func loadConfig() (ghcfg config.GithubConfig, err error) {
+func loadConfig() (ghcfg config.GithubConfig) {
 	cfg := config.GetInstance()
 	cfg.Load()
-	if err != nil {
-		return ghcfg, err
-	}
-
-	return cfg.Github, nil
+	return cfg.Github
 }

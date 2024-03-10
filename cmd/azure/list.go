@@ -10,11 +10,7 @@ import (
 func RunListCmd(origins utils.Remotes) (
 	prs []models.PullRequest, err error) {
 
-	azCfg, err := loadConfig()
-	if err != nil {
-		return prs, err
-	}
-
+	azCfg := loadConfig()
 	originSvc := origin.NewService()
 	svc := listprs.NewService(azCfg.PAT, originSvc)
 
@@ -23,4 +19,3 @@ func RunListCmd(origins utils.Remotes) (
 	return prs, err
 
 }
-

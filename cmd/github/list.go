@@ -7,15 +7,10 @@ import (
 	"github.com/cgxarrie-go/prq/internal/utils"
 )
 
-
 func RunListCmd(origins utils.Remotes) (
 	prs []models.PullRequest, err error) {
 
-	ghCfg, err := loadConfig()
-	if err != nil {
-		return prs, err
-	}
-
+	ghCfg := loadConfig()
 	originSvc := origin.NewService()
 	svc := listprs.NewService(ghCfg.PAT, originSvc)
 

@@ -17,13 +17,15 @@ var configCmd = &cobra.Command{
 	Short: "display config",
 	Long:  `display config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runConfigCmd(cmd, args)
+		return runConfigCmd()
 	},
 }
 
 func init() {
 	configCmd.AddCommand(azure.CfgPATCmd)
+	configCmd.AddCommand(azure.CfgDefTgtBranchCmd)
 	configCmd.AddCommand(github.CfgPATCmd)
+	configCmd.AddCommand(github.CfgDefTgtBranchCmd)
 	configCmd.AddCommand(ConfigRemotes)
 
 	// Here you will define your flags and configuration settings.
@@ -38,7 +40,7 @@ func init() {
 
 }
 
-func runConfigCmd(cmd *cobra.Command, args []string) error {
+func runConfigCmd() error {
 
 	cfg := config.GetInstance()
 	err := cfg.Load()

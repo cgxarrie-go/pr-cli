@@ -14,25 +14,24 @@ var createCmd = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"c"},
 	Short:   "Create Pull Request",
-	Long: "Create a Pull Request." +
-		"\n\tSource branch is the current repository active brnach" +
-		"\n\tDestination branch can be specified by flag -d. If ommitted, destination will be master" +
-		"\n\tTitle can be specified by flag -t. If ommitted, title will be standard title",
+	Long:    "Create a Pull Request.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		dest, _ := cmd.Flags().GetString("destination")
+		dest, _ := cmd.Flags().GetString("target")
 		ttl, _ := cmd.Flags().GetString("title")
+		dft, _ := cmd.Flags().GetString("draft")
+		draft := !utils.IsFalse(dft)
 
 		o, err := utils.CurrentFolderRemote()
 		if err != nil {
 			return fmt.Errorf("getting origin: %w", err)
 		}
 		if o.IsAzure() {
-			err := azure.RunCreatCmd(cmd, dest, ttl)	
+			err := azure.RunCreatCmd(cmd, dest, ttl, draft)
 			return err
 		}
 
 		if o.IsGithub() {
-			err := github.RunCreatCmd(cmd, dest, ttl)
+			err := github.RunCreatCmd(cmd, dest, ttl, draft)
 			return err
 		}
 
@@ -51,7 +50,8 @@ func init() {
 	// is called directly, e.g.:
 	// azCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	createCmd.Flags().StringP("destination", "d", "", "target branch. If blank, master is used")
+	createCmd.Flags().StringP("target", "b", "", "target branch. If blank, master is used")
 	createCmd.Flags().StringP("title", "t", "", "title. If blank, standard title is used")
+	createCmd.Flags().StringP("draft", "d", "", "draft. default is true")
 
 }

@@ -9,17 +9,13 @@ import (
 	"github.com/cgxarrie-go/prq/internal/github/origin"
 )
 
-func RunCreatCmd(cmd *cobra.Command, tgt, ttl string) error {
+func RunCreatCmd(cmd *cobra.Command, tgt, ttl string, isDraft bool) error {
 
-	ghCfg, err := loadConfig()
-	if err != nil {
-		return err
-	}
-
+	ghCfg := loadConfig()
 	originSvc := origin.NewService()
 	svc := createpr.NewService(ghCfg.PAT, originSvc)
 
-	req := createpr.NewRequest(tgt,ttl)
+	req := createpr.NewRequest(tgt, ttl, isDraft)
 	pr, err := svc.Run(req)
 	if err != nil {
 		return fmt.Errorf("failed to create PR: %w", err)
