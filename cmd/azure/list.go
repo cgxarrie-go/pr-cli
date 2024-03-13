@@ -4,10 +4,10 @@ import (
 	"github.com/cgxarrie-go/prq/internal/azure/listprs"
 	"github.com/cgxarrie-go/prq/internal/azure/origin"
 	"github.com/cgxarrie-go/prq/internal/models"
-	"github.com/cgxarrie-go/prq/internal/utils"
+	"github.com/cgxarrie-go/prq/internal/remote"
 )
 
-func RunListCmd(origins utils.Remotes) (
+func RunListCmd(origins remote.Remotes) (
 	prs []models.PullRequest, err error) {
 
 	azCfg := loadConfig()

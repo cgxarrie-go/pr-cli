@@ -1,9 +1,9 @@
 package ports
 
 import (
-	"github.com/cgxarrie-go/prq/internal/utils"
+	"github.com/cgxarrie-go/prq/internal/remote"
 )
 
 type ListPRRequest interface {
-	Origins() utils.Remotes
+	Origins() remote.Remotes
 }

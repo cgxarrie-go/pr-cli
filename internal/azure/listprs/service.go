@@ -13,11 +13,11 @@ import (
 
 type service struct {
 	pat       string
-	originSvc ports.RemoteService
+	originSvc ports.Remote
 }
 
 // NewService return new instnce of azure service
-func NewService(pat string, originSvc ports.RemoteService) ports.PRReader {
+func NewService(pat string, originSvc ports.Remote) ports.PRReader {
 	return service{
 		pat:       fmt.Sprintf("`:%s", pat),
 		originSvc: originSvc,

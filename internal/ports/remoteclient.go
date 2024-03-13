@@ -1,10 +1,13 @@
 package ports
 
+import "github.com/cgxarrie-go/prq/internal/remote"
+
 type RemoteClient interface {
-	Do(req RemoteClientDoRequest) error
+	Create(req RemoteClientCreateRequest) error
 }
 
-type RemoteClientDoRequest struct {
+type RemoteClientCreateRequest struct {
+	remote      remote.Remote
 	Source      string
 	Destination string
 	Title       string

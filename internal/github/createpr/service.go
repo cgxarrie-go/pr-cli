@@ -17,11 +17,11 @@ import (
 
 type service struct {
 	pat       string
-	originSvc ports.RemoteService
+	originSvc ports.Remote
 }
 
 // NewService return new instnce of github service
-func NewService(pat string, originSvc ports.RemoteService) ports.PRCreator {
+func NewService(pat string, originSvc ports.Remote) ports.PRCreator {
 	return service{
 		pat:       fmt.Sprintf("`:%s", pat),
 		originSvc: originSvc,
@@ -78,7 +78,7 @@ func (svc service) Run(req ports.CreatePRRequest) (
 }
 
 func (svc service) doPOST(src, dest models.Branch, ttl, desc string, draft bool,
-	o origin.GithubOrigin, resp *Response) (err error) {
+	o origin.GithubRemote, resp *Response) (err error) {
 
 	url, err := svc.originSvc.CreatePRsURL(o.Remote)
 	if err != nil {

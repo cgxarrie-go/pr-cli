@@ -12,16 +12,17 @@ import (
 	"github.com/cgxarrie-go/prq/internal/azure/origin"
 	"github.com/cgxarrie-go/prq/internal/models"
 	"github.com/cgxarrie-go/prq/internal/ports"
+	"github.com/cgxarrie-go/prq/internal/remote"
 	"github.com/cgxarrie-go/prq/internal/utils"
 )
 
 type service struct {
 	pat       string
-	originSvc ports.RemoteService
+	originSvc ports.Remote
 }
 
 // NewService return new instnce of azure service
-func NewService(pat string, originSvc ports.RemoteService) ports.PRCreator {
+func NewService(pat string, originSvc ports.Remote) ports.PRCreator {
 	return service{
 		pat:       fmt.Sprintf("`:%s", pat),
 		originSvc: originSvc,
@@ -57,7 +58,7 @@ func (svc service) Run(req ports.CreatePRRequest) (
 		}
 	}
 
-	o, err := utils.CurrentFolderRemote()
+	o, err := remote.CurrentFolderRemote()
 	if err != nil {
 		return pr, fmt.Errorf("getting repository origin: %w", err)
 	}

@@ -12,7 +12,7 @@ import (
 	"github.com/cgxarrie-go/prq/cmd/github"
 	"github.com/cgxarrie-go/prq/internal/config"
 	"github.com/cgxarrie-go/prq/internal/models"
-	"github.com/cgxarrie-go/prq/internal/utils"
+	"github.com/cgxarrie-go/prq/internal/remote"
 )
 
 const (
@@ -32,12 +32,12 @@ var listCmd = &cobra.Command{
 		filter, _ := cmd.Flags().GetString("filter")
 		opt, _ := cmd.Flags().GetString("option")
 
-		var remotes utils.Remotes
+		var remotes remote.Remotes
 		var err error
 
 		switch opt {
 		case "d":
-			remotes, err = utils.CurrentFolderTreeRemotes()
+			remotes, err = remote.CurrentFolderTreeRemotes()
 			if err != nil {
 				return errors.Wrapf(err, "getting remotes from current directory tree")
 			}
@@ -47,17 +47,17 @@ var listCmd = &cobra.Command{
 			if err != nil {
 				return errors.Wrapf(err, "getting remotes from config")
 			}
-			remotes = make(utils.Remotes, len(cfg.Remotes))
+			remotes = make(remote.Remotes, len(cfg.Remotes))
 			for i, c := range cfg.Remotes {
-				remotes[i] = utils.Remote(c)
+				remotes[i] = remote.Remote(c)
 			}
 
 		default:
-			currentRemote, err := utils.CurrentFolderRemote()
+			currentRemote, err := remote.CurrentFolderRemote()
 			if err != nil {
 				return errors.Wrapf(err, "getting remote from current directory")
 			}
-			remotes = utils.Remotes{
+			remotes = remote.Remotes{
 				currentRemote,
 			}
 		}
@@ -82,21 +82,21 @@ func init() {
 	listCmd.Flags().StringP("filter", "f", "", "")
 }
 
-func runListCmd(remotes utils.Remotes, filter string) error {
+func runListCmd(remotes remote.Remotes, filter string) error {
 
-	azRemotes := utils.Remotes{}
-	ghRemotes := utils.Remotes{}
-	unknownRemotes := utils.Remotes{}
+	azRemotes := remote.Remotes{}
+	ghRemotes := remote.Remotes{}
+	unknownRemotes := remote.Remotes{}
 
 	prs := []models.PullRequest{}
-	for _, remote := range remotes {
-		switch true {
-		case remote.IsAzure():
-			azRemotes.Append(remote)
-		case remote.IsGithub():
-			ghRemotes.Append(remote)
+	for r := range remotes {
+		switch r.Type() {
+		case remote.RemoteTypeAzure:
+			azRemotes.Append(r)
+		case remote.RemoteTypeGitHub:
+			ghRemotes.Append(r)
 		default:
-			unknownRemotes.Append(remote)
+			unknownRemotes.Append(r)
 		}
 	}
 

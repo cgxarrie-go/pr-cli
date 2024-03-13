@@ -5,6 +5,7 @@ import (
 
 	"github.com/cgxarrie-go/prq/cmd/azure"
 	"github.com/cgxarrie-go/prq/cmd/github"
+	"github.com/cgxarrie-go/prq/internal/remote"
 	"github.com/cgxarrie-go/prq/internal/utils"
 	"github.com/spf13/cobra"
 )
@@ -21,21 +22,22 @@ var createCmd = &cobra.Command{
 		dft, _ := cmd.Flags().GetString("draft")
 		draft := !utils.IsFalse(dft)
 
-		o, err := utils.CurrentFolderRemote()
+		o, err := remote.CurrentFolderRemote()
 		if err != nil {
 			return fmt.Errorf("getting origin: %w", err)
 		}
-		if o.IsAzure() {
-			err := azure.RunCreatCmd(cmd, dest, ttl, draft)
-			return err
-		}
 
-		if o.IsGithub() {
+		switch o.Type() {
+		case remote.RemoteTypeGitHub:
 			err := github.RunCreatCmd(cmd, dest, ttl, draft)
 			return err
-		}
+		case remote.RemoteTypeAzure:
+			err := azure.RunCreatCmd(cmd, dest, ttl, draft)
+			return err
+		default:
+			return fmt.Errorf("unknown origin type: %s", o)
 
-		return fmt.Errorf("unknown origin type: %s", o)
+		}
 	},
 }
 
