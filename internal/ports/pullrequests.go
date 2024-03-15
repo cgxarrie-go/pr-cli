@@ -10,5 +10,5 @@ type PRReader interface {
 }
 
 type PRCreator interface {
-	Run(req CreateSvcPRRequest) (pr CreatePRSvcResponse, err error)
+	Run(req CreatePRSvcRequest) (pr CreatePRSvcResponse, err error)
 }

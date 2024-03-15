@@ -3,10 +3,11 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/cgxarrie-go/prq/cmd/azure"
-	"github.com/cgxarrie-go/prq/cmd/github"
-	"github.com/cgxarrie-go/prq/internal/remote"
+	"github.com/cgxarrie-go/prq/internal/ports"
+	"github.com/cgxarrie-go/prq/internal/remoteclient"
+	"github.com/cgxarrie-go/prq/internal/services"
 	"github.com/cgxarrie-go/prq/internal/utils"
+	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 )
 
@@ -22,22 +23,32 @@ var createCmd = &cobra.Command{
 		dft, _ := cmd.Flags().GetString("draft")
 		draft := !utils.IsFalse(dft)
 
-		o, err := remote.CurrentFolderRemote()
+		r, err := utils.CurrentFolderRemote()
 		if err != nil {
-			return fmt.Errorf("getting origin: %w", err)
+			return fmt.Errorf("getting remote: %w", err)
 		}
 
-		switch o.Type() {
-		case remote.RemoteTypeGitHub:
-			err := github.RunCreatCmd(cmd, dest, ttl, draft)
-			return err
-		case remote.RemoteTypeAzure:
-			err := azure.RunCreatCmd(cmd, dest, ttl, draft)
-			return err
-		default:
-			return fmt.Errorf("unknown origin type: %s", o)
-
+		cl, err := remoteclient.NewRemoteClient(r)
+		if err != nil {
+			return fmt.Errorf("creating remote client: %w", err)
 		}
+
+		svc := services.NewCreatePRService(r, cl)
+		svcReq := ports.CreatePRSvcRequest{
+			Destination: dest,
+			Title:       ttl,
+			IsDraft:     draft,
+		}
+
+		pr, err := svc.Run(svcReq)
+		if err != nil {
+			return fmt.Errorf("creating PR: %w", err)
+		}
+
+		lnk := termenv.Hyperlink(pr.Link, "open PR")
+
+		fmt.Printf("PR created with ID: %s (%s)\n", pr.ID, lnk)
+		return nil
 	},
 }
 

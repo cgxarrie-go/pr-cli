@@ -2,18 +2,16 @@ package errors
 
 import (
 	"fmt"
-
-	"github.com/cgxarrie-go/prq/internal/utils"
 )
 
 type ErrInvalidRepositoryType struct {
 	BaseError
 }
 
-func NewErrInvalidRepositoryType(origin utils.Remote) error {
+func NewUnknownRepositoryType(r string) error {
 	return ErrInvalidRepositoryType{
 		BaseError: BaseError{
-			message: fmt.Sprintf("invalid repository type %s", origin),
+			message: fmt.Sprintf("remote type not supported: %s", r),
 		},
 	}
 }

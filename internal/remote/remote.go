@@ -2,6 +2,7 @@ package remote
 
 import (
 	"github.com/cgxarrie-go/prq/internal/models"
+	"github.com/cgxarrie-go/prq/internal/ports"
 	"github.com/cgxarrie-go/prq/internal/remotetype"
 )
 
@@ -30,7 +31,7 @@ func (r Remote) String() string {
 	return r.remote
 }
 
-type Remotes map[Remote]any
+type Remotes map[ports.Remote]any
 
 func (rs *Remotes) Append(r Remote) {
 

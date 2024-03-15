@@ -2,6 +2,7 @@ package ports
 
 import (
 	"github.com/cgxarrie-go/prq/internal/models"
+	"github.com/cgxarrie-go/prq/internal/remotetype"
 )
 
 type Remote interface {
@@ -11,4 +12,5 @@ type Remote interface {
 	NewBranch(name string) models.Branch
 	DefaultTargetBranch() models.Branch
 	Repository() string
+	Type() remotetype.RemoteType
 }

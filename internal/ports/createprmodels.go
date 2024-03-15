@@ -1,6 +1,6 @@
 package ports
 
-type CreateSvcPRRequest struct {
+type CreatePRSvcRequest struct {
 	Destination string
 	Title       string
 	IsDraft     bool

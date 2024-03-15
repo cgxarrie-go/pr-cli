@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cgxarrie-go/prq/internal/ports"
 	"github.com/cgxarrie-go/prq/internal/remote"
 	"github.com/pkg/errors"
 )
@@ -30,7 +31,7 @@ func IsGitRepo(path string) bool {
 	return strings.TrimSpace(string(out)) == "true"
 }
 
-func CurrentFolderRemote() (remote.Remote, error) {
+func CurrentFolderRemote() (ports.Remote, error) {
 	return folderRemote("")
 }
 
@@ -79,15 +80,14 @@ func listRemotes(root string) (remotes remote.Remotes, err error) {
 	return
 }
 
-func folderRemote(path string) (remote.Remote, error) {
+func folderRemote(path string) (ports.Remote, error) {
 	cmd := exec.Command("git", "config", "--get", "remote.origin.url")
 	if path != "" {
 		cmd.Dir = path
 	}
 	out, err := cmd.Output()
 	if err != nil {
-		return remote.NewRemote(""),
-			fmt.Errorf("failed to get remote url: %w", err)
+		return nil, fmt.Errorf("failed to get remote url: %w", err)
 	}
-	return remote.NewRemote(string(out)), nil
+	return remote.NewRemote(string(out))
 }

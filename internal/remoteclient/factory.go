@@ -1,21 +1,20 @@
 package remoteclient
 
 import (
-	"fmt"
-	"strings"
-
+	"github.com/cgxarrie-go/prq/internal/config"
+	"github.com/cgxarrie-go/prq/internal/errors"
 	"github.com/cgxarrie-go/prq/internal/ports"
 	"github.com/cgxarrie-go/prq/internal/remotetype"
 )
 
-func NewRemoteClient(remote string, pat string) (ports.RemoteClient, error) {
+func NewRemoteClient(remote ports.Remote) (ports.RemoteClient, error) {
 
-	switch true {
-	case strings.Contains(remote, remotetype.Github.Name()):
-		return newGhClient(pat), nil
-	case strings.Contains(remote, remotetype.Azure.Name()):
-		return newAzClient(pat), nil
+	switch remote.Type() {
+	case remotetype.Github:
+		return newGhClient(config.GetInstance().Github.PAT), nil
+	case remotetype.Azure:
+		return newAzClient(config.GetInstance().Azure.PAT), nil
 	default:
-		return nil, fmt.Errorf("remote type not supported")
+		return nil, errors.NewUnknownRepositoryType(remote.Type().Name())
 	}
 }
