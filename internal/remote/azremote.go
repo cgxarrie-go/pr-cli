@@ -19,7 +19,7 @@ type azureRemote struct {
 	baseUrl      string
 }
 
-func NewAzureRemote(r string) ports.Remote {
+func newAzureRemote(r string) ports.Remote {
 
 	split := strings.Split(string(r), "/")
 	org := split[len(split)-4]

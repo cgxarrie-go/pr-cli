@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/cgxarrie-go/prq/internal/ports"
 
@@ -26,6 +28,28 @@ type ghClientCreateResponse struct {
 	IsDraft     bool   `json:"draft"`
 }
 
+type ghClientGetResponse struct {
+	Value []ghClientGetResponseItem `json:"value"`
+	Count int                       `json:"count"`
+}
+type ghClientGetResponseItem struct {
+	ID          int                         `json:"id"`
+	URL         string                      `json:"html_url"`
+	Number      int                         `json:"number"`
+	Title       string                      `json:"title"`
+	Body        string                      `json:"body"`
+	Status      string                      `json:"sate"`
+	MergeStatus string                      `json:"mergeStatus"`
+	User        ghClientGetResponseItemUser `json:"user"`
+	IsDraft     bool                        `json:"draft"`
+	Created     time.Time                   `json:"created_at"`
+	Closed      time.Time                   `json:"closed_at"`
+}
+
+type ghClientGetResponseItemUser struct {
+	Login string `json:"login"`
+}
+
 func newGhClient(pat string) ports.RemoteClient {
 	return &githubClient{
 		base: newClient(),
@@ -33,29 +57,17 @@ func newGhClient(pat string) ports.RemoteClient {
 	}
 }
 
-func (r ghClientCreateResponse) ToSvcResponse() ports.CreatePRSvcResponse {
-	return ports.CreatePRSvcResponse{
-		ID:          fmt.Sprintf("%d", r.Number),
-		Title:       r.Title,
-		Description: r.Description,
-		URL:         r.URL,
-		IsDraft:     r.IsDraft,
-		Repository:  "",
-		Link:        "",
-	}
-}
-
 func (c *githubClient) Create(req ports.RemoteClientCreateRequest) (
 	resp ports.RemoteClientCreateResponse, err error) {
 
-	azReq, err := c.getCreateRequest(req)
+	clReq, err := c.getCreateRequest(req)
 	if err != nil {
-		return resp, fmt.Errorf("creating http request: %w", err)
+		return resp, errors.Wrap(err, "creating http request")
 	}
 
-	clResp, err := c.base.doCreate(azReq)
+	clResp, err := c.base.doCreate(clReq)
 	if err != nil {
-		return resp, fmt.Errorf("creating PR via client: %w", err)
+		return resp, errors.Wrap(err, "creating PR in Github")
 	}
 
 	ghResp, ok := clResp.(ghClientCreateResponse)
@@ -74,7 +86,58 @@ func (c *githubClient) Create(req ports.RemoteClientCreateRequest) (
 	return
 }
 
-func (c *githubClient) getCreateRequest(req ports.RemoteClientCreateRequest) (*http.Request, error) {
+func (c *githubClient) Get(req ports.RemoteClientGetRequest) (
+	resp []ports.RemoteClientGetResponse, err error) {
+
+	clReq, err := c.getGetReques(req)
+	if err != nil {
+		return resp, errors.Wrap(err, "creating http request")
+	}
+
+	clResp, err := c.base.doGet(clReq)
+	if err != nil {
+		return resp, errors.Wrap(err, "getting PRs from Github")
+	}
+
+	ghResp, ok := clResp.(ghClientGetResponse)
+	if !ok {
+		return resp, errors.New("casting response to github response")
+	}
+
+	resp = make([]ports.RemoteClientGetResponse, ghResp.Count)
+	for i := 0; i < ghResp.Count; i++ {
+		resp[i] = ports.RemoteClientGetResponse{
+			ID:          strconv.Itoa(ghResp.Value[i].Number),
+			Title:       ghResp.Value[i].Title,
+			Description: ghResp.Value[i].Body,
+			Status:      ghResp.Value[i].Status,
+			CreatedBy:   ghResp.Value[i].User.Login,
+			IsDraft:     ghResp.Value[i].IsDraft,
+			Created:     ghResp.Value[i].Created,
+		}
+	}
+
+	return
+}
+
+func (c *githubClient) getGetReques(req ports.RemoteClientGetRequest) (
+	*http.Request, error) {
+
+	bearer := fmt.Sprintf("Bearer %s", c.pat)
+
+	clReq, err := http.NewRequest("GET", req.Remote.GetPRsURL(), nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "creating http request")
+	}
+	clReq.Header.Add("Authorization", bearer)
+	clReq.Header.Add("Accept", "application/vnd.github+json")
+	clReq.Header.Add("X-GitHub-Api-Version", "2022-11-28")
+
+	return clReq, nil
+}
+
+func (c *githubClient) getCreateRequest(req ports.RemoteClientCreateRequest) (
+	*http.Request, error) {
 	b64PAT := base64.RawStdEncoding.EncodeToString([]byte(c.pat))
 	bearer := fmt.Sprintf("Basic %s", b64PAT)
 
@@ -91,15 +154,15 @@ func (c *githubClient) getCreateRequest(req ports.RemoteClientCreateRequest) (*h
 		return nil, errors.Wrap(err, "marshalling request body")
 	}
 
-	ghReq, err := http.NewRequest("POST", req.Remote.CreatePRsURL(),
+	clReq, err := http.NewRequest("POST", req.Remote.CreatePRsURL(),
 		bytes.NewBuffer(body))
 	if err != nil {
 		return nil, errors.Wrap(err, "creating http request")
 	}
 
-	ghReq.Header.Add("Authorization", bearer)
-	ghReq.Header.Add("Accept", "application/vnd.github+json")
-	ghReq.Header.Add("X-GitHub-Api-Version", "2022-11-28")
+	clReq.Header.Add("Authorization", bearer)
+	clReq.Header.Add("Accept", "application/vnd.github+json")
+	clReq.Header.Add("X-GitHub-Api-Version", "2022-11-28")
 
-	return ghReq, nil
+	return clReq, nil
 }

@@ -22,7 +22,6 @@ func NewCreatePRService(r ports.Remote, c ports.RemoteClient) ports.PRCreator {
 	}
 }
 
-// Create .
 func (svc createPRService) Run(req ports.CreatePRSvcRequest) (
 	resp ports.CreatePRSvcResponse, err error) {
 

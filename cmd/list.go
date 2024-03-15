@@ -13,6 +13,10 @@ import (
 	"github.com/cgxarrie-go/prq/internal/config"
 	"github.com/cgxarrie-go/prq/internal/models"
 	"github.com/cgxarrie-go/prq/internal/remote"
+	"github.com/cgxarrie-go/prq/internal/remoteclient"
+	"github.com/cgxarrie-go/prq/internal/remotetype"
+	"github.com/cgxarrie-go/prq/internal/services"
+	"github.com/cgxarrie-go/prq/internal/utils"
 )
 
 const (
@@ -37,7 +41,7 @@ var listCmd = &cobra.Command{
 
 		switch opt {
 		case "d":
-			remotes, err = remote.CurrentFolderTreeRemotes()
+			remotes, err = utils.CurrentFolderTreeRemotes()
 			if err != nil {
 				return errors.Wrapf(err, "getting remotes from current directory tree")
 			}
@@ -48,17 +52,18 @@ var listCmd = &cobra.Command{
 				return errors.Wrapf(err, "getting remotes from config")
 			}
 			remotes = make(remote.Remotes, len(cfg.Remotes))
-			for i, c := range cfg.Remotes {
-				remotes[i] = remote.Remote(c)
+			for _, c := range cfg.Remotes {
+				r, _ := remote.NewRemote(c)
+				remotes[r] = struct{}{}
 			}
 
 		default:
-			currentRemote, err := remote.CurrentFolderRemote()
+			currentRemote, err := utils.CurrentFolderRemote()
 			if err != nil {
 				return errors.Wrapf(err, "getting remote from current directory")
 			}
 			remotes = remote.Remotes{
-				currentRemote,
+				currentRemote: struct{}{},
 			}
 		}
 
@@ -91,9 +96,9 @@ func runListCmd(remotes remote.Remotes, filter string) error {
 	prs := []models.PullRequest{}
 	for r := range remotes {
 		switch r.Type() {
-		case remote.RemoteTypeAzure:
+		case remotetype.Azure:
 			azRemotes.Append(r)
-		case remote.RemoteTypeGitHub:
+		case remotetype.Github:
 			ghRemotes.Append(r)
 		default:
 			unknownRemotes.Append(r)
@@ -110,6 +115,9 @@ func runListCmd(remotes remote.Remotes, filter string) error {
 	}
 
 	if len(azRemotes) > 0 {
+		azClient := remoteclient.NewRemoteClient()
+		azSvc := services.NewGetPRsService(azClient)
+
 		azPrs, err := azure.RunListCmd(azRemotes)
 		if err != nil {
 			return errors.Wrapf(err, "getting PRs from azure repositories")
