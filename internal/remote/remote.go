@@ -23,6 +23,10 @@ func newRemote(r string, t remotetype.RemoteType,
 
 }
 
+func (r Remote) Type() remotetype.RemoteType {
+	return r.remoteType
+}
+
 func (r Remote) DefaultTargetBranch() models.Branch {
 	return r.defaultTargetBranch
 }
@@ -33,7 +37,7 @@ func (r Remote) String() string {
 
 type Remotes map[ports.Remote]any
 
-func (rs *Remotes) Append(r Remote) {
+func (rs *Remotes) Append(r ports.Remote) {
 
 	if _, ok := (*rs)[r]; ok {
 		return
