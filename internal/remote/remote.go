@@ -11,7 +11,7 @@ type Remote struct {
 	defaultTargetBranch models.Branch
 }
 
-func NewRemote(r string, t remotetype.RemoteType,
+func newRemote(r string, t remotetype.RemoteType,
 	defTgtBranch models.Branch) Remote {
 
 	return Remote{

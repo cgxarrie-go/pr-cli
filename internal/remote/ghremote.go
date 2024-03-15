@@ -1,4 +1,4 @@
-package github
+package remote
 
 import (
 	"fmt"
@@ -8,18 +8,17 @@ import (
 	"github.com/cgxarrie-go/prq/internal/config"
 	"github.com/cgxarrie-go/prq/internal/models"
 	"github.com/cgxarrie-go/prq/internal/ports"
-	"github.com/cgxarrie-go/prq/internal/remote"
 	"github.com/cgxarrie-go/prq/internal/remotetype"
 )
 
 type githubRemote struct {
-	remote.Remote
+	Remote
 	user       string
 	repository string
 	baseUrl    string
 }
 
-func NewRemote(r string) ports.Remote {
+func newGithubRemote(r string) ports.Remote {
 
 	split := strings.Split(string(r), "/")
 
@@ -32,7 +31,7 @@ func NewRemote(r string) ports.Remote {
 		fmt.Sprintf("refs/heads/%s", config.GetInstance().Github.DefaultTargetBranch))
 
 	return githubRemote{
-		Remote:     remote.NewRemote(r, remotetype.Github, defTgtBranch),
+		Remote:     newRemote(r, remotetype.Github, defTgtBranch),
 		user:       usr,
 		repository: repo,
 		baseUrl:    fmt.Sprintf("https://api.github.com/repos/%s/%s", usr, repo),
@@ -53,6 +52,10 @@ func (r githubRemote) GetPRsURL() string {
 
 func (r githubRemote) CreatePRsURL() string {
 	return fmt.Sprintf("%s/pulls", r.baseUrl)
+}
+
+func (r githubRemote) Repository() string {
+	return r.repository
 }
 
 func (r githubRemote) PRLinkURL(id string) string {

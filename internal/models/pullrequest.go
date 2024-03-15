@@ -23,16 +23,6 @@ type PullRequest struct {
 	Link         string
 }
 
-type CreatedPullRequest struct {
-	ID           string
-	Title        string
-	Description  string
-	URL          string
-	IsDraft      bool
-	Organization string
-	Link         string
-}
-
 // Hierarchy of a PR
 type Hierarchy struct {
 	ID   string

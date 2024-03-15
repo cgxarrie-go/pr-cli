@@ -10,4 +10,5 @@ type Remote interface {
 	PRLinkURL(id string) string
 	NewBranch(name string) models.Branch
 	DefaultTargetBranch() models.Branch
+	Repository() string
 }
