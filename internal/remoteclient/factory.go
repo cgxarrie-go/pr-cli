@@ -11,9 +11,9 @@ func NewRemoteClient(remote ports.Remote) (ports.RemoteClient, error) {
 
 	switch remote.Type() {
 	case remotetype.Github:
-		return newGhClient(config.GetInstance().Github.PAT), nil
+		return newGhClient(remote, config.GetInstance().Github.PAT), nil
 	case remotetype.Azure:
-		return newAzClient(config.GetInstance().Azure.PAT), nil
+		return newAzClient(remote, config.GetInstance().Azure.PAT), nil
 	default:
 		return nil, errors.NewUnknownRepositoryType(remote.Type().Name())
 	}

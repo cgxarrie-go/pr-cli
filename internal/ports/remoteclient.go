@@ -8,11 +8,11 @@ import (
 
 type RemoteClient interface {
 	Create(req RemoteClientCreateRequest) (resp RemoteClientCreateResponse, err error)
-	Get(req RemoteClientGetRequest) (resp []RemoteClientGetResponse, err error)
+	Get() (resp []RemoteClientGetResponse, err error)
+	Remote() Remote
 }
 
 type RemoteClientCreateRequest struct {
-	Remote      Remote
 	Source      models.Branch
 	Destination models.Branch
 	Title       string
@@ -26,10 +26,6 @@ type RemoteClientCreateResponse struct {
 	Description string
 	URL         string
 	IsDraft     bool
-}
-
-type RemoteClientGetRequest struct {
-	Remote Remote
 }
 
 type RemoteClientGetResponse struct {

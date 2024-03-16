@@ -50,11 +50,15 @@ type ghClientGetResponseItemUser struct {
 	Login string `json:"login"`
 }
 
-func newGhClient(pat string) ports.RemoteClient {
+func newGhClient(r ports.Remote, pat string) ports.RemoteClient {
 	return &githubClient{
-		base: newClient(),
+		base: newClient(r),
 		pat:  fmt.Sprintf("`:%s", pat),
 	}
+}
+
+func (c *githubClient) Remote() ports.Remote {
+	return c.base.remote
 }
 
 func (c *githubClient) Create(req ports.RemoteClientCreateRequest) (
@@ -86,10 +90,10 @@ func (c *githubClient) Create(req ports.RemoteClientCreateRequest) (
 	return
 }
 
-func (c *githubClient) Get(req ports.RemoteClientGetRequest) (
+func (c *githubClient) Get() (
 	resp []ports.RemoteClientGetResponse, err error) {
 
-	clReq, err := c.getGetReques(req)
+	clReq, err := c.getGetReques()
 	if err != nil {
 		return resp, errors.Wrap(err, "creating http request")
 	}
@@ -120,12 +124,12 @@ func (c *githubClient) Get(req ports.RemoteClientGetRequest) (
 	return
 }
 
-func (c *githubClient) getGetReques(req ports.RemoteClientGetRequest) (
+func (c *githubClient) getGetReques() (
 	*http.Request, error) {
 
 	bearer := fmt.Sprintf("Bearer %s", c.pat)
 
-	clReq, err := http.NewRequest("GET", req.Remote.GetPRsURL(), nil)
+	clReq, err := http.NewRequest("GET", c.Remote().GetPRsURL(), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating http request")
 	}
@@ -154,7 +158,7 @@ func (c *githubClient) getCreateRequest(req ports.RemoteClientCreateRequest) (
 		return nil, errors.Wrap(err, "marshalling request body")
 	}
 
-	clReq, err := http.NewRequest("POST", req.Remote.CreatePRsURL(),
+	clReq, err := http.NewRequest("POST", c.Remote().CreatePRsURL(),
 		bytes.NewBuffer(body))
 	if err != nil {
 		return nil, errors.Wrap(err, "creating http request")

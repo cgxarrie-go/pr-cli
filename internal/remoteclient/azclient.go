@@ -14,7 +14,7 @@ import (
 )
 
 type azClient struct {
-	base Client
+	base client
 	pat  string
 }
 
@@ -61,11 +61,15 @@ type azClientGetResponseItemUser struct {
 	Email       string `json:"uniqueName"`
 }
 
-func newAzClient(pat string) ports.RemoteClient {
+func newAzClient(r ports.Remote, pat string) ports.RemoteClient {
 	return &azClient{
-		base: newClient(),
+		base: newClient(r),
 		pat:  fmt.Sprintf("`:%s", pat),
 	}
+}
+
+func (c *azClient) Remote() ports.Remote {
+	return c.base.remote
 }
 
 func (c *azClient) Create(req ports.RemoteClientCreateRequest) (
@@ -97,10 +101,10 @@ func (c *azClient) Create(req ports.RemoteClientCreateRequest) (
 	return
 }
 
-func (c *azClient) Get(req ports.RemoteClientGetRequest) (
+func (c *azClient) Get() (
 	resp []ports.RemoteClientGetResponse, err error) {
 
-	clReq, err := c.getGetReques(req)
+	clReq, err := c.getGetReques()
 	if err != nil {
 		return resp, errors.Wrap(err, "creating http request")
 	}
@@ -131,13 +135,13 @@ func (c *azClient) Get(req ports.RemoteClientGetRequest) (
 	return
 }
 
-func (c *azClient) getGetReques(req ports.RemoteClientGetRequest) (
+func (c *azClient) getGetReques() (
 	*http.Request, error) {
 
 	b64PAT := base64.RawStdEncoding.EncodeToString([]byte(c.pat))
 	bearer := fmt.Sprintf("Basic %s", b64PAT)
 
-	clReq, err := http.NewRequest("GET", req.Remote.GetPRsURL(), nil)
+	clReq, err := http.NewRequest("GET", c.Remote().GetPRsURL(), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating http request")
 	}
@@ -163,7 +167,7 @@ func (c *azClient) getCreateRequest(req ports.RemoteClientCreateRequest) (*http.
 		return nil, errors.Wrap(err, "marshalling request body")
 	}
 
-	clReq, err := http.NewRequest("POST", req.Remote.CreatePRsURL(),
+	clReq, err := http.NewRequest("POST", c.Remote().CreatePRsURL(),
 		bytes.NewBuffer(body))
 	if err != nil {
 		return nil, errors.Wrap(err, "creating http request")

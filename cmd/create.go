@@ -33,7 +33,7 @@ var createCmd = &cobra.Command{
 			return fmt.Errorf("creating remote client: %w", err)
 		}
 
-		svc := services.NewCreatePRService(r, cl)
+		svc := services.NewCreatePRService(cl)
 		svcReq := ports.CreatePRSvcRequest{
 			Destination: dest,
 			Title:       ttl,

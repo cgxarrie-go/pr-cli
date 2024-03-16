@@ -6,14 +6,18 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/cgxarrie-go/prq/internal/ports"
 	"github.com/pkg/errors"
 )
 
 type client struct {
+	remote ports.Remote
 }
 
-func newClient() client {
-	return client{}
+func newClient(r ports.Remote) client {
+	return client{
+		remote: r,
+	}
 }
 
 func (c *client) doCreate(req *http.Request) (

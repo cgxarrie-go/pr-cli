@@ -8,10 +8,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	"github.com/cgxarrie-go/prq/cmd/azure"
-	"github.com/cgxarrie-go/prq/cmd/github"
 	"github.com/cgxarrie-go/prq/internal/config"
-	"github.com/cgxarrie-go/prq/internal/models"
+	"github.com/cgxarrie-go/prq/internal/ports"
 	"github.com/cgxarrie-go/prq/internal/remote"
 	"github.com/cgxarrie-go/prq/internal/remoteclient"
 	"github.com/cgxarrie-go/prq/internal/remotetype"
@@ -89,79 +87,41 @@ func init() {
 
 func runListCmd(remotes remote.Remotes, filter string) error {
 
-	azRemotes := remote.Remotes{}
-	ghRemotes := remote.Remotes{}
 	unknownRemotes := remote.Remotes{}
 
-	prs := []models.PullRequest{}
 	for r := range remotes {
 		switch r.Type() {
-		case remotetype.Azure:
-			azRemotes.Append(r)
-		case remotetype.Github:
-			ghRemotes.Append(r)
-		default:
+		case remotetype.NotSet:
 			unknownRemotes.Append(r)
+		default:
+			cl, _ := remoteclient.NewRemoteClient(r)
+			svc := services.NewGetPRsService(cl)
+			resp := svc.Run()
+			printRemoteHeader(resp.Remote, resp.Count)
+
+			if resp.Error != nil {
+				fmt.Println(resp.Error)
+				continue
+			}
+
+			printList(resp, filter)
 		}
 	}
-
-	if len(unknownRemotes) > 0 {
-		msg := ""
-		for _, ur := range unknownRemotes {
-			msg = fmt.Sprintf("%s%s/n", msg, ur)
-		}
-		msg = fmt.Sprintf("unknown remote types/n%s", msg)
-		fmt.Println(msg)
-	}
-
-	if len(azRemotes) > 0 {
-		azClient := remoteclient.NewRemoteClient()
-		azSvc := services.NewGetPRsService(azClient)
-
-		azPrs, err := azure.RunListCmd(azRemotes)
-		if err != nil {
-			return errors.Wrapf(err, "getting PRs from azure repositories")
-		}
-		prs = append(prs, azPrs...)
-	}
-
-	if len(ghRemotes) > 0 {
-		ghPrs, err := github.RunListCmd(ghRemotes)
-		if err != nil {
-			return errors.Wrapf(err, "getting PRs from azure github")
-		}
-		prs = append(prs, ghPrs...)
-	}
-
-	printList(prs, filter)
 	return nil
 
 }
 
-func printList(prs []models.PullRequest, filter string) {
+func printList(req ports.GetPRsSvcResponse, filter string) {
 	filter = strings.ToLower(filter)
 
-	sort.SliceStable(prs, func(i, j int) bool {
-		if prs[i].Origin != prs[j].Origin {
-			return prs[i].Organization < prs[j].Origin
-		}
-
-		return prs[i].Created.Before(prs[j].Created)
+	sort.SliceStable(req.PullRequests, func(i, j int) bool {
+		return req.PullRequests[i].Created.Before(
+			req.PullRequests[j].Created)
 	})
 
-	lastOrigin := ""
-	visiblePRs := []string{}
+	for _, pr := range req.PullRequests {
 
-	for _, pr := range prs {
-		if pr.Origin != lastOrigin {
-			if len(visiblePRs) > 0 {
-				printRemotePRs(lastOrigin, visiblePRs)
-			}
-			lastOrigin = pr.Origin
-			visiblePRs = []string{}
-		}
-
-		status := pr.Status
+		status := "Active"
 		if pr.IsDraft {
 			status = "Draft"
 		}
@@ -169,7 +129,7 @@ func printList(prs []models.PullRequest, filter string) {
 			strings.Split(pr.CreatedBy, " ")[0],
 			pr.Created.Year(), pr.Created.Month(), pr.Created.Day())
 		format := getColumnFormat()
-		title := pr.ShortenedTitle(70)
+		title := shortenedText(pr.Title, 70)
 		prInfo := fmt.Sprintf(format, pr.ID, status, title,
 			created, pr.Link)
 
@@ -177,10 +137,8 @@ func printList(prs []models.PullRequest, filter string) {
 			continue
 		}
 
-		visiblePRs = append(visiblePRs, prInfo)
-
+		fmt.Println(prInfo)
 	}
-	printRemotePRs(lastOrigin, visiblePRs)
 }
 
 func printRemoteHeader(remote string, count int) {
@@ -198,18 +156,24 @@ func printRemoteHeader(remote string, count int) {
 	fmt.Println(line)
 }
 
+func shortenedText(text string, maxLength int) string {
+
+	pritntable := text
+
+	if len(pritntable) <= maxLength {
+		return pritntable
+	}
+
+	shortenLenght := maxLength - 3
+
+	title := fmt.Sprintf("%s...", pritntable[0:shortenLenght])
+	return title
+}
+
 func getColumnFormat() string {
 	return "%" + fmt.Sprintf("%d", prIDColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prStatusColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prTitleColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prCreatedColLength) + "s " +
 		"| %s"
-}
-
-func printRemotePRs(remote string, prs []string) {
-
-	printRemoteHeader(remote, len(prs))
-	for _, pr := range prs {
-		fmt.Println(pr)
-	}
 }

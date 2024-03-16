@@ -2,7 +2,6 @@ package services
 
 import (
 	"github.com/cgxarrie-go/prq/internal/ports"
-	"github.com/cgxarrie-go/prq/internal/remote"
 	"github.com/pkg/errors"
 )
 
@@ -16,19 +15,11 @@ func NewGetPRsService(c ports.RemoteClient) ports.PRReader {
 	}
 }
 
-func (svc getPRsService) Run() (resp ports.GetPRsSvcResponse, err error) {
+func (svc getPRsService) Run() (resp ports.GetPRsSvcResponse) {
 
-	resp.Remote = r
+	resp.Remote = svc.client.Remote().Repository()
 
-	rem, err := remote.NewRemote(r)
-	if err != nil {
-		resp.Error = errors.Wrap(err, "getting remote")
-	}
-
-	clReq := ports.RemoteClientGetRequest{
-		Remote: rem,
-	}
-	clResp, err := svc.client.Get(clReq)
+	clResp, err := svc.client.Get()
 	if err != nil {
 		resp.Error = errors.Wrap(err, "getting prs")
 	}
@@ -41,9 +32,9 @@ func (svc getPRsService) Run() (resp ports.GetPRsSvcResponse, err error) {
 			Title:       pr.Title,
 			Description: pr.Description,
 			IsDraft:     pr.IsDraft,
-			Link:        rem.PRLinkURL(pr.ID),
+			Link:        svc.client.Remote().PRLinkURL(pr.ID),
 		}
 	}
 
-	return resp, nil
+	return resp
 }
