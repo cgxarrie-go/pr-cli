@@ -21,10 +21,14 @@ type azureRemote struct {
 
 func newAzureRemote(r string) ports.Remote {
 
-	split := strings.Split(string(r), "/")
+	path := strings.Trim(r, "\n")
+	split := strings.Split(string(path), "/")
 	org := split[len(split)-4]
+	org = strings.Trim(org, "\n")
 	prj := split[len(split)-3]
+	prj = strings.Trim(prj, "\n")
 	repo := split[len(split)-1]
+	repo = strings.Trim(repo, "\n")
 
 	defTgtBranch := models.NewBranch(
 		config.GetInstance().Azure.DefaultTargetBranch,
@@ -32,7 +36,7 @@ func newAzureRemote(r string) ports.Remote {
 			DefaultTargetBranch))
 
 	return azureRemote{
-		Remote:       newRemote(r, remotetype.Azure, defTgtBranch),
+		Remote:       newRemote(path, remotetype.Azure, defTgtBranch),
 		organization: org,
 		project:      prj,
 		repository:   repo,

@@ -24,7 +24,9 @@ func newGithubRemote(r string) ports.Remote {
 
 	repo := split[len(split)-1]
 	repo = strings.Split(repo, ".")[0]
+	repo = strings.Trim(repo, "\n")
 	usr := split[len(split)-2]
+	usr = strings.Trim(usr, "\n")
 
 	defTgtBranch := models.NewBranch(
 		config.GetInstance().Github.DefaultTargetBranch,

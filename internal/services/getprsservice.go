@@ -17,7 +17,7 @@ func NewGetPRsService(c ports.RemoteClient) ports.PRReader {
 
 func (svc getPRsService) Run() (resp ports.GetPRsSvcResponse) {
 
-	resp.Remote = svc.client.Remote().Repository()
+	resp.Remote = svc.client.Remote().Path()
 
 	clResp, err := svc.client.Get()
 	if err != nil {

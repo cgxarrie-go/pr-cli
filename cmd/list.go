@@ -114,6 +114,8 @@ func runListCmd(remotes remote.Remotes, filter string) error {
 func printList(req ports.GetPRsSvcResponse, filter string) {
 	filter = strings.ToLower(filter)
 
+	fmt.Println(getTableTitle())
+
 	sort.SliceStable(req.PullRequests, func(i, j int) bool {
 		return req.PullRequests[i].Created.Before(
 			req.PullRequests[j].Created)
@@ -141,10 +143,14 @@ func printList(req ports.GetPRsSvcResponse, filter string) {
 	}
 }
 
+func getTableTitle() string {
+	format := getColumnFormat()
+	return fmt.Sprintf(format, "ID", "Status", "Title", "Created By", "Link")
+}
+
 func printRemoteHeader(remote string, count int) {
 
-	format := getColumnFormat()
-	head := fmt.Sprintf(format, "ID", "Status", "Title", "Created By", "Link")
+	head := getTableTitle()
 
 	line := strings.Repeat("-", len(head)+5)
 	doubleLine := strings.Repeat("=", len(head)+5)

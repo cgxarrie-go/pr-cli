@@ -23,6 +23,10 @@ func newRemote(r string, t remotetype.RemoteType,
 
 }
 
+func (r Remote) Path() string {
+	return r.remote
+}
+
 func (r Remote) Type() remotetype.RemoteType {
 	return r.remoteType
 }

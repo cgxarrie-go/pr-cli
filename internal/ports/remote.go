@@ -13,4 +13,5 @@ type Remote interface {
 	DefaultTargetBranch() models.Branch
 	Repository() string
 	Type() remotetype.RemoteType
+	Path() string
 }
