@@ -29,31 +29,27 @@ type ghClientCreateResponse struct {
 }
 
 type ghClientGetResponse struct {
-	Value []ghClientGetResponseItem `json:"value"`
-	Count int                       `json:"count"`
-}
-type ghClientGetResponseItem struct {
-	ID          int                         `json:"id"`
-	URL         string                      `json:"html_url"`
-	Number      int                         `json:"number"`
-	Title       string                      `json:"title"`
-	Body        string                      `json:"body"`
-	Status      string                      `json:"sate"`
-	MergeStatus string                      `json:"mergeStatus"`
-	User        ghClientGetResponseItemUser `json:"user"`
-	IsDraft     bool                        `json:"draft"`
-	Created     time.Time                   `json:"created_at"`
-	Closed      time.Time                   `json:"closed_at"`
+	ID          int                     `json:"id"`
+	URL         string                  `json:"html_url"`
+	Number      int                     `json:"number"`
+	Title       string                  `json:"title"`
+	Body        string                  `json:"body"`
+	Status      string                  `json:"sate"`
+	MergeStatus string                  `json:"mergeStatus"`
+	User        ghClientGetResponseUser `json:"user"`
+	IsDraft     bool                    `json:"draft"`
+	Created     time.Time               `json:"created_at"`
+	Closed      time.Time               `json:"closed_at"`
 }
 
-type ghClientGetResponseItemUser struct {
+type ghClientGetResponseUser struct {
 	Login string `json:"login"`
 }
 
 func newGhClient(r ports.Remote, pat string) ports.RemoteClient {
 	return &githubClient{
 		base: newClient(r),
-		pat:  fmt.Sprintf("`:%s", pat),
+		pat:  pat,
 	}
 }
 
@@ -69,22 +65,18 @@ func (c *githubClient) Create(req ports.RemoteClientCreateRequest) (
 		return resp, errors.Wrap(err, "creating http request")
 	}
 
-	clResp, err := c.base.doCreate(clReq)
+	clResp := ghClientCreateResponse{}
+	err = c.base.doCreate(clReq, &clResp)
 	if err != nil {
 		return resp, errors.Wrap(err, "creating PR in Github")
 	}
 
-	ghResp, ok := clResp.(ghClientCreateResponse)
-	if !ok {
-		return resp, errors.New("casting response to github response")
-	}
-
 	resp = ports.RemoteClientCreateResponse{
-		ID:          fmt.Sprintf("%d", ghResp.Number),
-		Title:       ghResp.Title,
-		Description: ghResp.Description,
-		URL:         ghResp.URL,
-		IsDraft:     ghResp.IsDraft,
+		ID:          fmt.Sprintf("%d", clResp.Number),
+		Title:       clResp.Title,
+		Description: clResp.Description,
+		URL:         clResp.URL,
+		IsDraft:     clResp.IsDraft,
 	}
 
 	return
@@ -93,38 +85,34 @@ func (c *githubClient) Create(req ports.RemoteClientCreateRequest) (
 func (c *githubClient) Get() (
 	resp []ports.RemoteClientGetResponse, err error) {
 
-	clReq, err := c.getGetReques()
+	clReq, err := c.getGetRequest()
 	if err != nil {
 		return resp, errors.Wrap(err, "creating http request")
 	}
 
-	clResp, err := c.base.doGet(clReq)
+	clResp := []ghClientGetResponse{}
+	err = c.base.doGet(clReq, &clResp)
 	if err != nil {
 		return resp, errors.Wrap(err, "getting PRs from Github")
 	}
 
-	ghResp, ok := clResp.(ghClientGetResponse)
-	if !ok {
-		return resp, errors.New("casting response to github response")
-	}
-
-	resp = make([]ports.RemoteClientGetResponse, ghResp.Count)
-	for i := 0; i < ghResp.Count; i++ {
+	resp = make([]ports.RemoteClientGetResponse, len(clResp))
+	for i := 0; i < len(clResp); i++ {
 		resp[i] = ports.RemoteClientGetResponse{
-			ID:          strconv.Itoa(ghResp.Value[i].Number),
-			Title:       ghResp.Value[i].Title,
-			Description: ghResp.Value[i].Body,
-			Status:      ghResp.Value[i].Status,
-			CreatedBy:   ghResp.Value[i].User.Login,
-			IsDraft:     ghResp.Value[i].IsDraft,
-			Created:     ghResp.Value[i].Created,
+			ID:          strconv.Itoa(clResp[i].Number),
+			Title:       clResp[i].Title,
+			Description: clResp[i].Body,
+			Status:      clResp[i].Status,
+			CreatedBy:   clResp[i].User.Login,
+			IsDraft:     clResp[i].IsDraft,
+			Created:     clResp[i].Created,
 		}
 	}
 
 	return
 }
 
-func (c *githubClient) getGetReques() (
+func (c *githubClient) getGetRequest() (
 	*http.Request, error) {
 
 	bearer := fmt.Sprintf("Bearer %s", c.pat)

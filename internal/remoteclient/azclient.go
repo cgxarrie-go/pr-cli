@@ -80,22 +80,18 @@ func (c *azClient) Create(req ports.RemoteClientCreateRequest) (
 		return resp, fmt.Errorf("creating http request: %w", err)
 	}
 
-	clResp, err := c.base.doCreate(azReq)
+	clResp := azClientCreateResponse{}
+	err = c.base.doCreate(azReq, &clResp)
 	if err != nil {
 		return resp, fmt.Errorf("creating PR via client: %w", err)
 	}
 
-	azResp, ok := clResp.(azClientCreateResponse)
-	if !ok {
-		return resp, errors.New("casting response to github response")
-	}
-
 	resp = ports.RemoteClientCreateResponse{
-		ID:          fmt.Sprintf("%d", azResp.ID),
-		Title:       azResp.Title,
-		Description: azResp.Description,
-		URL:         azResp.URL,
-		IsDraft:     azResp.IsDraft,
+		ID:          fmt.Sprintf("%d", clResp.ID),
+		Title:       clResp.Title,
+		Description: clResp.Description,
+		URL:         clResp.URL,
+		IsDraft:     clResp.IsDraft,
 	}
 
 	return
@@ -109,26 +105,22 @@ func (c *azClient) Get() (
 		return resp, errors.Wrap(err, "creating http request")
 	}
 
-	clResp, err := c.base.doGet(clReq)
+	clResp := azClientGetResponse{}
+	err = c.base.doGet(clReq, &clResp)
 	if err != nil {
-		return resp, errors.Wrap(err, "getting PRs from Github")
+		return resp, errors.Wrap(err, "getting PRs from Azure")
 	}
 
-	azResp, ok := clResp.(azClientGetResponse)
-	if !ok {
-		return resp, errors.New("casting response to github response")
-	}
-
-	resp = make([]ports.RemoteClientGetResponse, azResp.Count)
-	for i := 0; i < azResp.Count; i++ {
+	resp = make([]ports.RemoteClientGetResponse, clResp.Count)
+	for i := 0; i < clResp.Count; i++ {
 		resp[i] = ports.RemoteClientGetResponse{
-			ID:          strconv.Itoa(azResp.Value[i].ID),
-			Title:       azResp.Value[i].Title,
-			Description: azResp.Value[i].Description,
-			Status:      azResp.Value[i].Status,
-			CreatedBy:   azResp.Value[i].CreatedBy.DisplayName,
-			IsDraft:     azResp.Value[i].IsDraft,
-			Created:     azResp.Value[i].Created,
+			ID:          strconv.Itoa(clResp.Value[i].ID),
+			Title:       clResp.Value[i].Title,
+			Description: clResp.Value[i].Description,
+			Status:      clResp.Value[i].Status,
+			CreatedBy:   clResp.Value[i].CreatedBy.DisplayName,
+			IsDraft:     clResp.Value[i].IsDraft,
+			Created:     clResp.Value[i].Created,
 		}
 	}
 

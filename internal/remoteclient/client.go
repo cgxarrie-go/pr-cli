@@ -20,14 +20,13 @@ func newClient(r ports.Remote) client {
 	}
 }
 
-func (c *client) doCreate(req *http.Request) (
-	resp any, err error) {
+func (c *client) doCreate(req *http.Request, resp any) (err error) {
 
 	client := &http.Client{}
 	clResp, err := client.Do(req)
 
 	if err != nil {
-		return resp, errors.Wrap(err, "doing request")
+		return errors.Wrap(err, "doing request")
 	}
 
 	if clResp.StatusCode != http.StatusCreated {
@@ -36,7 +35,7 @@ func (c *client) doCreate(req *http.Request) (
 			respBody = []byte("cannot read response body content")
 		}
 
-		return resp, fmt.Errorf("response code: %d - "+
+		return fmt.Errorf("response code: %d - "+
 			"response body: %+v", clResp.StatusCode, string(respBody))
 
 	}
@@ -44,28 +43,28 @@ func (c *client) doCreate(req *http.Request) (
 	defer clResp.Body.Close()
 	err = json.NewDecoder(clResp.Body).Decode(&resp)
 	if err != nil {
-		return resp, errors.Wrap(err, "decoding response body")
+		return errors.Wrap(err, "decoding response body")
 	}
 
 	return
 }
 
-func (c *client) doGet(req *http.Request) (resp any, err error) {
+func (c *client) doGet(req *http.Request, resp any) (err error) {
 
 	client := &http.Client{}
 	clResp, err := client.Do(req)
 	if err != nil {
-		return resp, errors.Wrap(err, "doing request")
+		return errors.Wrap(err, "doing request")
 	}
 
 	if clResp.StatusCode != http.StatusOK {
-		return resp, fmt.Errorf("%d - %s", clResp.StatusCode, clResp.Status)
+		return fmt.Errorf("%d - %s", clResp.StatusCode, clResp.Status)
 	}
 
 	defer clResp.Body.Close()
-	err = json.NewDecoder(clResp.Body).Decode(resp)
+	err = json.NewDecoder(clResp.Body).Decode(&resp)
 	if err != nil {
-		return resp, errors.Wrap(err, "decoding response body")
+		return errors.Wrap(err, "decoding response body")
 	}
 
 	return

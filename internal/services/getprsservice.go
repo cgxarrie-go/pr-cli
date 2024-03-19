@@ -33,6 +33,8 @@ func (svc getPRsService) Run() (resp ports.GetPRsSvcResponse) {
 			Description: pr.Description,
 			IsDraft:     pr.IsDraft,
 			Link:        svc.client.Remote().PRLinkURL(pr.ID),
+			Created:     pr.Created,
+			CreatedBy:   pr.CreatedBy,
 		}
 	}
 

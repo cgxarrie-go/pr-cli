@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/muesli/termenv"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
@@ -87,6 +88,8 @@ func init() {
 
 func runListCmd(remotes remote.Remotes, filter string) error {
 
+	config.GetInstance().Load()
+
 	unknownRemotes := remote.Remotes{}
 
 	for r := range remotes {
@@ -114,7 +117,9 @@ func runListCmd(remotes remote.Remotes, filter string) error {
 func printList(req ports.GetPRsSvcResponse, filter string) {
 	filter = strings.ToLower(filter)
 
-	fmt.Println(getTableTitle())
+	tableTitle := getTableTitle()
+	fmt.Println(tableTitle)
+	fmt.Println(strings.Repeat("-", len(tableTitle)+5))
 
 	sort.SliceStable(req.PullRequests, func(i, j int) bool {
 		return req.PullRequests[i].Created.Before(
@@ -132,8 +137,9 @@ func printList(req ports.GetPRsSvcResponse, filter string) {
 			pr.Created.Year(), pr.Created.Month(), pr.Created.Day())
 		format := getColumnFormat()
 		title := shortenedText(pr.Title, 70)
+		lnk := termenv.Hyperlink(pr.Link, "open PR")
 		prInfo := fmt.Sprintf(format, pr.ID, status, title,
-			created, pr.Link)
+			created, lnk)
 
 		if filter != "" && !strings.Contains(strings.ToLower(prInfo), filter) {
 			continue
