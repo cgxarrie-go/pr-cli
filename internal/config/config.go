@@ -27,7 +27,7 @@ var (
 	configFileName string = "prqcfg.json"
 )
 
-// Config main configuration for CLI
+// Config main configuration for CLI.
 type Config struct {
 	Azure   AzureConfig
 	Github  GithubConfig
