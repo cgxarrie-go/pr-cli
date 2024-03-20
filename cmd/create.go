@@ -22,6 +22,8 @@ var createCmd = &cobra.Command{
 		dest, _ := cmd.Flags().GetString("target")
 		ttl, _ := cmd.Flags().GetString("title")
 		dft, _ := cmd.Flags().GetString("draft")
+		desc, _ := cmd.Flags().GetString("desc")
+		template, _ := cmd.Flags().GetString("templ")
 		draft := !utils.IsFalse(dft)
 
 		config.GetInstance().Load()
@@ -41,6 +43,8 @@ var createCmd = &cobra.Command{
 			Destination: dest,
 			Title:       ttl,
 			IsDraft:     draft,
+			Description: desc,
+			Template:    template,
 		}
 
 		pr, err := svc.Run(svcReq)
@@ -66,8 +70,10 @@ func init() {
 	// is called directly, e.g.:
 	// azCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	createCmd.Flags().StringP("target", "b", "", "target branch. If blank, master is used")
-	createCmd.Flags().StringP("title", "t", "", "title. If blank, standard title is used")
-	createCmd.Flags().StringP("draft", "d", "", "draft. default is true")
+	createCmd.Flags().StringP("target", "", "", "target branch. If blank, default is used")
+	createCmd.Flags().StringP("title", "", "", "title. If blank, standard title is used")
+	createCmd.Flags().StringP("draft", "", "", "draft. default is true")
+	createCmd.Flags().StringP("desc", "", "", "description. default is emty")
+	createCmd.Flags().StringP("templ", "", "", "template. default is none")
 
 }

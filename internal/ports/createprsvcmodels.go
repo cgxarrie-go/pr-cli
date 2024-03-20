@@ -4,7 +4,8 @@ type CreatePRSvcRequest struct {
 	Destination string
 	Title       string
 	IsDraft     bool
-	PRTemplate  string
+	Template    string
+	Description string
 }
 
 type CreatePRSvcResponse struct {

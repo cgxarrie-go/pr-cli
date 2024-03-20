@@ -40,11 +40,17 @@ func (svc createPRService) Run(req ports.CreatePRSvcRequest) (
 			source.Name(), destination.Name())
 	}
 
-	desc := []byte("")
-	if req.PRTemplate != "" {
-		desc, err = os.ReadFile(req.PRTemplate)
+	desc := req.Description
+
+	template := []byte("")
+	if req.Template != "" {
+		template, err = os.ReadFile(req.Template)
 		if err != nil {
-			desc = []byte("")
+			template = []byte("")
+		}
+		t := string(template)
+		if t != "" {
+			desc = fmt.Sprintf("%s\n%s", desc, t)
 		}
 	}
 
@@ -52,7 +58,7 @@ func (svc createPRService) Run(req ports.CreatePRSvcRequest) (
 		Source:      source,
 		Destination: destination,
 		Title:       title,
-		Description: string(desc),
+		Description: desc,
 		IsDraft:     req.IsDraft,
 	}
 
