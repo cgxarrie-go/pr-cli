@@ -29,6 +29,20 @@
             ]
         },
         {
+            "name": "gh Create",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "./main.go",
+            "args": [
+                "c",
+                "-d",
+                "main",
+                "-t",
+                "test-pr -> ABANDON!!!!"
+            ]
+        },
+        {
             "name": "Create def dest",
             "type": "go",
             "request": "launch",

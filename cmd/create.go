@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/cgxarrie-go/prq/internal/config"
 	"github.com/cgxarrie-go/prq/internal/ports"
 	"github.com/cgxarrie-go/prq/internal/remoteclient"
 	"github.com/cgxarrie-go/prq/internal/services"
@@ -22,6 +23,8 @@ var createCmd = &cobra.Command{
 		ttl, _ := cmd.Flags().GetString("title")
 		dft, _ := cmd.Flags().GetString("draft")
 		draft := !utils.IsFalse(dft)
+
+		config.GetInstance().Load()
 
 		r, err := utils.CurrentFolderRemote()
 		if err != nil {
