@@ -72,7 +72,7 @@ func init() {
 
 	createCmd.Flags().StringP("target", "g", "", "target branch. If blank, default is used")
 	createCmd.Flags().StringP("title", "t", "", "title. If blank, standard title is used")
-	createCmd.Flags().StringP("draft", "f", "", "draft. default is true")
+	createCmd.Flags().BoolP("draft", "f", true, "draft. default is true")
 	createCmd.Flags().StringP("desc", "d", "", "description. default is emty")
 	createCmd.Flags().StringP("templ", "m", "", "template. default is none")
 

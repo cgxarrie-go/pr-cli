@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cgxarrie-go/prq/internal/models"
 	"github.com/cgxarrie-go/prq/internal/ports"
 	"github.com/cgxarrie-go/prq/internal/utils"
 	"github.com/pkg/errors"
@@ -23,35 +24,16 @@ func NewCreatePRService(c ports.RemoteClient) ports.PRCreator {
 func (svc createPRService) Run(req ports.CreatePRSvcRequest) (
 	resp ports.CreatePRSvcResponse, err error) {
 
-	src, err := utils.GitCurrentBranchName()
+	source, destination, err := svc.geBranches(req)
 	if err != nil {
-		return resp, fmt.Errorf("getting current branch name: %w", err)
+		return resp, errors.Wrap(err, "getting branches")
+
 	}
 
-	source := svc.client.Remote().NewBranch(src)
-	destination := svc.client.Remote().DefaultTargetBranch()
-	if req.Destination != "" {
-		destination = svc.client.Remote().NewBranch(req.Destination)
-	}
-
-	title := req.Title
-	if req.Title == "" {
-		title = fmt.Sprintf("PR from %s to %s",
-			source.Name(), destination.Name())
-	}
-
-	desc := req.Description
-
-	template := []byte("")
-	if req.Template != "" {
-		template, err = os.ReadFile(req.Template)
-		if err != nil {
-			template = []byte("")
-		}
-		t := string(template)
-		if t != "" {
-			desc = fmt.Sprintf("%s\n\n%s", desc, t)
-		}
+	title := svc.getTitle(req.Title, source, destination)
+	desc, err := svc.getDescription(req.Description, req.Template)
+	if err != nil {
+		return resp, errors.Wrap(err, "getting description")
 	}
 
 	clientReq := ports.RemoteClientCreateRequest{
@@ -78,4 +60,51 @@ func (svc createPRService) Run(req ports.CreatePRSvcRequest) (
 	}
 
 	return
+}
+
+func (svc *createPRService) geBranches(req ports.CreatePRSvcRequest) (source, destination models.Branch, err error) {
+	src, err := utils.GitCurrentBranchName()
+	if err != nil {
+		return source, destination,
+			fmt.Errorf("getting current branch name: %w", err)
+	}
+
+	source = svc.client.Remote().NewBranch(src)
+
+	destination = svc.client.Remote().DefaultTargetBranch()
+	if req.Destination != "" {
+		destination = svc.client.Remote().NewBranch(req.Destination)
+	}
+
+	return
+}
+
+func (svc createPRService) getTitle(title string, src, dest models.Branch) string {
+	if title != "" {
+		return title
+	}
+
+	return fmt.Sprintf("PR from %s to %s", src.Name(), dest.Name())
+}
+
+func (svc *createPRService) getDescription(desc, template string) (string, error) {
+
+	if template == "" {
+		return desc, nil
+	}
+
+	tmpl, err := os.ReadFile(template)
+	if err != nil {
+		tmpl = []byte("")
+	}
+
+	t := string(tmpl)
+	if t == "" {
+		return desc, nil
+	}
+
+	if desc == "" {
+		return t, nil
+	}
+	return fmt.Sprintf("%s\n\n%s", desc, t), nil
 }
