@@ -6,8 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cgxarrie-go/prq/cmd/azure"
-	"github.com/cgxarrie-go/prq/cmd/github"
 	"github.com/cgxarrie-go/prq/internal/config"
 )
 
@@ -17,17 +15,16 @@ var configCmd = &cobra.Command{
 	Short: "display config",
 	Long:  `display config`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runConfigCmd(cmd, args)
+		return runConfigCmd()
 	},
 }
 
 func init() {
-	configCmd.AddCommand(azure.CfgPATCmd)
-	configCmd.AddCommand(github.CfgPATCmd)
+	configCmd.AddCommand(configAzureCmd)
+	configCmd.AddCommand(configGithubCmd)
 	configCmd.AddCommand(ConfigRemotes)
 
 	// Here you will define your flags and configuration settings.
-
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// azCmd.PersistentFlags().String("foo", "", "A help for foo")
@@ -38,7 +35,7 @@ func init() {
 
 }
 
-func runConfigCmd(cmd *cobra.Command, args []string) error {
+func runConfigCmd() error {
 
 	cfg := config.GetInstance()
 	err := cfg.Load()

@@ -3,9 +3,12 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/cgxarrie-go/prq/cmd/azure"
-	"github.com/cgxarrie-go/prq/cmd/github"
+	"github.com/cgxarrie-go/prq/internal/config"
+	"github.com/cgxarrie-go/prq/internal/ports"
+	"github.com/cgxarrie-go/prq/internal/remoteclient"
+	"github.com/cgxarrie-go/prq/internal/services"
 	"github.com/cgxarrie-go/prq/internal/utils"
+	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 )
 
@@ -14,29 +17,45 @@ var createCmd = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"c"},
 	Short:   "Create Pull Request",
-	Long: "Create a Pull Request." +
-		"\n\tSource branch is the current repository active brnach" +
-		"\n\tDestination branch can be specified by flag -d. If ommitted, destination will be master" +
-		"\n\tTitle can be specified by flag -t. If ommitted, title will be standard title",
+	Long:    "Create a Pull Request.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		dest, _ := cmd.Flags().GetString("destination")
+		dest, _ := cmd.Flags().GetString("target")
 		ttl, _ := cmd.Flags().GetString("title")
+		dft, _ := cmd.Flags().GetString("draft")
+		desc, _ := cmd.Flags().GetString("desc")
+		template, _ := cmd.Flags().GetString("templ")
+		draft := !utils.IsFalse(dft)
 
-		o, err := utils.CurrentFolderRemote()
+		config.GetInstance().Load()
+
+		r, err := utils.CurrentFolderRemote()
 		if err != nil {
-			return fmt.Errorf("getting origin: %w", err)
-		}
-		if o.IsAzure() {
-			err := azure.RunCreatCmd(cmd, dest, ttl)	
-			return err
+			return fmt.Errorf("getting remote: %w", err)
 		}
 
-		if o.IsGithub() {
-			err := github.RunCreatCmd(cmd, dest, ttl)
-			return err
+		cl, err := remoteclient.NewRemoteClient(r)
+		if err != nil {
+			return fmt.Errorf("creating remote client: %w", err)
 		}
 
-		return fmt.Errorf("unknown origin type: %s", o)
+		svc := services.NewCreatePRService(cl)
+		svcReq := ports.CreatePRSvcRequest{
+			Destination: dest,
+			Title:       ttl,
+			IsDraft:     draft,
+			Description: desc,
+			Template:    template,
+		}
+
+		pr, err := svc.Run(svcReq)
+		if err != nil {
+			return fmt.Errorf("creating PR: %w", err)
+		}
+
+		lnk := termenv.Hyperlink(pr.Link, "open PR")
+
+		fmt.Printf("PR created with ID: %s (%s)\n", pr.ID, lnk)
+		return nil
 	},
 }
 
@@ -51,7 +70,10 @@ func init() {
 	// is called directly, e.g.:
 	// azCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	createCmd.Flags().StringP("destination", "d", "", "target branch. If blank, master is used")
+	createCmd.Flags().StringP("target", "g", "", "target branch. If blank, default is used")
 	createCmd.Flags().StringP("title", "t", "", "title. If blank, standard title is used")
+	createCmd.Flags().BoolP("draft", "f", true, "draft. default is true")
+	createCmd.Flags().StringP("desc", "d", "", "description. default is emty")
+	createCmd.Flags().StringP("templ", "m", "", "template. default is none")
 
 }

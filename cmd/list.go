@@ -5,13 +5,16 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/muesli/termenv"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	"github.com/cgxarrie-go/prq/cmd/azure"
-	"github.com/cgxarrie-go/prq/cmd/github"
 	"github.com/cgxarrie-go/prq/internal/config"
-	"github.com/cgxarrie-go/prq/internal/models"
+	"github.com/cgxarrie-go/prq/internal/ports"
+	"github.com/cgxarrie-go/prq/internal/remote"
+	"github.com/cgxarrie-go/prq/internal/remoteclient"
+	"github.com/cgxarrie-go/prq/internal/remotetype"
+	"github.com/cgxarrie-go/prq/internal/services"
 	"github.com/cgxarrie-go/prq/internal/utils"
 )
 
@@ -32,7 +35,7 @@ var listCmd = &cobra.Command{
 		filter, _ := cmd.Flags().GetString("filter")
 		opt, _ := cmd.Flags().GetString("option")
 
-		var remotes utils.Remotes
+		var remotes remote.Remotes
 		var err error
 
 		switch opt {
@@ -47,9 +50,10 @@ var listCmd = &cobra.Command{
 			if err != nil {
 				return errors.Wrapf(err, "getting remotes from config")
 			}
-			remotes = make(utils.Remotes, len(cfg.Remotes))
-			for i, c := range cfg.Remotes {
-				remotes[i] = utils.Remote(c)
+			remotes = make(remote.Remotes, len(cfg.Remotes))
+			for _, c := range cfg.Remotes {
+				r, _ := remote.NewRemote(c)
+				remotes[r] = struct{}{}
 			}
 
 		default:
@@ -57,8 +61,8 @@ var listCmd = &cobra.Command{
 			if err != nil {
 				return errors.Wrapf(err, "getting remote from current directory")
 			}
-			remotes = utils.Remotes{
-				currentRemote,
+			remotes = remote.Remotes{
+				currentRemote: struct{}{},
 			}
 		}
 
@@ -82,78 +86,49 @@ func init() {
 	listCmd.Flags().StringP("filter", "f", "", "")
 }
 
-func runListCmd(remotes utils.Remotes, filter string) error {
+func runListCmd(remotes remote.Remotes, filter string) error {
 
-	azRemotes := utils.Remotes{}
-	ghRemotes := utils.Remotes{}
-	unknownRemotes := utils.Remotes{}
+	config.GetInstance().Load()
 
-	prs := []models.PullRequest{}
-	for _, remote := range remotes {
-		switch true {
-		case remote.IsAzure():
-			azRemotes.Append(remote)
-		case remote.IsGithub():
-			ghRemotes.Append(remote)
+	unknownRemotes := remote.Remotes{}
+
+	for r := range remotes {
+		switch r.Type() {
+		case remotetype.NotSet:
+			unknownRemotes.Append(r)
 		default:
-			unknownRemotes.Append(remote)
+			cl, _ := remoteclient.NewRemoteClient(r)
+			svc := services.NewGetPRsService(cl)
+			resp := svc.Run()
+			printRemoteHeader(resp.Remote, resp.Count)
+
+			if resp.Error != nil {
+				fmt.Println(resp.Error)
+				continue
+			}
+
+			printList(resp, filter)
 		}
 	}
-
-	if len(unknownRemotes) > 0 {
-		msg := ""
-		for _, ur := range unknownRemotes {
-			msg = fmt.Sprintf("%s%s/n", msg, ur)
-		}
-		msg = fmt.Sprintf("unknown remote types/n%s", msg)
-		fmt.Println(msg)
-	}
-
-	if len(azRemotes) > 0 {
-		azPrs, err := azure.RunListCmd(azRemotes)
-		if err != nil {
-			return errors.Wrapf(err, "getting PRs from azure repositories")
-		}
-		prs = append(prs, azPrs...)
-	}
-
-	if len(ghRemotes) > 0 {
-		ghPrs, err := github.RunListCmd(ghRemotes)
-		if err != nil {
-			return errors.Wrapf(err, "getting PRs from azure github")
-		}
-		prs = append(prs, ghPrs...)
-	}
-
-	printList(prs, filter)
 	return nil
 
 }
 
-func printList(prs []models.PullRequest, filter string) {
+func printList(req ports.GetPRsSvcResponse, filter string) {
 	filter = strings.ToLower(filter)
 
-	sort.SliceStable(prs, func(i, j int) bool {
-		if prs[i].Origin != prs[j].Origin {
-			return prs[i].Organization < prs[j].Origin
-		}
+	tableTitle := getTableTitle()
+	fmt.Println(tableTitle)
+	fmt.Println(strings.Repeat("-", len(tableTitle)+5))
 
-		return prs[i].Created.Before(prs[j].Created)
+	sort.SliceStable(req.PullRequests, func(i, j int) bool {
+		return req.PullRequests[i].Created.Before(
+			req.PullRequests[j].Created)
 	})
 
-	lastOrigin := ""
-	visiblePRs := []string{}
+	for _, pr := range req.PullRequests {
 
-	for _, pr := range prs {
-		if pr.Origin != lastOrigin {
-			if len(visiblePRs) > 0 {
-				printRemotePRs(lastOrigin, visiblePRs)
-			}
-			lastOrigin = pr.Origin
-			visiblePRs = []string{}
-		}
-
-		status := pr.Status
+		status := "Active"
 		if pr.IsDraft {
 			status = "Draft"
 		}
@@ -161,24 +136,27 @@ func printList(prs []models.PullRequest, filter string) {
 			strings.Split(pr.CreatedBy, " ")[0],
 			pr.Created.Year(), pr.Created.Month(), pr.Created.Day())
 		format := getColumnFormat()
-		title := pr.ShortenedTitle(70)
+		title := shortenedText(pr.Title, 70)
+		lnk := termenv.Hyperlink(pr.Link, "open PR")
 		prInfo := fmt.Sprintf(format, pr.ID, status, title,
-			created, pr.Link)
+			created, lnk)
 
 		if filter != "" && !strings.Contains(strings.ToLower(prInfo), filter) {
 			continue
 		}
 
-		visiblePRs = append(visiblePRs, prInfo)
-
+		fmt.Println(prInfo)
 	}
-	printRemotePRs(lastOrigin, visiblePRs)
+}
+
+func getTableTitle() string {
+	format := getColumnFormat()
+	return fmt.Sprintf(format, "ID", "Status", "Title", "Created By", "Link")
 }
 
 func printRemoteHeader(remote string, count int) {
 
-	format := getColumnFormat()
-	head := fmt.Sprintf(format, "ID", "Status", "Title", "Created By", "Link")
+	head := getTableTitle()
 
 	line := strings.Repeat("-", len(head)+5)
 	doubleLine := strings.Repeat("=", len(head)+5)
@@ -190,18 +168,24 @@ func printRemoteHeader(remote string, count int) {
 	fmt.Println(line)
 }
 
+func shortenedText(text string, maxLength int) string {
+
+	pritntable := text
+
+	if len(pritntable) <= maxLength {
+		return pritntable
+	}
+
+	shortenLenght := maxLength - 3
+
+	title := fmt.Sprintf("%s...", pritntable[0:shortenLenght])
+	return title
+}
+
 func getColumnFormat() string {
 	return "%" + fmt.Sprintf("%d", prIDColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prStatusColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prTitleColLength) + "s " +
 		"| %-" + fmt.Sprintf("%d", prCreatedColLength) + "s " +
 		"| %s"
-}
-
-func printRemotePRs(remote string, prs []string) {
-
-	printRemoteHeader(remote, len(prs))
-	for _, pr := range prs {
-		fmt.Println(pr)
-	}
 }

@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -28,27 +27,36 @@ var (
 	configFileName string = "prqcfg.json"
 )
 
-// Config main configuration for CLI
+// Config main configuration for CLI.
 type Config struct {
-	Azure AzureConfig
-	Github GithubConfig
+	Azure   AzureConfig
+	Github  GithubConfig
 	Remotes []string
 }
 
 // AzureConfig configuration for Azure
 type AzureConfig struct {
-	PAT string
+	PAT                 string
+	DefaultTargetBranch string
 }
 
 // GithubConfig configuration for Github
 type GithubConfig struct {
-	PAT string
+	PAT                 string
+	DefaultTargetBranch string
 }
 
 // NewConfig creates a new instance of Config
 func NewConfig() Config {
 	return Config{
-		Azure: AzureConfig{},
+		Azure: AzureConfig{
+			PAT:                 "",
+			DefaultTargetBranch: "master",
+		},
+		Github: GithubConfig{
+			PAT:                 "",
+			DefaultTargetBranch: "main",
+		},
 	}
 }
 
@@ -70,7 +78,7 @@ func (c *Config) Load() (err error) {
 			"Use prq config to add configuration")
 	}
 
-	file, err := ioutil.ReadFile(fileName)
+	file, err := os.ReadFile(fileName)
 	if err != nil {
 		return fmt.Errorf("loading config file: %w", err)
 

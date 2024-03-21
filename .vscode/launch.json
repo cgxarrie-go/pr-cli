@@ -11,9 +11,7 @@
             "mode": "auto",
             "program": "./main.go",
             "args": [
-                "l",
-                "-f",
-                "david"
+                "l"
             ]
         },
         {
@@ -26,6 +24,20 @@
                 "c",
                 "-d",
                 "master",
+                "-t",
+                "test-pr -> ABANDON!!!!"
+            ]
+        },
+        {
+            "name": "gh Create",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "./main.go",
+            "args": [
+                "c",
+                "-d",
+                "main",
                 "-t",
                 "test-pr -> ABANDON!!!!"
             ]
