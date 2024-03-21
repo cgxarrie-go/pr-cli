@@ -50,7 +50,7 @@ func (svc createPRService) Run(req ports.CreatePRSvcRequest) (
 		}
 		t := string(template)
 		if t != "" {
-			desc = fmt.Sprintf("%s\n%s", desc, t)
+			desc = fmt.Sprintf("%s\n\n%s", desc, t)
 		}
 	}
 

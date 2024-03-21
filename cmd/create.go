@@ -70,10 +70,10 @@ func init() {
 	// is called directly, e.g.:
 	// azCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	createCmd.Flags().StringP("target", "", "", "target branch. If blank, default is used")
-	createCmd.Flags().StringP("title", "", "", "title. If blank, standard title is used")
-	createCmd.Flags().StringP("draft", "", "", "draft. default is true")
-	createCmd.Flags().StringP("desc", "", "", "description. default is emty")
-	createCmd.Flags().StringP("templ", "", "", "template. default is none")
+	createCmd.Flags().StringP("target", "g", "", "target branch. If blank, default is used")
+	createCmd.Flags().StringP("title", "t", "", "title. If blank, standard title is used")
+	createCmd.Flags().StringP("draft", "f", "", "draft. default is true")
+	createCmd.Flags().StringP("desc", "d", "", "description. default is emty")
+	createCmd.Flags().StringP("templ", "m", "", "template. default is none")
 
 }

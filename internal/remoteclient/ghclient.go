@@ -134,11 +134,11 @@ func (c *githubClient) getCreateRequest(req ports.RemoteClientCreateRequest) (
 	bearer := fmt.Sprintf("Basic %s", b64PAT)
 
 	pullRequest := map[string]interface{}{
-		"head":        req.Source.Name(),      // Source branch
-		"base":        req.Destination.Name(), // Target branch
-		"title":       req.Title,              // Title of PR
-		"draft":       req.IsDraft,            // Draft PR
-		"description": req.Description,        // Description of PR
+		"head":  req.Source.Name(),      // Source branch
+		"base":  req.Destination.Name(), // Target branch
+		"title": req.Title,              // Title of PR
+		"draft": req.IsDraft,            // Draft PR
+		"body":  req.Description,        // Description of PR
 	}
 
 	body, err := json.Marshal(pullRequest)
