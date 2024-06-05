@@ -17,7 +17,14 @@ var createCmd = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"c"},
 	Short:   "Create Pull Request",
-	Long:    "Create a Pull Request.",
+	Long: `Create a Pull Request.
+	
+	Flags:
+	-g, --target	: target branch. If blank, default is used
+	-t, --title	: title. If blank, standard title is used
+	-f, --draft	: draft. default is true
+	-d, --desc	: description. default is emty
+	-m, --templ	: template. default is none`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dest, _ := cmd.Flags().GetString("target")
 		ttl, _ := cmd.Flags().GetString("title")
