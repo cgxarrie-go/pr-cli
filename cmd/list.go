@@ -30,7 +30,12 @@ var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l", "ls"},
 	Short:   "list PRs",
-	Long:    `List Pull Requests from the specified provider according to config`,
+	Long: `List Pull Requests from the specified provider according to config
+	
+	Flags
+	-o, -- option	: option to list PRs from current directory tree (d), config (c) or current directory (default)
+	-f, -- filter	: filter PRs by any field`,
+
 	RunE: func(cmd *cobra.Command, args []string) error {
 		filter, _ := cmd.Flags().GetString("filter")
 		opt, _ := cmd.Flags().GetString("option")
