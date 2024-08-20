@@ -53,6 +53,7 @@ func CurrentFolderTreeRemotes() (remotes remote.Remotes, err error) {
 
 func listRemotes(root string) (remotes remote.Remotes, err error) {
 
+	remotes = make(remote.Remotes)
 	// Define a function to be called for each directory and subdirectory
 	visit := func(path string, info os.FileInfo, err error) error {
 		if err != nil {

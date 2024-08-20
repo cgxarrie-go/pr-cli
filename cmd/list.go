@@ -30,12 +30,7 @@ var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"l", "ls"},
 	Short:   "list PRs",
-	Long: `List Pull Requests from the specified provider according to config
-	
-	Flags
-	-o, -- option	: option to list PRs from current directory tree (d), config (c) or current directory (default)
-	-f, -- filter	: filter PRs by any field`,
-
+	Long:    `List Pull Requests from the specified repositories`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		filter, _ := cmd.Flags().GetString("filter")
 		opt, _ := cmd.Flags().GetString("option")
@@ -87,8 +82,8 @@ func init() {
 	// is called directly, e.g.:
 	// azCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	listCmd.Flags().StringP("option", "o", "", "option")
-	listCmd.Flags().StringP("filter", "f", "", "")
+	listCmd.Flags().StringP("option", "o", "", "option to list PRs from current directory tree (d), config (c) or current directory (default)")
+	listCmd.Flags().StringP("filter", "f", "", "filter PRs by any field")
 }
 
 func runListCmd(remotes remote.Remotes, filter string) error {
@@ -105,6 +100,9 @@ func runListCmd(remotes remote.Remotes, filter string) error {
 			cl, _ := remoteclient.NewRemoteClient(r)
 			svc := services.NewGetPRsService(cl)
 			resp := svc.Run()
+			if resp.Count == 0 {
+				continue
+			}
 			printRemoteHeader(resp.Remote, resp.Count)
 
 			if resp.Error != nil {
