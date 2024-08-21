@@ -86,6 +86,12 @@ func init() {
 	listCmd.Flags().StringP("filter", "f", "", "filter PRs by any field")
 }
 
+type printable struct {
+	Remote       string
+	Count        int
+	PullRequests []string
+}
+
 func runListCmd(remotes remote.Remotes, filter string) error {
 
 	config.GetInstance().Load()
@@ -103,26 +109,34 @@ func runListCmd(remotes remote.Remotes, filter string) error {
 			if resp.Count == 0 {
 				continue
 			}
-			printRemoteHeader(resp.Remote, resp.Count)
+
+			printable := processResponse(resp, filter)
+			if printable.Count == 0 {
+				continue
+			}
+
+			printRemoteHeader(printable.Remote, printable.Count)
 
 			if resp.Error != nil {
 				fmt.Println(resp.Error)
 				continue
 			}
 
-			printList(resp, filter)
+			printList(printable)
 		}
 	}
 	return nil
 
 }
 
-func printList(req ports.GetPRsSvcResponse, filter string) {
+func processResponse(req ports.GetPRsSvcResponse, filter string) printable {
 	filter = strings.ToLower(filter)
 
-	tableTitle := getTableTitle()
-	fmt.Println(tableTitle)
-	fmt.Println(strings.Repeat("-", len(tableTitle)+5))
+	printable := printable{
+		Remote:       req.Remote,
+		PullRequests: []string{},
+		Count:        0,
+	}
 
 	sort.SliceStable(req.PullRequests, func(i, j int) bool {
 		return req.PullRequests[i].Created.Before(
@@ -148,7 +162,24 @@ func printList(req ports.GetPRsSvcResponse, filter string) {
 			continue
 		}
 
-		fmt.Println(prInfo)
+		printable.PullRequests = append(printable.PullRequests, prInfo)
+
+	}
+
+	printable.Count = len(printable.PullRequests)
+
+	return printable
+}
+
+func printList(req printable) {
+
+	tableTitle := getTableTitle()
+	fmt.Println(tableTitle)
+	fmt.Println(strings.Repeat("-", len(tableTitle)+5))
+
+	for _, pr := range req.PullRequests {
+
+		fmt.Println(pr)
 	}
 }
 
