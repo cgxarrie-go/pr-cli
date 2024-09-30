@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/cgxarrie-go/prq/internal/ports"
+	"github.com/cgxarrie-go/prq/internal/utils"
 	"github.com/pkg/errors"
 )
 
@@ -125,6 +126,11 @@ func (c *azClient) Get() (
 	}
 
 	return
+}
+
+func (c *azClient) Open(id string) error {
+	url := c.base.remote.PRLinkURL(id)
+	return utils.OpenBrowser(url)
 }
 
 func (c *azClient) getGetReques() (

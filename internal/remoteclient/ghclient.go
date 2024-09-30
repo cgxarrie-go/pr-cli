@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/cgxarrie-go/prq/internal/ports"
+	"github.com/cgxarrie-go/prq/internal/utils"
 
 	"github.com/pkg/errors"
 )
@@ -110,6 +111,11 @@ func (c *githubClient) Get() (
 	}
 
 	return
+}
+
+func (c *githubClient) Open(id string) error {
+	url := c.base.remote.PRLinkURL(id)
+	return utils.OpenBrowser(url)
 }
 
 func (c *githubClient) getGetRequest() (

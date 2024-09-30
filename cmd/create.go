@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// ListCmd represents the list command
+// CreateCmd represents the Create PR command
 var createCmd = &cobra.Command{
 	Use:     "create",
 	Aliases: []string{"c"},
