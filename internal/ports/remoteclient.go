@@ -10,6 +10,7 @@ type RemoteClient interface {
 	Create(req RemoteClientCreateRequest) (resp RemoteClientCreateResponse, err error)
 	Get() (resp []RemoteClientGetResponse, err error)
 	Remote() Remote
+	Open(id string) error
 }
 
 type RemoteClientCreateRequest struct {
