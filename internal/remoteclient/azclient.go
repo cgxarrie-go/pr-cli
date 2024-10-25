@@ -133,6 +133,10 @@ func (c *azClient) Open(id string) error {
 	return utils.OpenBrowser(url)
 }
 
+func (c *azClient) OpenCode() error {
+	return utils.OpenBrowser(c.Remote().CodeURL())
+}
+
 func (c *azClient) getGetReques() (
 	*http.Request, error) {
 

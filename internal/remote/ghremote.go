@@ -16,6 +16,7 @@ type githubRemote struct {
 	user       string
 	repository string
 	baseUrl    string
+	codeUrl    string
 }
 
 func newGithubRemote(r string) ports.Remote {
@@ -37,6 +38,7 @@ func newGithubRemote(r string) ports.Remote {
 		user:       usr,
 		repository: repo,
 		baseUrl:    fmt.Sprintf("https://api.github.com/repos/%s/%s", usr, repo),
+		codeUrl:    fmt.Sprintf("https://github.com/%s/%s", usr, repo),
 	}
 }
 
@@ -67,4 +69,8 @@ func (r githubRemote) PRLinkURL(id string) string {
 
 	// TODO: sample to get the link
 	// return termenv.Hyperlink(url, text)
+}
+
+func (r githubRemote) CodeURL() string {
+	return r.codeUrl
 }

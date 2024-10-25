@@ -17,6 +17,7 @@ type azureRemote struct {
 	project      string
 	repository   string
 	baseUrl      string
+	codeUrl      string
 }
 
 func newAzureRemote(r string) ports.Remote {
@@ -42,6 +43,8 @@ func newAzureRemote(r string) ports.Remote {
 		repository:   repo,
 		baseUrl: fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/git",
 			org, prj),
+		codeUrl: fmt.Sprintf("https://dev.azure.com/%s/%s/_git/%s",
+			org, prj, repo),
 	}
 }
 
@@ -70,4 +73,8 @@ func (r azureRemote) Repository() string {
 func (r azureRemote) PRLinkURL(id string) string {
 	return fmt.Sprintf("https://dev.azure.com/%s/%s/_git/%s/pullrequest/%s",
 		r.organization, r.project, r.repository, id)
+}
+
+func (r azureRemote) CodeURL() string {
+	return r.codeUrl
 }

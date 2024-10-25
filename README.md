@@ -69,3 +69,9 @@ Open will open the PR in the default browser
 
 - prq open **pr_id**: Open the PR with id **pr_id** in the default browser
 - prq o **pr_id**: Open the PR with id **pr_id** in the default browser
+
+### Open remote repository code command
+code will open the current folder repository in the default browser
+
+- prq code
+- prq d
