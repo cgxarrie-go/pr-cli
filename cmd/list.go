@@ -106,19 +106,16 @@ func runListCmd(remotes remote.Remotes, filter string) error {
 			cl, _ := remoteclient.NewRemoteClient(r)
 			svc := services.NewGetPRsService(cl)
 			resp := svc.Run()
-			if resp.Count == 0 {
-				continue
-			}
 
 			printable := processResponse(resp, filter)
-			if printable.Count == 0 {
-				continue
-			}
-
 			printRemoteHeader(printable.Remote, printable.Count)
 
 			if resp.Error != nil {
 				fmt.Println(resp.Error)
+				continue
+			}
+
+			if printable.Count == 0 {
 				continue
 			}
 
