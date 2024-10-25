@@ -11,6 +11,7 @@ type RemoteClient interface {
 	Get() (resp []RemoteClientGetResponse, err error)
 	Remote() Remote
 	Open(id string) error
+	OpenCode() error
 }
 
 type RemoteClientCreateRequest struct {

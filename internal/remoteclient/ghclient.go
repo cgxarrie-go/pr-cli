@@ -118,6 +118,10 @@ func (c *githubClient) Open(id string) error {
 	return utils.OpenBrowser(url)
 }
 
+func (c *githubClient) OpenCode() error {
+	return utils.OpenBrowser(c.Remote().CodeURL())
+}
+
 func (c *githubClient) getGetRequest() (
 	*http.Request, error) {
 
