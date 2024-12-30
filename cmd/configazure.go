@@ -12,7 +12,8 @@ var configAzureCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		pat, _ := cmd.Flags().GetString("pat")
 		branch, _ := cmd.Flags().GetString("branch")
-		err := runConfigAzureCmd(pat, branch)
+		version, _ := cmd.Flags().GetString("version")
+		err := runConfigAzureCmd(pat, branch, version)
 		return err
 	},
 }
@@ -29,9 +30,10 @@ func init() {
 
 	configAzureCmd.Flags().StringP("pat", "p", "", "set the PAT for Azure DevOps")
 	configAzureCmd.Flags().StringP("branch", "b", "", "set the default target branch for creation of PRs")
+	configAzureCmd.Flags().StringP("version", "v", "", "set the azure api version")
 }
 
-func runConfigAzureCmd(pat string, branch string) error {
+func runConfigAzureCmd(pat, branch, version string) error {
 
 	if pat == "" && branch == "" {
 		return nil
@@ -46,6 +48,10 @@ func runConfigAzureCmd(pat string, branch string) error {
 
 	if branch != "" {
 		cfg.Azure.DefaultTargetBranch = branch
+	}
+
+	if version != "" {
+		cfg.Azure.Version = version
 	}
 
 	err := cfg.Save()
