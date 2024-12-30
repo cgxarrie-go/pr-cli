@@ -2,7 +2,6 @@ package remoteclient
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -65,7 +64,7 @@ type azClientGetResponseItemUser struct {
 func newAzClient(r ports.Remote, pat string) ports.RemoteClient {
 	return &azClient{
 		base: newClient(r),
-		pat:  fmt.Sprintf("`:%s", pat),
+		pat:  pat,
 	}
 }
 
@@ -101,7 +100,7 @@ func (c *azClient) Create(req ports.RemoteClientCreateRequest) (
 func (c *azClient) Get() (
 	resp []ports.RemoteClientGetResponse, err error) {
 
-	clReq, err := c.getGetReques()
+	clReq, err := c.getGetRequest()
 	if err != nil {
 		return resp, errors.Wrap(err, "creating http request")
 	}
@@ -137,24 +136,19 @@ func (c *azClient) OpenCode() error {
 	return utils.OpenBrowser(c.Remote().CodeURL())
 }
 
-func (c *azClient) getGetReques() (
+func (c *azClient) getGetRequest() (
 	*http.Request, error) {
-
-	b64PAT := base64.RawStdEncoding.EncodeToString([]byte(c.pat))
-	bearer := fmt.Sprintf("Basic %s", b64PAT)
 
 	clReq, err := http.NewRequest("GET", c.Remote().GetPRsURL(), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating http request")
 	}
-	clReq.Header.Add("Authorization", bearer)
+	clReq.Header.Add("Authorization", c.pat)
 
 	return clReq, nil
 }
 
 func (c *azClient) getCreateRequest(req ports.RemoteClientCreateRequest) (*http.Request, error) {
-	b64PAT := base64.RawStdEncoding.EncodeToString([]byte(c.pat))
-	bearer := fmt.Sprintf("Basic %s", b64PAT)
 
 	pullRequest := map[string]interface{}{
 		"sourceRefName": req.Source.FullName(),      // Source branch
@@ -175,7 +169,7 @@ func (c *azClient) getCreateRequest(req ports.RemoteClientCreateRequest) (*http.
 		return nil, errors.Wrap(err, "creating http request")
 	}
 
-	clReq.Header.Add("Authorization", bearer)
+	clReq.Header.Add("Authorization", c.pat)
 	clReq.Header.Add("Content-Type", "application/json")
 	clReq.Header.Add("Host", "dev.azure.com")
 	clReq.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/117.0")

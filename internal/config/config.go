@@ -38,6 +38,7 @@ type Config struct {
 type AzureConfig struct {
 	PAT                 string
 	DefaultTargetBranch string
+	Version             string
 }
 
 // GithubConfig configuration for Github
@@ -52,6 +53,7 @@ func NewConfig() Config {
 		Azure: AzureConfig{
 			PAT:                 "",
 			DefaultTargetBranch: "master",
+			Version:             "7.0",
 		},
 		Github: GithubConfig{
 			PAT:                 "",

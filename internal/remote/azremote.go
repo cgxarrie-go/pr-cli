@@ -56,14 +56,15 @@ func (r azureRemote) NewBranch(name string) models.Branch {
 }
 
 func (r azureRemote) GetPRsURL() string {
-	return fmt.Sprintf("%s/repositories/%s/pullrequests?api-version=7.0"+
+	return fmt.Sprintf("%s/repositories/%s/pullrequests?api-version=%s"+
 		"&searchCriteria.status=%d", r.baseUrl, r.repository,
-		status.Active)
+		config.GetInstance().Azure.Version, status.Active)
 }
 
 func (r azureRemote) CreatePRsURL() string {
-	return fmt.Sprintf("%s/repositories/%s/pullrequests?api-version=7.0"+
-		"&supportsIterations=true", r.baseUrl, r.repository)
+	return fmt.Sprintf("%s/repositories/%s/pullrequests?api-version=%s"+
+		"&supportsIterations=true", r.baseUrl, r.repository,
+		config.GetInstance().Azure.Version)
 }
 
 func (r azureRemote) Repository() string {
