@@ -139,9 +139,6 @@ func (c *azClient) OpenCode() error {
 func (c *azClient) getGetRequest() (
 	*http.Request, error) {
 
-	fmt.Println("url:", c.Remote().GetPRsURL())
-	fmt.Println("bearer:", c.pat)
-
 	clReq, err := http.NewRequest("GET", c.Remote().GetPRsURL(), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "creating http request")
